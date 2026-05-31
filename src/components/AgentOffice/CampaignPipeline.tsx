@@ -15,7 +15,7 @@ export default function CampaignPipeline() {
             <div
               style={{
                 fontFamily: 'VT323, monospace',
-                fontSize: 9,
+                fontSize: 11,
                 color: '#2a3560',
                 textAlign: 'center',
                 flex: 1,
@@ -29,7 +29,7 @@ export default function CampaignPipeline() {
             >
               {stage.label}
             </div>
-            {i < PIPELINE_STAGES.length - 1 && <span style={{ color: '#1a2540', fontSize: 8, flexShrink: 0 }}>›</span>}
+            {i < PIPELINE_STAGES.length - 1 && <span style={{ color: '#1a2540', fontSize: 11, flexShrink: 0 }}>›</span>}
           </div>
         ))}
       </div>
@@ -45,7 +45,7 @@ export default function CampaignPipeline() {
             <div key={campaign.id} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {/* Campaign name + channel */}
               <div style={{ minWidth: 168, paddingRight: 8, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#8892b0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={campaign.name}>
+                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#8892b0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={campaign.name}>
                   <span style={{ color: channelCfg.color, marginRight: 4 }}>■</span>
                   {campaign.name}
                 </div>
@@ -79,8 +79,8 @@ export default function CampaignPipeline() {
                         transition: 'all 0.2s',
                       }}
                     >
-                      {isDone && <span style={{ fontFamily: 'VT323, monospace', fontSize: 8, color: channelCfg.color }}>✓</span>}
-                      {isActive && <span style={{ fontFamily: 'VT323, monospace', fontSize: 9, color: isLosing ? '#ff5252' : '#06090f', fontWeight: 'bold' }}>▶</span>}
+                      {isDone && <span style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: channelCfg.color }}>✓</span>}
+                      {isActive && <span style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: isLosing ? '#ff5252' : '#06090f', fontWeight: 'bold' }}>▶</span>}
                     </div>
                     {i < PIPELINE_STAGES.length - 1 && <div style={{ width: 2, height: 2, background: isDone ? channelCfg.color : '#1a2540', flexShrink: 0 }} />}
                   </div>
@@ -90,7 +90,7 @@ export default function CampaignPipeline() {
               {/* Finance warning icon */}
               <div style={{ minWidth: 14, textAlign: 'center' }}>
                 {campaign.financeWarnings.length > 0 && (
-                  <span style={{ fontSize: 9, color: isLosing ? '#ff5252' : '#ffb300' }} title={campaign.financeWarnings[0]}>
+                  <span style={{ fontSize: 11, color: isLosing ? '#ff5252' : '#ffb300' }} title={campaign.financeWarnings[0]}>
                     {isLosing ? '⛔' : '⚠'}
                   </span>
                 )}

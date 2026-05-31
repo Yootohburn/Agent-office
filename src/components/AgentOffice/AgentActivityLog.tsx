@@ -29,7 +29,7 @@ export default function AgentActivityLog() {
                 <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: '#e8eaf6', lineHeight: 1.2 }}>
                   {campaign.name}
                 </span>
-                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: cfg.color, padding: '1px 5px', background: `${cfg.color}22`, flexShrink: 0, marginLeft: 4 }}>
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: cfg.color, padding: '1px 5px', background: `${cfg.color}22`, flexShrink: 0, marginLeft: 4 }}>
                   {cfg.label}
                 </span>
               </div>
@@ -42,7 +42,7 @@ export default function AgentActivityLog() {
               </div>
 
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: cfg.color }}>
+                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: cfg.color }}>
                   {PIPELINE_STAGES[activeIdx]?.label} · {campaign.progress}%
                 </div>
                 <div style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: isLoss ? '#ff5252' : '#00ff9f' }}>
@@ -51,7 +51,7 @@ export default function AgentActivityLog() {
               </div>
 
               {campaign.financeWarnings.length > 0 && (
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: isLoss ? '#ff5252' : '#ffb300', marginTop: 2 }}>
+                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: isLoss ? '#ff5252' : '#ffb300', marginTop: 2 }}>
                   ⚠ {campaign.financeWarnings[0].substring(0, 55)}{campaign.financeWarnings[0].length > 55 ? '...' : ''}
                 </div>
               )}
@@ -68,19 +68,19 @@ export default function AgentActivityLog() {
 
         {[...mockActivityLog].reverse().map(entry => (
           <div key={entry.id} style={{ marginBottom: 6, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-            <span style={{ fontSize: 8, color: '#1a2540', minWidth: 52, paddingTop: 1, flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: '#1a2540', minWidth: 52, paddingTop: 1, flexShrink: 0 }}>
               [{entry.timestamp}]
             </span>
-            <span style={{ fontSize: 8, color: TYPE_COLOR[entry.type], minWidth: 72, paddingTop: 1, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: 11, color: TYPE_COLOR[entry.type], minWidth: 72, paddingTop: 1, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {entry.agentName.split(' ')[0]}
             </span>
-            <span style={{ fontSize: 8, color: '#4a5680', lineHeight: 1.4 }}>
+            <span style={{ fontSize: 11, color: '#4a5680', lineHeight: 1.4 }}>
               {entry.message}
             </span>
           </div>
         ))}
 
-        <div style={{ fontSize: 9, color: '#00ff9f', marginTop: 8, animation: 'blink 1s step-end infinite' }}>█</div>
+        <div style={{ fontSize: 11, color: '#00ff9f', marginTop: 8, animation: 'blink 1s step-end infinite' }}>█</div>
       </div>
     </div>
   )

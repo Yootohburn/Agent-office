@@ -36,8 +36,8 @@ export default function CampaignDetailPanel({ campaign, onClose }: Props) {
           <span style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: channelCfg.color, background: `${channelCfg.color}22`, padding: '1px 7px', letterSpacing: 1 }}>
             {channelCfg.label}
           </span>
-          <span style={{ fontSize: 8, color: '#4a5680' }}>{campaign.category}</span>
-          <span style={{ fontSize: 8, color: '#4a5680' }}>{campaign.targetPrice}</span>
+          <span style={{ fontSize: 11, color: '#4a5680' }}>{campaign.category}</span>
+          <span style={{ fontSize: 11, color: '#4a5680' }}>{campaign.targetPrice}</span>
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export default function CampaignDetailPanel({ campaign, onClose }: Props) {
           {PIPELINE_STAGES[activeIdx]?.label ?? '—'} · {campaign.progress}%
         </div>
         {ownerAgent && (
-          <div style={{ fontSize: 8, color: '#4a5680', marginTop: 3 }}>
+          <div style={{ fontSize: 11, color: '#4a5680', marginTop: 3 }}>
             รับผิดชอบ: <span style={{ color: '#8892b0' }}>{ownerAgent.thaiName}</span>
           </div>
         )}
@@ -78,7 +78,7 @@ export default function CampaignDetailPanel({ campaign, onClose }: Props) {
         marginBottom: 14,
         textAlign: 'center',
       }}>
-        <div style={{ fontSize: 8, color: '#4a5680', marginBottom: 2 }}>กำไรสุทธิ</div>
+        <div style={{ fontSize: 11, color: '#4a5680', marginBottom: 2 }}>กำไรสุทธิ</div>
         <div style={{ fontFamily: 'VT323, monospace', fontSize: 28, color: isLoss ? '#ff5252' : '#00ff9f', lineHeight: 1 }}>
           {formatTHB(campaign.finance.netProfit)}
         </div>
@@ -104,7 +104,7 @@ export default function CampaignDetailPanel({ campaign, onClose }: Props) {
             <div
               key={i}
               style={{
-                fontSize: 9,
+                fontSize: 11,
                 color: isLoss ? '#ff5252' : '#ffb300',
                 background: isLoss ? '#ff525211' : '#ffb30011',
                 padding: '3px 8px',
@@ -121,13 +121,13 @@ export default function CampaignDetailPanel({ campaign, onClose }: Props) {
 
       {/* Brief */}
       <PanelSection title="Brief">
-        <p style={{ margin: 0, fontSize: 9, color: '#8892b0', lineHeight: 1.5 }}>{campaign.brief}</p>
+        <p style={{ margin: 0, fontSize: 11, color: '#8892b0', lineHeight: 1.5 }}>{campaign.brief}</p>
       </PanelSection>
 
       {/* Notes */}
       {campaign.notes && (
         <PanelSection title="หมายเหตุ">
-          <p style={{ margin: 0, fontSize: 9, color: '#00e5ff', lineHeight: 1.5 }}>{campaign.notes}</p>
+          <p style={{ margin: 0, fontSize: 11, color: '#00e5ff', lineHeight: 1.5 }}>{campaign.notes}</p>
         </PanelSection>
       )}
 
@@ -149,7 +149,7 @@ function PanelSection({ title, children }: { title: string; children: ReactNode 
 function MetricChip({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{ background: '#060d1a', padding: '4px 8px', border: '1px solid #1a2540' }}>
-      <div style={{ fontSize: 8, color: '#2a3560', letterSpacing: 1, marginBottom: 1 }}>{label}</div>
+      <div style={{ fontSize: 11, color: '#2a3560', letterSpacing: 1, marginBottom: 1 }}>{label}</div>
       <div style={{ fontFamily: 'VT323, monospace', fontSize: 13, color }}>{value}</div>
     </div>
   )

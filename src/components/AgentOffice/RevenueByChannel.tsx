@@ -128,7 +128,7 @@ export default function RevenueByChannel({ summary, compact = false }: Props) {
 function CompactRow({ label, value, color, bold }: { label: string; value: string; color: string; bold?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#4a5680' }}>{label}</span>
+      <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#4a5680' }}>{label}</span>
       <span style={{ fontFamily: 'VT323, monospace', fontSize: bold ? 15 : 13, color, letterSpacing: 0.5 }}>{value}</span>
     </div>
   )

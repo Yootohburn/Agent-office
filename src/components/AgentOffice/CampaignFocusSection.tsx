@@ -106,18 +106,18 @@ export default function CampaignFocusSection({ selectedCampaignId, onSelectCampa
                       />
                     ))}
                   </div>
-                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#4a5680', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#4a5680', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {PIPELINE_STAGES[activeIdx]?.label ?? '—'}
                   </span>
                   {ownerAgent && (
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#2a3560', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#2a3560', whiteSpace: 'nowrap', flexShrink: 0 }}>
                       · {ownerAgent.thaiName.split('/')[0].trim()}
                     </span>
                   )}
                 </div>
 
                 {/* Next action */}
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#00e5ff', lineHeight: 1.4 }}>
+                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#00e5ff', lineHeight: 1.4 }}>
                   → {nextAction}
                 </div>
 

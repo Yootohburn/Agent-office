@@ -223,3 +223,152 @@ When Codex repository access is working:
 2. Codex can assist with: backend API integration, data pipeline, UI testing, build automation.
 3. Claude Code handles: agent logic, content strategy, campaign decisions, creative output.
 4. Do not create `.codex/` files until Codex access is confirmed working.
+
+---
+
+## Agent Office v2.2 — Executive Office Layout + Agent Chat
+
+### What changed in v2.2
+
+#### Navigation (5 tabs → 4 tabs)
+The separate "Agent Office" tab was removed because it duplicated the overview.
+Agent rooms now live inside **ภาพรวมบริษัท** alongside campaign focus and revenue channels.
+
+Navigation tabs:
+- ภาพรวมบริษัท — 5 agent rooms + campaign focus + revenue channel cards
+- แคมเปญ — campaign list + 8-stage pipeline view
+- การเงิน — full finance dashboard with channel breakdown
+- บันทึกการทำงาน — system activity log
+
+Shopee, Lazada, and TikTok remain revenue channel tags on campaigns, not navigation tabs.
+
+#### Font and readability
+- Body/task Thai text now uses **Sarabun** (Google Font, no new library dependency).
+- Pixel fonts (VT323, Share Tech Mono) are reserved for headings, badges, borders, numbers, and the 8-bit atmosphere.
+- Minimum sizes: body Thai 14px, room titles 20px, KPI numbers 28px, chat text 14px.
+- The CSS `image-rendering: pixelated` property was removed from body to allow Sarabun to render correctly.
+
+#### Executive layout (ภาพรวมบริษัท tab)
+```
+[Header: brand + 6 KPI chips]
+[Nav: 4 tabs]
+[Main: left scrollable | right panel (when selected)]
+  Left:
+    - 5 agent room cards (grid 5 columns)
+    - Bottom row:
+        - CampaignFocusSection (left, larger)
+        - Revenue channel compact cards (right)
+  Right (when agent selected):
+    - AgentCommandPanel with mock chat
+  Right (when campaign selected):
+    - CampaignDetailPanel
+```
+
+#### Agent room cards
+Each room card shows:
+- Thai display name (VT323 20px)
+- English title subtitle
+- Channel badge (if active campaign)
+- Current task text (Sarabun 14px)
+- Progress bar
+- Risk / decision badges
+- Next action (Sarabun 13px)
+- **คุยกับ Agent** button → opens AgentCommandPanel
+
+---
+
+### Agent Command Panel
+
+Located in `src/components/AgentOffice/AgentCommandPanel.tsx`.
+
+Shows when the user selects an agent room (click card or "คุยกับ Agent" button).
+
+Structure:
+1. **Header** — agent name, role, current campaign, next action, current task, risk/decision alerts
+2. **Quick Prompts** — 6 buttons that pre-fill and send common questions
+3. **Chat area** — scrollable conversation bubbles with auto-scroll
+4. **Input row** — text field + ส่ง button, Enter key support
+
+Quick prompts:
+- สรุปสถานะตอนนี้
+- แนะนำขั้นตอนถัดไป
+- แก้ปัญหาแคมเปญนี้
+- สร้างไอเดียใหม่
+- ตรวจความเสี่ยง
+- อธิบายตัวเลขการเงิน
+
+Conversation state persists per agent within the session (in-memory, resets on page reload).
+
+---
+
+### Mock Chat System (Phase 1)
+
+**Phase 1: mock responses only. No real LLM API calls.**
+
+Files:
+- `src/agents/agentConversationStore.ts` — message data model and in-memory store
+- `src/agents/agentChatRouter.ts` — intent detection + mock response routing
+
+Data model (`ChatMessage`):
+```ts
+interface ChatMessage {
+  id: string
+  agentId: string
+  campaignId?: string
+  sender: 'user' | 'agent'
+  text: string
+  timestamp: string
+  intent?: string           // detected intent key
+  mockActionResult?: string // reserved for future action results
+}
+```
+
+Intent detection (`detectIntent`):
+Maps Thai keywords to intent keys: `status`, `next_action`, `problem_solve`, `ideas`, `risk`, `finance`, `general`.
+
+Mock responses:
+Each of the 5 agents has pre-written Thai responses per intent key, referencing live data from registries (actual ROAS, profit, campaign names).
+
+Initial greeting:
+When a conversation starts, `getInitialGreeting(agentId)` generates a context-aware opening message referencing the agent's current campaign and progress.
+
+---
+
+### How to replace mock responses with a real LLM (Phase 2+)
+
+Replace the body of `getMockResponse()` in `agentChatRouter.ts`:
+
+```ts
+// Phase 1: mock
+export function getMockResponse(agentId, userMessage, campaignId?): MockResponse {
+  const intent = detectIntent(userMessage)
+  const text = RESPONSES[agentId][intent] ?? RESPONSES[agentId].general
+  return { text, intent, mockDelay: 700 + Math.random() * 800 }
+}
+
+// Phase 2: real LLM (example structure)
+export async function getMockResponse(agentId, userMessage, campaignId?): Promise<MockResponse> {
+  const systemPrompt = buildAgentSystemPrompt(agentId, campaignId)
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    body: JSON.stringify({ agentId, message: userMessage, systemPrompt }),
+  })
+  const { text } = await response.json()
+  return { text, intent: detectIntent(userMessage), mockDelay: 0 }
+}
+```
+
+No component changes required — only `agentChatRouter.ts` needs updating.
+
+---
+
+### How each agent should answer (role guide for LLM Phase 2)
+
+| Agent | Expertise | Response style |
+|---|---|---|
+| CEO / ผู้อำนวยการแคมเปญ | Strategy, approvals, KPIs, priorities | Decisive, brief, executive-level |
+| นักวิเคราะห์สินค้า | Product scores, trends, competitors, commissions | Data-driven, analytical |
+| ทีมผลิตคอนเทนต์ | TikTok hooks, scripts, captions, UGC briefs | Creative, specific hooks and formats |
+| ทีมตรวจสอบ | Compliance rules, platform policies, queue | Risk-focused, checklist-style |
+| ฝ่ายการเงิน | ROAS, P&L, ad spend, budget reallocation | Numbers-first, actionable recommendations |
+

@@ -99,13 +99,6 @@ function OfficeBackWall() {
         <div style={{ color: '#00ff9f', textShadow: '0 0 8px #00ff9f88' }}>PIXEL OFFICE</div>
       </div>
 
-      <div style={{ flex: 1 }} />
-
-      {/* Bookshelf */}
-      <PixelBookshelf />
-
-      {/* Water cooler */}
-      <WaterCooler />
     </div>
   )
 }
@@ -163,71 +156,6 @@ function NeonSign() {
           {text}
         </div>
       ))}
-    </div>
-  )
-}
-
-function PixelBookshelf() {
-  const rows = [
-    ['#ff5252', '#00e5ff', '#ffb300', '#00ff9f'],
-    ['#ff9800', '#ff4081', '#4488ff'],
-    ['#66bb6a', '#ff5252', '#00e5ff', '#ffb300'],
-  ]
-  return (
-    <div style={{
-      width: 46,
-      height: 62,
-      background: '#08101e',
-      border: '2px solid #1a2540',
-      borderBottom: '4px solid #1a2540',
-      padding: '2px 3px 0',
-      display: 'flex', flexDirection: 'column', gap: 3,
-    }}>
-      {rows.map((books, r) => (
-        <div key={r} style={{
-          flex: 1,
-          display: 'flex', alignItems: 'flex-end', gap: 1,
-          borderBottom: '1px solid #1a2540', paddingBottom: 1,
-        }}>
-          {books.map((color, i) => (
-            <div key={i} style={{
-              width: 5 + (i % 2),
-              height: `${70 + (i * 7 + r * 5) % 28}%`,
-              background: color,
-              opacity: 0.75,
-            }} />
-          ))}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function WaterCooler() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, marginLeft: 6 }}>
-      {/* Jug */}
-      <div style={{
-        width: 14, height: 18,
-        background: 'linear-gradient(to right, #1e4a80, #0d3060)',
-        border: '1px solid #2a5a90',
-      }}>
-        <div style={{ width: 5, height: 3, background: '#1a6090', margin: '2px auto' }} />
-      </div>
-      {/* Body */}
-      <div style={{
-        width: 20, height: 22,
-        background: '#0c1525',
-        border: '2px solid #1a2540',
-        borderTop: 'none',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', gap: 3,
-      }}>
-        <div style={{ width: 6, height: 3, background: '#00e5ff88' }} />
-        <div style={{ width: 6, height: 3, background: '#ff525288' }} />
-      </div>
-      {/* Base */}
-      <div style={{ width: 22, height: 3, background: '#1a2540' }} />
     </div>
   )
 }

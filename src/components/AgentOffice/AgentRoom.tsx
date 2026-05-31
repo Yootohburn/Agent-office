@@ -154,7 +154,7 @@ function RoomScene({ agentId, status, accent, roomLabel, avatarLeft, currentTask
 
   return (
     <div style={{
-      position: 'relative', height: 110, overflow: 'hidden', background: '#060d1a',
+      position: 'relative', height: 150, overflow: 'hidden', background: '#060d1a',
       backgroundImage: 'radial-gradient(circle, #1a2540 1px, transparent 1px)',
       backgroundSize: '10px 10px',
     }}>
@@ -163,9 +163,9 @@ function RoomScene({ agentId, status, accent, roomLabel, avatarLeft, currentTask
       <div style={{ position: 'absolute', bottom: 28, left: '6%', right: '6%', height: 3, background: '#162040', borderTop: `1px solid ${accent}22` }} />
       <RoomElements agentId={agentId} accent={accent} status={status} />
       <div style={{ position: 'absolute', bottom: 31, left: avatarLeft, transform: 'translateX(-50%)' }}>
-        <PixelAgentAvatar agentId={agentId} status={status} />
+        <PixelAgentAvatar agentId={agentId} status={status} scale={2} />
       </div>
-      <div style={{ position: 'absolute', bottom: 74, left: avatarLeft, transform: 'translateX(-50%)', zIndex: 3 }}>
+      <div style={{ position: 'absolute', bottom: 115, left: avatarLeft, transform: 'translateX(-50%)', zIndex: 3 }}>
         <TaskBubble text={currentTask} status={status} isActive={isActive} />
       </div>
       <div style={{ position: 'absolute', top: 6, left: 8, fontFamily: 'VT323, monospace', fontSize: 10, color: `${accent}77`, letterSpacing: 2 }}>

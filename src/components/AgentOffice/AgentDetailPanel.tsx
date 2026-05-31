@@ -1,6 +1,7 @@
 import type { Agent } from '../../agents/agentRegistry'
 import { getCampaignById, PIPELINE_STAGES, CHANNEL_CONFIG, getStageIndex, formatTHB } from '../../agents/campaignRegistry'
 import { channelSummaries, companySummary, RECOMMENDATION_CONFIG } from '../../agents/financeRegistry'
+import PixelAgentAvatar from './PixelAgentAvatar'
 import styles from './AgentDesk.module.css'
 
 interface Props {
@@ -25,12 +26,15 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
       </button>
 
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #1a2540', paddingBottom: 10, marginBottom: 14 }}>
-        <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: '#00ff9f', lineHeight: 1.2, marginBottom: 2 }}>
-          ▶ {agent.thaiName}
-        </div>
-        <div style={{ fontSize: 8, color: '#4a5680', letterSpacing: 1, textTransform: 'uppercase' }}>
-          {agent.title} · {agent.codeName}
+      <div style={{ borderBottom: '1px solid #1a2540', paddingBottom: 10, marginBottom: 14, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        <PixelAgentAvatar agentId={agent.id} status={agent.status} scale={1.4} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: '#00ff9f', lineHeight: 1.2, marginBottom: 2 }}>
+            ▶ {agent.thaiName}
+          </div>
+          <div style={{ fontSize: 8, color: '#4a5680', letterSpacing: 1, textTransform: 'uppercase' }}>
+            {agent.title} · {agent.codeName}
+          </div>
         </div>
       </div>
 

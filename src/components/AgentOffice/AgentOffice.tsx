@@ -4,7 +4,7 @@ import type { DepartmentId } from '../../agents/agentRegistry'
 import { campaigns } from '../../agents/campaignRegistry'
 import { companySummary } from '../../agents/financeRegistry'
 import { formatTHB } from '../../agents/campaignRegistry'
-import AgentDepartmentCard from './AgentDepartmentCard'
+import AgentRoom from './AgentRoom'
 import AgentDetailPanel from './AgentDetailPanel'
 import CampaignPipeline from './CampaignPipeline'
 import FinanceDashboard from './FinanceDashboard'
@@ -30,7 +30,7 @@ export default function AgentOffice() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 24, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
-              ░▒▓ AGENT OFFICE v1.2 ▓▒░
+              ░▒▓ AGENT OFFICE v2.0 ▓▒░
             </div>
             <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#00e5ff', background: '#00e5ff11', padding: '2px 10px', border: '1px solid #00e5ff33', letterSpacing: 1 }}>
               AI AFFILIATE CONTENT COMPANY
@@ -65,14 +65,14 @@ export default function AgentOffice() {
         {/* Left: scrollable office floor */}
         <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 16px 16px' }}>
 
-          {/* 5 department cards */}
+          {/* 5 department rooms */}
           <div>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: '#2a3560', letterSpacing: 2, marginBottom: 8 }}>
-              ▶ 5 แผนกหลักของบริษัท
+              ▶ 5 ห้องแผนกหลักของบริษัท
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
               {agents.map(agent => (
-                <AgentDepartmentCard
+                <AgentRoom
                   key={agent.id}
                   agent={agent}
                   selected={selectedAgentId === agent.id}

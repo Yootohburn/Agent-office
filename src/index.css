@@ -71,6 +71,12 @@ button, [role="button"] {
   50%       { opacity: 0; }
 }
 
+/* Slow glow pulse — used by ring light in Content Studio when working */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
 /* Scanline overlay — subtle CRT effect */
 body::after {
   content: '';

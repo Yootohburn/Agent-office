@@ -161,7 +161,62 @@ Each campaign includes finance fields:
 
 ---
 
-## 12. Codex Support (Future)
+## 12. Agent Room System (v2.0)
+
+Each of the 5 departments is visualised as an 8-bit room on the office floor. Rooms replace the flat department cards from v1.2.
+
+### Room layout
+
+Every room card has two zones:
+
+| Zone | Height | Content |
+|---|---|---|
+| Room scene | 120 px | Pixel-art room interior: wall, floor, desk, department elements, avatar |
+| Info strip | auto | Thai name, title, current task, progress bar, risk/decision alerts |
+
+### Department rooms
+
+| Agent | Room name | Accent | Signature elements |
+|---|---|---|---|
+| CEO / Campaign Director | COMMAND ROOM | `#00ff9f` | Campaign board (wall), KPI monitor (desk), approval stamp stack |
+| Product & Trend Analyst | RESEARCH LAB | `#00e5ff` | Trend bar chart, data monitor with live bars, product box stack (wall) |
+| Content Studio | CONTENT STUDIO | `#ff9800` | Ring light (left wall), script board (desk), camera with lens + record light |
+| Ops & Review | CONTROL ROOM | `#ffb300` | Compliance checklist (wall), warning monitor (blinks red when blocked), queue shelf |
+| Finance & Ads Controller | FINANCE ROOM | `#00c8a0` | Revenue bar chart, ROAS dashboard screen, traffic-light budget indicator |
+
+### Pixel avatar (Phase 1 — CSS only)
+
+Each room contains a pixel character made of plain CSS `div` elements:
+- **Head** — 14 × 12 px skin-tone rectangle with 2 × 2 eye blocks
+- **Body / outfit** — 14 × 16 px rectangle in department accent color
+- **Accessory** — a small unicode glyph below the body (▣ CEO, ▦ analyst, ⊙ camera, ☑ ops, ▲ finance)
+
+No image files are used. Phase 2 can replace these with real pixel-art sprite sheets by swapping `PixelAgentAvatar.tsx`.
+
+### Status-linked visuals
+
+Room elements respond to agent status without JavaScript timers — CSS animations only:
+
+| Status | Visual change |
+|---|---|
+| `working` | Monitor screen border glows accent color; cursor blink in screen; ring light pulses (Content Studio); revenue bar tip blinks (Finance) |
+| `needs_review` | Amber status dot blinks (top-right of room); desk LED amber |
+| `blocked` | Monitor shows ⚠ symbol with red border and fast blink (Ops); desk LED red and blinking |
+| `failed` | Same as blocked; avatar glow turns red via `drop-shadow` filter |
+| `idle` | All lights dim; monitor border uses `accent44` (dim accent) |
+| `done` | Cyan status dot; avatar glow cyan |
+
+### Files
+
+| File | Role |
+|---|---|
+| `src/components/AgentOffice/AgentRoom.tsx` | Main room card; contains `ROOM_META`, `RoomScene`, `RoomElements`, and five scene sub-components |
+| `src/components/AgentOffice/PixelAgentAvatar.tsx` | CSS pixel character; `scale` prop for larger version in detail panel |
+| `src/components/AgentOffice/RoomStatusIndicator.tsx` | Reusable status dot + label; blinks per `AgentStatus` |
+
+---
+
+## 13. Codex Support (Future)
 
 When Codex repository access is working:
 1. Create `.codex/agents/` and mirror the 5 department instruction files.

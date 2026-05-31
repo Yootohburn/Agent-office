@@ -1,5 +1,6 @@
 import type { Agent } from '../../agents/agentRegistry'
 import { workflowTemplates } from '../../agents/agentTaskRouter'
+import styles from './AgentDesk.module.css'
 
 interface Props {
   agent: Agent
@@ -32,7 +33,7 @@ export default function AgentDesk({ agent }: Props) {
         ▶ {agent.name.toUpperCase()}
       </div>
 
-      {/* Meta */}
+      {/* Meta grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
         <Field label="PLATFORM" value={agent.platform.toUpperCase()} />
         <Field label="STATUS" value={agent.status.replace('_', ' ').toUpperCase()} />
@@ -88,6 +89,16 @@ export default function AgentDesk({ agent }: Props) {
         <p style={{ margin: 0, fontSize: 11, color: '#00e5ff' }}>→ {agent.nextAction}</p>
       </Section>
 
+      {/* Rendered HTML detail — the main agent spec */}
+      {agent.detailHtml && (
+        <Section title="AGENT DETAIL">
+          <div
+            className={styles.detail}
+            dangerouslySetInnerHTML={{ __html: agent.detailHtml }}
+          />
+        </Section>
+      )}
+
       {/* Workflows this agent participates in */}
       {workflows.length > 0 && (
         <Section title="WORKFLOWS">
@@ -103,9 +114,6 @@ export default function AgentDesk({ agent }: Props) {
                       height: 16,
                       background: stepId === agent.id ? '#00ff9f' : STEP_STATUS_COLOR['pending'],
                       border: stepId === agent.id ? '2px solid #00ff9f' : '1px solid #1a2540',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
                     }}
                     title={stepId}
                   />

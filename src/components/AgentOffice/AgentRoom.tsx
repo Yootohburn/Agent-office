@@ -45,6 +45,7 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
         accent={meta.accent}
         roomLabel={meta.label}
         avatarLeft={meta.avatarLeft}
+        currentTask={agent.currentTask}
       />
 
       {/* ── Info section ── */}
@@ -143,9 +144,10 @@ interface RoomSceneProps {
   accent: string
   roomLabel: string
   avatarLeft: string
+  currentTask: string
 }
 
-function RoomScene({ agentId, status, accent, roomLabel, avatarLeft }: RoomSceneProps) {
+function RoomScene({ agentId, status, accent, roomLabel, avatarLeft, currentTask }: RoomSceneProps) {
   const isActive  = status === 'working' || status === 'needs_review'
   const isBlocked = status === 'blocked'  || status === 'failed'
   const statusLightColor = isBlocked ? '#ff5252' : isActive ? accent : '#1a2540'
@@ -162,6 +164,9 @@ function RoomScene({ agentId, status, accent, roomLabel, avatarLeft }: RoomScene
       <RoomElements agentId={agentId} accent={accent} status={status} />
       <div style={{ position: 'absolute', bottom: 31, left: avatarLeft, transform: 'translateX(-50%)' }}>
         <PixelAgentAvatar agentId={agentId} status={status} />
+      </div>
+      <div style={{ position: 'absolute', bottom: 74, left: avatarLeft, transform: 'translateX(-50%)', zIndex: 3 }}>
+        <TaskBubble text={currentTask} status={status} isActive={isActive} />
       </div>
       <div style={{ position: 'absolute', top: 6, left: 8, fontFamily: 'VT323, monospace', fontSize: 10, color: `${accent}77`, letterSpacing: 2 }}>
         {roomLabel}
@@ -383,6 +388,46 @@ function FinanceScene({ accent, screenGlow, isWorking }: { accent: string; scree
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}` }} />
       </div>
     </>
+  )
+}
+
+function TaskBubble({ text, status, isActive }: { text: string; status: AgentStatus; isActive: boolean }) {
+  const isBlocked = status === 'blocked' || status === 'failed'
+  const isDone    = status === 'done'
+  const bgColor   = isBlocked ? '#1a0808' : '#080f1e'
+  const border    = isBlocked ? '#ff525244' : '#1e2e50'
+  const txtColor  = isBlocked ? '#ff7070' : isDone ? '#00ff9f' : '#9baac8'
+
+  const short = text.length > 18 ? text.slice(0, 18) + '…' : text
+  const label = isBlocked ? `⚠ ${short}` : isDone ? `✓ done` : status === 'idle' ? 'idle...' : short
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <div style={{
+        background: bgColor,
+        border: `1px solid ${border}`,
+        padding: '2px 6px',
+        display: 'flex', alignItems: 'center', gap: 3,
+        whiteSpace: 'nowrap',
+      }}>
+        <span style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 10, color: txtColor, lineHeight: 1.3 }}>
+          {label}
+        </span>
+        {isActive && !isBlocked && (
+          <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: txtColor, lineHeight: 1, animation: 'blink 1s step-end infinite' }}>
+            ▮
+          </span>
+        )}
+      </div>
+      <div style={{
+        position: 'absolute', bottom: -4, left: '50%',
+        transform: 'translateX(-50%)',
+        width: 0, height: 0,
+        borderLeft: '4px solid transparent',
+        borderRight: '4px solid transparent',
+        borderTop: `4px solid ${border}`,
+      }} />
+    </div>
   )
 }
 

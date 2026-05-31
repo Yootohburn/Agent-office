@@ -8,20 +8,22 @@ interface Props {
 }
 
 const BODY_COLORS: Record<DepartmentId, string> = {
-  'ceo-director':       '#00ff9f',
-  'product-analyst':    '#00e5ff',
-  'content-studio':     '#ff9800',
-  'ops-review':         '#ffb300',
-  'finance-controller': '#00c8a0',
+  'ceo-director':             '#00ff9f',
+  'product-analyst':          '#00e5ff',
+  'content-studio':           '#ff9800',
+  'social-community-manager': '#ff4081',
+  'ops-review':               '#ffb300',
+  'finance-controller':       '#00c8a0',
 }
 
 // Small accessory character rendered below body
 const ACCESSORIES: Record<DepartmentId, { char: string; color: string }> = {
-  'ceo-director':       { char: '▣', color: '#e8eaf6' },   // clipboard / stamp
-  'product-analyst':    { char: '▦', color: '#00e5ff' },   // data grid
-  'content-studio':     { char: '⊙', color: '#ffb300' },   // camera lens
-  'ops-review':         { char: '☑', color: '#00ff9f' },   // checklist
-  'finance-controller': { char: '▲', color: '#00e5ff' },   // chart up
+  'ceo-director':             { char: '▣', color: '#e8eaf6' },   // clipboard / stamp
+  'product-analyst':          { char: '▦', color: '#00e5ff' },   // data grid
+  'content-studio':           { char: '⊙', color: '#ffb300' },   // camera lens
+  'social-community-manager': { char: '♥', color: '#ff4081' },   // social heart
+  'ops-review':               { char: '☑', color: '#00ff9f' },   // checklist
+  'finance-controller':       { char: '▲', color: '#00e5ff' },   // chart up
 }
 
 // Drop-shadow glow per status

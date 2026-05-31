@@ -11,6 +11,7 @@ export type DepartmentId =
   | 'ceo-director'
   | 'product-analyst'
   | 'content-studio'
+  | 'social-community-manager'
   | 'ops-review'
   | 'finance-controller'
 
@@ -158,6 +159,44 @@ export const agents: Agent[] = [
         <li>ไม่วิจัยสินค้า — ใช้ brief จาก Product Analyst</li>
         <li>ไม่อนุมัติคอนเทนต์ — ส่งให้ Ops & Review แล้วค่อยไป CEO</li>
         <li>ไม่ทำ claim สุขภาพหรือการเงินที่ไม่มีหลักฐาน</li>
+      </ul>`,
+  },
+  {
+    id: 'social-community-manager',
+    codeName: 'social_studio_agent',
+    thaiName: 'ทีมโซเชียลมีเดีย',
+    title: 'Social Media & Community Manager',
+    role: 'Adapts TikTok content for Facebook/IG, manages community replies',
+    status: 'working',
+    currentTask: 'ดัดแปลงสคริปต์ TikTok Earbuds เป็นโพสต์ Facebook review 3 แบบ',
+    currentCampaignId: 'camp-001',
+    progress: 60,
+    recentOutput: 'Facebook review post สำหรับ Earbuds เสร็จ 3 แบบ — รอ approval จาก Ops',
+    decisionNeeded: null,
+    risks: ['TikTok content บางชิ้นต้องปรับ tone สำหรับ Facebook — audience ต่างกัน'],
+    nextAction: 'ส่ง Facebook draft ให้ Ops ตรวจ แล้วทำ IG carousel สำหรับ Skincare',
+    detailHtml: `
+      <h3>บทบาทในบริษัท</h3>
+      <p>ดัดแปลง TikTok content ให้เหมาะกับ Facebook, Instagram และ LINE OA เขียนโพสต์ review ตอบ comment และบริหาร community engagement</p>
+      <h3>Platform ที่ดูแล</h3>
+      <table>
+        <tr><th>Platform</th><th>รูปแบบ</th><th>Tone</th></tr>
+        <tr><td>Facebook</td><td>โพสต์ review, แชร์</td><td>เป็นกันเอง</td></tr>
+        <tr><td>Instagram</td><td>Carousel, Story</td><td>สวยงาม aesthetic</td></tr>
+        <tr><td>LINE OA</td><td>Rich message, broadcast</td><td>สั้น กระชับ</td></tr>
+      </table>
+      <h3>งานปัจจุบัน — ข้อมูลจำลอง</h3>
+      <table>
+        <tr><th>แคมเปญ</th><th>Platform</th><th>สถานะ</th></tr>
+        <tr><td>Earbuds X9</td><td>Facebook</td><td class="amber">กำลังทำ 3 แบบ</td></tr>
+        <tr><td>Skincare Pouch</td><td class="cyan">Instagram</td><td class="amber">รอ approve</td></tr>
+        <tr><td>Desk Lamp</td><td>LINE OA</td><td>รออยู่ในคิว</td></tr>
+      </table>
+      <h3>สิ่งที่ไม่ทำ</h3>
+      <ul>
+        <li>ไม่โพสต์อัตโนมัติใน Phase 1</li>
+        <li>ไม่เพิ่ม claim ที่ไม่มีใน TikTok script เดิม</li>
+        <li>ไม่จัดการ TikTok โดยตรง — ดูแลแค่ Facebook/IG/LINE</li>
       </ul>`,
   },
   {

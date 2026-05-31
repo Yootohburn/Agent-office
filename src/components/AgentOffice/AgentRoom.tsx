@@ -5,11 +5,12 @@ import PixelAgentAvatar from './PixelAgentAvatar'
 import RoomStatusIndicator from './RoomStatusIndicator'
 
 const ROOM_META: Record<DepartmentId, { label: string; accent: string; avatarLeft: string }> = {
-  'ceo-director':       { label: 'COMMAND ROOM',   accent: '#00ff9f', avatarLeft: '56%' },
-  'product-analyst':    { label: 'RESEARCH LAB',   accent: '#00e5ff', avatarLeft: '58%' },
-  'content-studio':     { label: 'CONTENT STUDIO', accent: '#ff9800', avatarLeft: '46%' },
-  'ops-review':         { label: 'CONTROL ROOM',   accent: '#ffb300', avatarLeft: '57%' },
-  'finance-controller': { label: 'FINANCE ROOM',   accent: '#00c8a0', avatarLeft: '60%' },
+  'ceo-director':             { label: 'COMMAND ROOM',   accent: '#00ff9f', avatarLeft: '56%' },
+  'product-analyst':          { label: 'RESEARCH LAB',   accent: '#00e5ff', avatarLeft: '58%' },
+  'content-studio':           { label: 'CONTENT STUDIO', accent: '#ff9800', avatarLeft: '46%' },
+  'social-community-manager': { label: 'SOCIAL STUDIO',  accent: '#ff4081', avatarLeft: '52%' },
+  'ops-review':               { label: 'CONTROL ROOM',   accent: '#ffb300', avatarLeft: '57%' },
+  'finance-controller':       { label: 'FINANCE ROOM',   accent: '#00c8a0', avatarLeft: '60%' },
 }
 
 interface Props {
@@ -196,6 +197,7 @@ function RoomElements({ agentId, accent, status }: ElementsProps) {
     case 'ceo-director':    return <CeoScene    accent={accent} screenGlow={screenGlow} isWorking={isWorking} />
     case 'product-analyst': return <ProductScene accent={accent} screenGlow={screenGlow} isWorking={isWorking} />
     case 'content-studio':  return <ContentScene accent={accent} isWorking={isWorking} />
+    case 'social-community-manager': return <SocialScene accent={accent} isWorking={isWorking} />
     case 'ops-review':      return <OpsScene     accent={accent} screenGlow={screenGlow} isBlocked={isBlocked} isWorking={isWorking} />
     case 'finance-controller': return <FinanceScene accent={accent} screenGlow={screenGlow} isWorking={isWorking} />
   }
@@ -379,6 +381,52 @@ function FinanceScene({ accent, screenGlow, isWorking }: { accent: string; scree
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff525444' }} />
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ffb30044' }} />
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}` }} />
+      </div>
+    </>
+  )
+}
+
+function SocialScene({ accent, isWorking }: { accent: string; isWorking: boolean }) {
+  return (
+    <>
+      {/* Phone prop */}
+      <div style={{ position: 'absolute', bottom: 32, left: '8%', width: 22, height: 38, background: '#040a14', border: `2px solid ${accent}66`, borderRadius: 2 }}>
+        <div style={{ margin: '3px 2px', background: '#060d1a', height: 24, display: 'flex', flexDirection: 'column', gap: 2, padding: 2 }}>
+          <div style={{ height: 2, background: `${accent}99`, width: '80%' }} />
+          <div style={{ height: 2, background: `${accent}44`, width: '60%' }} />
+          <div style={{ display: 'flex', gap: 2, marginTop: 1 }}>
+            <span style={{ fontFamily: 'VT323, monospace', fontSize: 8, color: accent, lineHeight: 1 }}>♥</span>
+            <div style={{ height: 2, background: `${accent}33`, flex: 1, alignSelf: 'center' }} />
+          </div>
+          {isWorking && <div style={{ width: 4, height: 4, borderRadius: '50%', background: accent, margin: '0 auto', animation: 'blink 1.2s step-end infinite' }} />}
+        </div>
+        <div style={{ width: 6, height: 1, background: `${accent}44`, margin: '0 auto' }} />
+      </div>
+      {/* Notification bubbles */}
+      <div style={{ position: 'absolute', top: 14, right: '5%', display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+        {[
+          { icon: 'f', label: '2' },
+          { icon: '◈', label: '5' },
+        ].map((b, i) => (
+          <div key={i} style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+            <span style={{ fontFamily: 'VT323, monospace', fontSize: 9, color: `${accent}88` }}>{b.label}</span>
+            <div style={{ width: 14, height: 10, background: '#040a14', border: `1px solid ${accent}33`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: 'VT323, monospace', fontSize: 8, color: `${accent}99` }}>{b.icon}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Post drafts stack */}
+      <div style={{ position: 'absolute', bottom: 32, left: '38%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{
+            width: 28, height: 7, background: '#040a14',
+            border: `1px solid ${i === 0 ? `${accent}66` : `${accent}22`}`,
+            padding: '1px 3px',
+          }}>
+            <div style={{ height: 1, background: i === 0 ? `${accent}88` : `${accent}33`, width: `${90 - i * 20}%` }} />
+          </div>
+        ))}
       </div>
     </>
   )

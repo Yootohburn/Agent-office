@@ -5,6 +5,7 @@ export type PipelineStage =
   | 'campaign_brief'
   | 'product_research'
   | 'content_creation'
+  | 'social_adaptation'
   | 'review_compliance'
   | 'ceo_approval'
   | 'export_publish'
@@ -15,6 +16,7 @@ export const PIPELINE_STAGES: { id: PipelineStage; label: string }[] = [
   { id: 'campaign_brief',       label: 'บรีฟแคมเปญ'         },
   { id: 'product_research',     label: 'วิเคราะห์สินค้า'    },
   { id: 'content_creation',     label: 'ผลิตคอนเทนต์'       },
+  { id: 'social_adaptation',    label: 'ปรับสำหรับโซเชียล'  },
   { id: 'review_compliance',    label: 'ตรวจสอบความเสี่ยง'  },
   { id: 'ceo_approval',         label: 'CEO อนุมัติ'         },
   { id: 'export_publish',       label: 'พร้อมส่งออก'         },

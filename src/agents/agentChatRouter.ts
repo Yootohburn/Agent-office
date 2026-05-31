@@ -14,12 +14,13 @@ export interface MockResponse {
   mockDelay: number
 }
 
-type IntentKey = 'status' | 'next_action' | 'problem_solve' | 'ideas' | 'risk' | 'finance' | 'general'
+type IntentKey = 'status' | 'next_action' | 'problem_solve' | 'ideas' | 'risk' | 'finance' | 'social_post' | 'general'
 
 function detectIntent(msg: string): IntentKey {
   const m = msg.toLowerCase()
   if (m.includes('สรุป') || m.includes('สถานะ') || m.includes('ตอนนี้') || m.includes('overview')) return 'status'
   if (m.includes('ถัดไป') || m.includes('ขั้นตอน') || m.includes('แนะนำ') || m.includes('ต่อไป')) return 'next_action'
+  if (m.includes('โพสต์') || m.includes('facebook') || m.includes('instagram') || m.includes('ig') || m.includes('โซเชียล') || m.includes('caption') || m.includes('community')) return 'social_post'
   if (m.includes('ปัญหา') || m.includes('แก้') || m.includes('ช่วย') || m.includes('แคมเปญ') || m.includes('fix')) return 'problem_solve'
   if (m.includes('ไอเดีย') || m.includes('hook') || m.includes('script') || m.includes('คอนเทนต์') || m.includes('สร้าง') || m.includes('idea')) return 'ideas'
   if (m.includes('เสี่ยง') || m.includes('ตรวจ') || m.includes('risk') || m.includes('ระวัง')) return 'risk'
@@ -231,6 +232,75 @@ const RESPONSES: Record<DepartmentId, Partial<Record<IntentKey, string>>> = {
       `ถามได้ทุกเรื่องเกี่ยวกับ compliance rules, queue status, หรือ platform policies ครับ`,
   },
 
+  'social-community-manager': {
+    status:
+      `📱 สถานะ social adaptation queue:\n\n` +
+      `🔄 Facebook: Earbuds review post — กำลังทำ 3 แบบ (60%)\n` +
+      `⏳ Instagram: Skincare carousel 5 slides — รอ Ops ตรวจ\n` +
+      `📥 LINE OA: Desk Lamp message — คิวถัดไป\n\n` +
+      `✅ Facebook Earbuds แบบที่ 1–2 ผ่าน compliance แล้ว\n` +
+      `⚠️ IG Skincare: ต้องเพิ่ม #ad ใน bio ก่อน approve`,
+    social_post:
+      `ตัวอย่างโพสต์ Facebook สำหรับ Earbuds X9:\n\n` +
+      `📝 แบบที่ 1 (เปรียบเทียบ):\n` +
+      `"เทสหูฟัง 9 รุ่น แล้วเจอตัวนี้ราคา ฿280 🎧\n` +
+      `— Noise cancel ดีกว่ารุ่น ฿2,000 บางยี่ห้อ\n` +
+      `— Battery 8 ชม. ใช้งานได้ทั้งวัน\n` +
+      `ลิงก์ในคอมเมนต์ครับ #ad"\n\n` +
+      `📝 แบบที่ 2 (Q&A):\n` +
+      `"มีคนถามเรื่องหูฟังถูกๆ ดีไหม — มาตอบแบบจริงจัง 🎵\n` +
+      `Q: คุณภาพเสียงเป็นยังไง?\n` +
+      `A: ดีกว่าราคามาก รายละเอียดในลิงก์ #โฆษณา"\n\n` +
+      `ต้องการแบบอื่นหรือปรับ tone บอกได้เลยครับ`,
+    next_action:
+      `ขั้นตอนถัดไปของทีม Social:\n\n` +
+      `1️⃣ ส่ง Facebook Earbuds draft แบบที่ 3 ให้ Ops ตรวจ\n` +
+      `2️⃣ ทำ IG carousel Skincare Pouch:\n` +
+      `   → Slide 1: Hook — "routine เดินทาง 5 ชิ้น"\n` +
+      `   → Slide 2–4: Product shots + benefits\n` +
+      `   → Slide 5: CTA + ลิงก์\n` +
+      `3️⃣ เตรียม LINE OA broadcast สำหรับ Desk Lamp`,
+    ideas:
+      `ไอเดีย social content format:\n\n` +
+      `📘 Facebook:\n` +
+      `→ "ทดสอบจริง" — text review แบบยาว engagement สูง\n` +
+      `→ "before/after" — ภาพเปรียบเทียบ viral ได้\n` +
+      `→ Poll: "คุณจ่ายเท่าไหร่กับหูฟัง?" → lead gen\n\n` +
+      `📸 Instagram:\n` +
+      `→ Carousel 5 slides — save rate สูง กว่า single image\n` +
+      `→ Reel 15 วิ — cut จาก TikTok แต่เพิ่ม caption ไทย\n` +
+      `→ Story sticker poll + link\n\n` +
+      `📲 LINE OA:\n` +
+      `→ Rich message: ภาพ + ปุ่ม "ดูสินค้า" → CTR สูง`,
+    risk:
+      `ความเสี่ยง social content:\n\n` +
+      `⚠️ Facebook: ต้องมี #ad หรือ #โฆษณา ชัดเจน\n` +
+      `⚠️ IG: bio link เปลี่ยนบ่อย — ต้องเช็ค affiliate link ทุกครั้ง\n` +
+      `⚠️ LINE OA: broadcast ไม่ได้ผล ถ้า copy เหมือน TikTok ทุกคำ — ต้องปรับ tone\n` +
+      `⚠️ Platform rules แตกต่าง: Facebook ยอมรับ review โดยตรง แต่ IG ต้องระวัง overclaim`,
+    finance:
+      `มุมมองการเงินจาก social side:\n\n` +
+      `Social media ไม่มี ad spend โดยตรงใน Phase 1\n` +
+      `→ Cost หลัก: เวลา content adaptation (~2–3 ชม./แคมเปญ)\n\n` +
+      `Potential uplift:\n` +
+      `→ Facebook organic: +10–20% traffic บน TikTok campaign\n` +
+      `→ IG carousel: save rate สูง → retarget audience ในอนาคต\n\n` +
+      `แนะนำ: track UTM แยก per platform เมื่อ connect API จริง`,
+    problem_solve:
+      `วิธีแก้ปัญหา social content:\n\n` +
+      `ปัญหา: TikTok script ยาวเกินสำหรับ Facebook caption\n` +
+      `→ ตัด script เหลือ 3 bullet points หลัก\n` +
+      `→ เพิ่ม emoji เพิ่ม engagement บน Facebook\n\n` +
+      `ปัญหา: IG audience ไม่ตอบสนองเหมือน TikTok\n` +
+      `→ เปลี่ยน hook: IG ใช้ visual hook แทน text hook\n` +
+      `→ Carousel slide 1 ต้องสวยงาม ไม่ใช่แค่ข้อความ\n\n` +
+      `ปัญหา: affiliate link ผิดใน post\n` +
+      `→ ตรวจ UTM parameter ทุกครั้งก่อน submit`,
+    general:
+      `ผมดูแล social media adaptation — แปลง TikTok content เป็น Facebook, Instagram, LINE OA ` +
+      `ถามได้ทุกเรื่องเกี่ยวกับ social post, community management, หรือ platform format ครับ`,
+  },
+
   'finance-controller': {
     status:
       `💰 สถานะการเงินบริษัท:\n\n` +
@@ -304,6 +374,9 @@ export function getInitialGreeting(agentId: DepartmentId): string {
     'content-studio':
       `สวัสดีครับ ทีม Content Studio${campaignName ? ` กำลังผลิต content สำหรับ "${campaignName}"` : ''} อยู่ ` +
       `ถามเรื่อง hook, script, ไอเดีย TikTok ได้เลยครับ`,
+    'social-community-manager':
+      `สวัสดีครับ ทีม Social Studio${campaignName ? ` กำลังปรับ content ของ "${campaignName}"` : ''} อยู่ ` +
+      `ถามเรื่อง Facebook post, IG carousel, หรือ LINE OA ได้เลยครับ`,
     'ops-review':
       `สวัสดีครับ ผม Ops & Review${campaignName ? ` กำลังตรวจ compliance ของ "${campaignName}"` : ''} อยู่ ` +
       `ถามเรื่อง compliance, queue, หรือ platform rules ได้ครับ`,

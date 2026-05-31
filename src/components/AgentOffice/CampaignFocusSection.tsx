@@ -20,6 +20,7 @@ const STAGE_FALLBACK: Record<PipelineStage, string> = {
   campaign_brief:       'CEO ตั้ง brief แคมเปญใหม่',
   product_research:     'วิเคราะห์สินค้าและเทรนด์',
   content_creation:     'ผลิต script และ content package',
+  social_adaptation:    'ปรับ content สำหรับ Facebook/IG/LINE',
   review_compliance:    'ตรวจสอบ compliance และ packaging',
   ceo_approval:         'รอ CEO อนุมัติ',
   export_publish:       'แพ็กเกจ export และโพสต์',

@@ -6,17 +6,18 @@ import type { ChatMessage } from '../../agents/agentConversationStore'
 import { getConversation, addMessage, createMessage } from '../../agents/agentConversationStore'
 
 const AGENT_ACCENT: Record<DepartmentId, string> = {
-  'ceo-director':       '#00ff9f',
-  'product-analyst':    '#00e5ff',
-  'content-studio':     '#ff9800',
-  'ops-review':         '#ffb300',
-  'finance-controller': '#00c8a0',
+  'ceo-director':             '#00ff9f',
+  'product-analyst':          '#00e5ff',
+  'content-studio':           '#ff9800',
+  'social-community-manager': '#ff4081',
+  'ops-review':               '#ffb300',
+  'finance-controller':       '#00c8a0',
 }
 
 const QUICK_PROMPTS = [
   'สรุปสถานะตอนนี้',
   'แนะนำขั้นตอนถัดไป',
-  'แก้ปัญหาแคมเปญนี้',
+  'เขียนโพสต์โซเชียล',
   'สร้างไอเดียใหม่',
   'ตรวจความเสี่ยง',
   'อธิบายตัวเลขการเงิน',

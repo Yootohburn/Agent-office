@@ -21,13 +21,10 @@ export default function PixelOfficeScene({ selectedAgentId, onSelectAgent }: Pro
   const row2 = agents.slice(3, 6)
 
   return (
-    <div style={{ background: FLOOR_BG, paddingBottom: 16 }}>
-
-      {/* ── Back wall ── */}
-      <OfficeBackWall />
+    <div style={{ background: FLOOR_BG, paddingBottom: 16, paddingTop: 14 }}>
 
       {/* ── Desk row 1 ── */}
-      <div style={{ padding: '12px 14px 0' }}>
+      <div style={{ padding: '0 14px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {row1.map(agent => (
             <AgentRoom
@@ -57,105 +54,6 @@ export default function PixelOfficeScene({ selectedAgentId, onSelectAgent }: Pro
         </div>
       </div>
 
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────
-// Back wall
-// ─────────────────────────────────────────────
-
-function OfficeBackWall() {
-  return (
-    <div style={{
-      background: '#070b16',
-      borderBottom: '3px solid #0e1830',
-      padding: '10px 20px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 16,
-      minHeight: 84,
-    }}>
-      {/* Windows */}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <PixelWindow />
-        <PixelWindow />
-      </div>
-
-      <div style={{ flex: 1 }} />
-
-      {/* Neon sign */}
-      <NeonSign />
-
-      <div style={{ flex: 1 }} />
-
-      {/* Company badge */}
-      <div style={{
-        fontFamily: 'VT323, monospace', fontSize: 14, letterSpacing: 3,
-        border: '2px solid #1a2540', padding: '5px 12px',
-        background: '#060a14', textAlign: 'center', lineHeight: 1.4,
-      }}>
-        <div style={{ color: '#2a3560' }}>AI AFFILIATE</div>
-        <div style={{ color: '#00ff9f', textShadow: '0 0 8px #00ff9f88' }}>PIXEL OFFICE</div>
-      </div>
-
-    </div>
-  )
-}
-
-function PixelWindow() {
-  const buildings = [6, 10, 7, 13, 8, 5, 11, 9, 7, 12]
-  return (
-    <div style={{
-      width: 54, height: 46,
-      background: '#08172e',
-      border: '3px solid #1a2a48',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Cross dividers */}
-      <div style={{ position: 'absolute', top: 0, left: '50%', bottom: 0, width: 1, background: '#1a2a48' }} />
-      <div style={{ position: 'absolute', top: '43%', left: 0, right: 0, height: 1, background: '#1a2a48' }} />
-      {/* Sky gradient */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '55%', background: 'linear-gradient(to bottom, #0a1e3a, #08172e)' }} />
-      {/* City skyline */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 18, display: 'flex', alignItems: 'flex-end' }}>
-        {buildings.map((h, i) => (
-          <div key={i} style={{ flex: 1, height: h, background: i % 3 === 0 ? '#0d1e36' : '#0b1a30' }} />
-        ))}
-      </div>
-      {/* Window light flickers */}
-      <div style={{ position: 'absolute', top: 6, left: 4, width: 3, height: 3, background: '#ffee8844', animation: 'blink 3s step-end infinite' }} />
-      <div style={{ position: 'absolute', top: 10, right: 6, width: 2, height: 2, background: '#4488ff44' }} />
-    </div>
-  )
-}
-
-function NeonSign() {
-  const lines = [
-    { text: 'FIND',   color: '#00ff9f' },
-    { text: 'CREATE', color: '#ff4081' },
-    { text: 'SELL',   color: '#00e5ff' },
-    { text: 'REPEAT', color: '#ffb300' },
-  ]
-  return (
-    <div style={{
-      border: '1px solid #1a2540', padding: '6px 14px',
-      background: '#04080f',
-      display: 'flex', flexDirection: 'column', gap: 1,
-    }}>
-      {lines.map(({ text, color }) => (
-        <div
-          key={text}
-          style={{
-            fontFamily: 'VT323, monospace', fontSize: 15,
-            color, letterSpacing: 4, lineHeight: 1.25,
-            textShadow: `0 0 6px ${color}88`,
-          }}
-        >
-          {text}
-        </div>
-      ))}
     </div>
   )
 }

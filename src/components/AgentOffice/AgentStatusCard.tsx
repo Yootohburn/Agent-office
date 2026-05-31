@@ -39,7 +39,7 @@ export default function AgentStatusCard({ agent, selected, onClick }: Props) {
       </div>
 
       <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: '#e8eaf6', marginBottom: 2, lineHeight: 1.1 }}>
-        {agent.name}
+        {agent.thaiName}
       </div>
 
       <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#4a5680', marginBottom: 10 }}>

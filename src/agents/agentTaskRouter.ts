@@ -9,6 +9,7 @@ export const STAGE_OWNER: Record<PipelineStage, DepartmentId> = {
   ceo_approval:         'ceo-director',
   export_publish:       'ops-review',
   performance_feedback: 'ops-review',
+  finance_review:       'finance-controller',
 }
 
 export const STAGE_SEQUENCE: PipelineStage[] = [
@@ -19,6 +20,7 @@ export const STAGE_SEQUENCE: PipelineStage[] = [
   'ceo_approval',
   'export_publish',
   'performance_feedback',
+  'finance_review',
 ]
 
 export function getNextStage(current: PipelineStage): PipelineStage | null {

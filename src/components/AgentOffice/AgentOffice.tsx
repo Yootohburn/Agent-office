@@ -6,103 +6,156 @@ import { companySummary } from '../../agents/financeRegistry'
 import { formatTHB } from '../../agents/campaignRegistry'
 import AgentRoom from './AgentRoom'
 import AgentDetailPanel from './AgentDetailPanel'
-import CampaignPipeline from './CampaignPipeline'
+import CampaignDetailPanel from './CampaignDetailPanel'
+import CampaignFocusSection from './CampaignFocusSection'
 import FinanceDashboard from './FinanceDashboard'
+import CampaignPipeline from './CampaignPipeline'
 import AgentActivityLog from './AgentActivityLog'
+
+type NavView = 'overview' | 'campaigns' | 'finance' | 'agentoffice' | 'log'
+
+const NAV_ITEMS: { id: NavView; label: string }[] = [
+  { id: 'overview',    label: 'ภาพรวมบริษัท' },
+  { id: 'campaigns',   label: 'แคมเปญ'       },
+  { id: 'finance',     label: 'การเงิน'       },
+  { id: 'agentoffice', label: 'Agent Office' },
+  { id: 'log',         label: 'Log'          },
+]
 
 const STATS = {
   active:        campaigns.length,
   pendingReview: campaigns.filter(c => c.stage === 'review_compliance').length,
   ceoApproval:   campaigns.filter(c => c.stage === 'ceo_approval').length,
-  readyPublish:  campaigns.filter(c => c.stage === 'export_publish').length,
 }
 
 export default function AgentOffice() {
-  const [selectedAgentId, setSelectedAgentId] = useState<DepartmentId | null>('ceo-director')
-  const selectedAgent = agents.find(a => a.id === selectedAgentId) ?? null
+  const [activeView,        setActiveView]        = useState<NavView>('overview')
+  const [selectedAgentId,   setSelectedAgentId]   = useState<DepartmentId | null>(null)
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
+
+  const selectedAgent    = selectedAgentId    ? (agents.find(a => a.id === selectedAgentId) ?? null)     : null
+  const selectedCampaign = selectedCampaignId ? (campaigns.find(c => c.id === selectedCampaignId) ?? null) : null
+  const hasPanel         = selectedAgent !== null || selectedCampaign !== null
+
+  function handleSelectAgent(id: DepartmentId) {
+    setSelectedAgentId(prev => prev === id ? null : id)
+    setSelectedCampaignId(null)
+  }
+
+  function handleSelectCampaign(id: string) {
+    setSelectedCampaignId(prev => prev === id ? null : id)
+    setSelectedAgentId(null)
+  }
+
+  function closePanel() {
+    setSelectedAgentId(null)
+    setSelectedCampaignId(null)
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column' }}>
 
-      {/* ── Top Bar ── */}
-      <header style={{ background: '#0a0e1a', borderBottom: '2px solid #1a2540', padding: '10px 20px', flexShrink: 0 }}>
-        {/* Row 1: brand + company KPIs */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ fontFamily: 'VT323, monospace', fontSize: 24, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
-              ░▒▓ AGENT OFFICE v2.0 ▓▒░
+      {/* ── Header ── */}
+      <header style={{ background: '#0a0e1a', borderBottom: '1px solid #1a2540', padding: '10px 20px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
+          {/* Brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
+              ░▒▓ AGENT OFFICE v2.1 ▓▒░
             </div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#00e5ff', background: '#00e5ff11', padding: '2px 10px', border: '1px solid #00e5ff33', letterSpacing: 1 }}>
-              AI AFFILIATE CONTENT COMPANY
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#00e5ff', background: '#00e5ff11', padding: '2px 8px', border: '1px solid #00e5ff22', letterSpacing: 1 }}>
+              AI AFFILIATE CONTENT CO.
             </div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#ffb300', background: '#ffb30011', padding: '2px 8px', borderLeft: '2px solid #ffb300' }}>
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#ffb300', background: '#ffb30011', padding: '2px 8px', borderLeft: '2px solid #ffb300' }}>
               PHASE 1 — MOCK DATA
             </div>
           </div>
 
-          {/* 8 KPI chips */}
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <KpiChip label="แคมเปญที่กำลังทำ"   value={STATS.active}                               color="#e8eaf6" />
-            <KpiChip label="รอรีวิว"             value={STATS.pendingReview}                        color="#ffb300" />
-            <KpiChip label="รอ CEO อนุมัติ"      value={STATS.ceoApproval}                          color="#ff9800" />
-            <KpiChip label="พร้อมโพสต์"          value={STATS.readyPublish}                         color="#00ff9f" />
-            <KpiChip label="รายได้รวมจำลอง"      value={formatTHB(companySummary.totalRevenue)}     color="#00e5ff" />
-            <KpiChip label="กำไรสุทธิจำลอง"      value={formatTHB(companySummary.totalNetProfit)}   color="#00ff9f" />
-            <KpiChip label="ค่าโฆษณารวม"         value={formatTHB(companySummary.totalAdSpend)}     color="#ffb300" />
-            <KpiChip label="ROAS เฉลี่ย"          value={`${companySummary.avgRoas}x`}               color={companySummary.avgRoas >= 4 ? '#00ff9f' : '#ffb300'} />
+          {/* 6 KPI chips — bigger numbers */}
+          <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end' }}>
+            <KpiChip label="แคมเปญที่กำลังทำ"  value={STATS.active}                             color="#e8eaf6" />
+            <KpiChip label="รอรีวิว"            value={STATS.pendingReview}                      color="#ffb300" />
+            <KpiChip label="รอ CEO อนุมัติ"     value={STATS.ceoApproval}                        color="#ff9800" />
+            <KpiChip label="รายได้รวม"          value={formatTHB(companySummary.totalRevenue)}   color="#00e5ff" />
+            <KpiChip label="กำไรสุทธิ"          value={formatTHB(companySummary.totalNetProfit)} color="#00ff9f" />
+            <KpiChip label="ROAS เฉลี่ย"         value={`${companySummary.avgRoas}x`}             color={companySummary.avgRoas >= 4 ? '#00ff9f' : '#ffb300'} />
           </div>
-        </div>
 
-        {/* Row 2: dept label */}
-        <div style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 2 }}>
-          แผนกหลัก — คลิกที่โต๊ะเพื่อดูรายละเอียด &nbsp;|&nbsp; Shopee · Lazada · TikTok คือ revenue channels ไม่ใช่แผนก
         </div>
       </header>
 
+      {/* ── Navigation ── */}
+      <nav style={{ background: '#080c18', borderBottom: '2px solid #1a2540', padding: '0 20px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        {NAV_ITEMS.map(item => (
+          <button
+            key={item.id}
+            onClick={() => setActiveView(item.id)}
+            style={{
+              fontFamily: 'VT323, monospace',
+              fontSize: 13,
+              color: activeView === item.id ? '#00ff9f' : '#4a5680',
+              background: 'none',
+              border: 'none',
+              borderBottom: `2px solid ${activeView === item.id ? '#00ff9f' : 'transparent'}`,
+              padding: '9px 18px',
+              cursor: 'pointer',
+              letterSpacing: 1,
+              transition: 'color 0.1s',
+              marginBottom: -2,
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+        <span style={{ marginLeft: 'auto', fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#1a2540', letterSpacing: 1 }}>
+          Shopee · Lazada · TikTok = revenue channels
+        </span>
+      </nav>
+
       {/* ── Main layout ── */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: selectedAgent ? '1fr 320px' : '1fr', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: hasPanel ? '1fr 320px' : '1fr', overflow: 'hidden', minHeight: 0 }}>
 
-        {/* Left: scrollable office floor */}
-        <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 16px 16px' }}>
+        {/* Left: scrollable view content */}
+        <div style={{ overflowY: 'auto', padding: '14px 16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-          {/* 5 department rooms */}
-          <div>
-            <div style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: '#2a3560', letterSpacing: 2, marginBottom: 8 }}>
-              ▶ 5 ห้องแผนกหลักของบริษัท
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
-              {agents.map(agent => (
-                <AgentRoom
-                  key={agent.id}
-                  agent={agent}
-                  selected={selectedAgentId === agent.id}
-                  onClick={() => setSelectedAgentId(selectedAgentId === agent.id ? null : agent.id)}
-                />
-              ))}
-            </div>
-          </div>
+          {activeView === 'overview' && (
+            <>
+              <AgentRoomsGrid selectedId={selectedAgentId} onSelect={handleSelectAgent} />
+              <FinanceDashboard compact />
+              <CampaignFocusSection selectedCampaignId={selectedCampaignId} onSelectCampaign={handleSelectCampaign} />
+            </>
+          )}
 
-          {/* Finance dashboard — revenue by channel */}
-          <FinanceDashboard />
+          {activeView === 'campaigns' && (
+            <>
+              <CampaignFocusSection selectedCampaignId={selectedCampaignId} onSelectCampaign={handleSelectCampaign} />
+              <CampaignPipeline />
+            </>
+          )}
 
-          {/* Campaign pipeline */}
-          <CampaignPipeline />
+          {activeView === 'finance' && (
+            <FinanceDashboard />
+          )}
 
-          {/* Activity log */}
-          <div style={{ minHeight: 200 }}>
+          {activeView === 'agentoffice' && (
+            <AgentRoomsGrid selectedId={selectedAgentId} onSelect={handleSelectAgent} />
+          )}
+
+          {activeView === 'log' && (
             <AgentActivityLog />
-          </div>
+          )}
+
         </div>
 
-        {/* Right: agent detail panel */}
-        {selectedAgent && (
+        {/* Right: detail panel */}
+        {hasPanel && (
           <div style={{ borderLeft: '2px solid #1a2540', background: '#0a0e1a', padding: 16, overflowY: 'auto', flexShrink: 0 }}>
-            <AgentDetailPanel
-              agent={selectedAgent}
-              onClose={() => setSelectedAgentId(null)}
-            />
+            {selectedAgent    && <AgentDetailPanel    agent={selectedAgent}       onClose={closePanel} />}
+            {selectedCampaign && <CampaignDetailPanel campaign={selectedCampaign} onClose={closePanel} />}
           </div>
         )}
+
       </div>
 
       {/* ── Footer ── */}
@@ -123,15 +176,40 @@ export default function AgentOffice() {
           PHASE 1 — MOCK DATA ONLY — Shopee / Lazada / TikTok เป็น revenue channels
         </span>
       </footer>
+
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// Shared sub-components (local to this file)
+// ─────────────────────────────────────────────
+
+function AgentRoomsGrid({ selectedId, onSelect }: { selectedId: DepartmentId | null; onSelect: (id: DepartmentId) => void }) {
+  return (
+    <div>
+      <div style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: '#2a3560', letterSpacing: 2, marginBottom: 8 }}>
+        ▶ 5 ห้องแผนกหลักของบริษัท — คลิกเพื่อดูรายละเอียด
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+        {agents.map(agent => (
+          <AgentRoom
+            key={agent.id}
+            agent={agent}
+            selected={selectedId === agent.id}
+            onClick={() => onSelect(agent.id)}
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
 function KpiChip({ label, value, color }: { label: string; value: string | number; color: string }) {
   return (
-    <div style={{ textAlign: 'center', minWidth: 60 }}>
-      <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#2a3560', letterSpacing: 0.3, marginTop: 1, whiteSpace: 'nowrap' }}>{label}</div>
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontFamily: 'VT323, monospace', fontSize: 24, color, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#2a3560', letterSpacing: 0.3, marginTop: 2, whiteSpace: 'nowrap' }}>{label}</div>
     </div>
   )
 }

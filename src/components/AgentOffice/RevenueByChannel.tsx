@@ -1,66 +1,103 @@
 import type { ChannelFinanceSummary } from '../../agents/financeRegistry'
-import { RECOMMENDATION_CONFIG } from '../../agents/financeRegistry'
 import { CHANNEL_CONFIG, formatTHB } from '../../agents/campaignRegistry'
 
 interface Props {
   summary: ChannelFinanceSummary
+  /** compact — show only 4 key metrics + status badge. Used in overview view. */
+  compact?: boolean
 }
 
-export default function RevenueByChannel({ summary }: Props) {
-  const cfg = CHANNEL_CONFIG[summary.channel]
-  const recCfg = RECOMMENDATION_CONFIG[summary.recommendation]
-  const isLoss = summary.netProfit < 0
+const COMPACT_BADGE: Record<ChannelFinanceSummary['recommendation'], { label: string; color: string }> = {
+  scale:    { label: 'ดี ↑',    color: '#00ff9f' },
+  maintain: { label: 'ปกติ',    color: '#00e5ff' },
+  stop:     { label: 'ขาดทุน', color: '#ff5252' },
+  review:   { label: 'ระวัง',   color: '#ffb300' },
+}
 
-  return (
-    <div
-      style={{
+export default function RevenueByChannel({ summary, compact = false }: Props) {
+  const cfg    = CHANNEL_CONFIG[summary.channel]
+  const isLoss = summary.netProfit < 0
+  const roasColor = summary.roas >= 4 ? '#00ff9f' : summary.roas >= 2 ? '#ffb300' : '#ff5252'
+
+  if (compact) {
+    const badge = COMPACT_BADGE[summary.recommendation]
+    return (
+      <div style={{
         background: '#0c1425',
         border: `1px solid ${isLoss ? '#ff525244' : '#1a2540'}`,
         borderTop: `3px solid ${cfg.color}`,
-        padding: 12,
+        padding: '10px 12px',
         flex: 1,
         minWidth: 0,
-      }}
-    >
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ fontFamily: 'VT323, monospace', fontSize: 17, color: cfg.color, letterSpacing: 1 }}>
+            {cfg.label.toUpperCase()}
+          </div>
+          <span style={{
+            fontFamily: 'VT323, monospace',
+            fontSize: 11,
+            color: badge.color,
+            background: `${badge.color}18`,
+            padding: '1px 7px',
+            border: `1px solid ${badge.color}44`,
+            letterSpacing: 1,
+          }}>
+            {badge.label}
+          </span>
+        </div>
+
+        {/* 4 compact rows */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <CompactRow label="รายได้"   value={formatTHB(summary.revenue)}   color="#e8eaf6" />
+          <CompactRow label="ค่าโฆษณา" value={formatTHB(summary.adSpend)}   color="#ffb300" />
+          <div style={{ borderTop: '1px solid #1a2540', margin: '2px 0' }} />
+          <CompactRow label="กำไรสุทธิ" value={formatTHB(summary.netProfit)} color={isLoss ? '#ff5252' : '#00ff9f'} bold />
+          <CompactRow label="ROAS"      value={`${summary.roas}x`}           color={roasColor} />
+        </div>
+      </div>
+    )
+  }
+
+  // ── Full mode (การเงิน view) ──────────────────────────────────
+  return (
+    <div style={{
+      background: '#0c1425',
+      border: `1px solid ${isLoss ? '#ff525244' : '#1a2540'}`,
+      borderTop: `3px solid ${cfg.color}`,
+      padding: 12,
+      flex: 1,
+      minWidth: 0,
+    }}>
       {/* Channel header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: cfg.color, letterSpacing: 1 }}>
           {cfg.label.toUpperCase()}
         </div>
-        <span
-          style={{
-            fontFamily: 'VT323, monospace',
-            fontSize: 11,
-            color: recCfg.color,
-            background: `${recCfg.color}18`,
-            padding: '2px 8px',
-            border: `1px solid ${recCfg.color}44`,
-            letterSpacing: 1,
-          }}
-        >
-          {recCfg.label}
+        <span style={{
+          fontFamily: 'VT323, monospace',
+          fontSize: 11,
+          color: COMPACT_BADGE[summary.recommendation].color,
+          background: `${COMPACT_BADGE[summary.recommendation].color}18`,
+          padding: '2px 8px',
+          border: `1px solid ${COMPACT_BADGE[summary.recommendation].color}44`,
+          letterSpacing: 1,
+        }}>
+          {COMPACT_BADGE[summary.recommendation].label}
         </span>
       </div>
 
-      {/* Finance rows */}
+      {/* All 7 finance rows */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <FinRow label="รายได้"            value={formatTHB(summary.revenue)}      color="#e8eaf6" />
-        <FinRow label="ค่าคอมมิชชั่น"    value={formatTHB(summary.commission)}   color="#00e5ff" />
-        <FinRow label="ค่าโฆษณา"         value={formatTHB(summary.adSpend)}      color="#ffb300" />
-        <FinRow label="ต้นทุนคอนเทนต์"   value={formatTHB(summary.contentCost)}  color="#ffb300" />
+        <FullRow label="รายได้"          value={formatTHB(summary.revenue)}       color="#e8eaf6" />
+        <FullRow label="ค่าคอมมิชชั่น"   value={formatTHB(summary.commission)}    color="#00e5ff" />
+        <FullRow label="ค่าโฆษณา"        value={formatTHB(summary.adSpend)}       color="#ffb300" />
+        <FullRow label="ต้นทุนคอนเทนต์"  value={formatTHB(summary.contentCost)}   color="#ffb300" />
         <div style={{ borderTop: '1px solid #1a2540', marginTop: 3, paddingTop: 3 }} />
-        <FinRow
-          label="กำไรสุทธิ"
-          value={formatTHB(summary.netProfit)}
-          color={isLoss ? '#ff5252' : '#00ff9f'}
-          bold
-        />
-        <FinRow
-          label="ROAS"
-          value={`${summary.roas}x`}
-          color={summary.roas >= 4 ? '#00ff9f' : summary.roas >= 2 ? '#ffb300' : '#ff5252'}
-        />
-        <FinRow label="ยอดรอรับเงิน"     value={formatTHB(summary.pendingPayout)} color="#8892b0" />
+        <FullRow label="กำไรสุทธิ"       value={formatTHB(summary.netProfit)}     color={isLoss ? '#ff5252' : '#00ff9f'} bold />
+        <FullRow label="ROAS"             value={`${summary.roas}x`}               color={roasColor} />
+        <FullRow label="ยอดรอรับเงิน"    value={formatTHB(summary.pendingPayout)} color="#8892b0" />
       </div>
 
       {/* Warnings */}
@@ -88,7 +125,16 @@ export default function RevenueByChannel({ summary }: Props) {
   )
 }
 
-function FinRow({ label, value, color, bold }: { label: string; value: string; color: string; bold?: boolean }) {
+function CompactRow({ label, value, color, bold }: { label: string; value: string; color: string; bold?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#4a5680' }}>{label}</span>
+      <span style={{ fontFamily: 'VT323, monospace', fontSize: bold ? 15 : 13, color, letterSpacing: 0.5 }}>{value}</span>
+    </div>
+  )
+}
+
+function FullRow({ label, value, color, bold }: { label: string; value: string; color: string; bold?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#4a5680' }}>{label}</span>

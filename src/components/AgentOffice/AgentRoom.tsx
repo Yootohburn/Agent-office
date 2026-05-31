@@ -48,7 +48,7 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
       />
 
       {/* ── Info section ── */}
-      <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 7, flex: 1 }}>
+      <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
 
         {/* Name + channel badge */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
@@ -67,10 +67,10 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
           )}
         </div>
 
-        {/* Current task */}
-        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#8892b0', lineHeight: 1.45, flex: 1 }}>
-          {agent.currentTask.length > 85
-            ? agent.currentTask.substring(0, 85) + '…'
+        {/* Current task (short) */}
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#8892b0', lineHeight: 1.4, flex: 1 }}>
+          {agent.currentTask.length > 60
+            ? agent.currentTask.substring(0, 60) + '…'
             : agent.currentTask}
         </div>
 
@@ -93,19 +93,26 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
           </div>
         </div>
 
-        {/* Decision needed */}
-        {agent.decisionNeeded && (
-          <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#ff9800', background: '#ff980011', padding: '3px 6px', borderLeft: '2px solid #ff9800', lineHeight: 1.45 }}>
-            ◆ {agent.decisionNeeded.substring(0, 68)}{agent.decisionNeeded.length > 68 ? '…' : ''}
+        {/* Compact badge row: decision + risk */}
+        {(agent.decisionNeeded || agent.risks.length > 0) && (
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+            {agent.decisionNeeded && (
+              <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: '#ff9800', background: '#ff980011', padding: '1px 6px', border: '1px solid #ff980033', letterSpacing: 0.5 }}>
+                ◆ ต้องตัดสินใจ
+              </span>
+            )}
+            {agent.risks.length > 0 && (
+              <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: '#ffb300', background: '#ffb30011', padding: '1px 6px', border: '1px solid #ffb30033', letterSpacing: 0.5 }}>
+                ⚠ {agent.risks.length} ความเสี่ยง
+              </span>
+            )}
           </div>
         )}
 
-        {/* First risk warning */}
-        {agent.risks.length > 0 && (
-          <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#ffb300', background: '#ffb30011', padding: '3px 6px', borderLeft: '2px solid #ffb300', lineHeight: 1.45 }}>
-            ⚠ {agent.risks[0].substring(0, 68)}{agent.risks[0].length > 68 ? '…' : ''}
-          </div>
-        )}
+        {/* Next action (short) */}
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#00e5ff', lineHeight: 1.4 }}>
+          → {agent.nextAction.length > 60 ? agent.nextAction.substring(0, 60) + '…' : agent.nextAction}
+        </div>
 
       </div>
     </div>

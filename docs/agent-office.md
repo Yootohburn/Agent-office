@@ -2,94 +2,127 @@
 
 ## 1. What is Agent Office?
 
-Agent Office is a mock 8-bit visual dashboard for coordinating AI agents in an affiliate marketing automation workflow.
+Agent Office is an AI-operated affiliate content creator company, visualized as an 8-bit pixel dashboard.
 
-It supports three affiliate platforms:
-- **Shopee Affiliate** — Southeast Asia e-commerce
-- **Lazada Affiliate** — Southeast Asia e-commerce
-- **TikTok Shop Affiliate** — Short-form video commerce
+It is **not** a platform integration tool. The platforms (Shopee, Lazada, TikTok) are campaign destinations — the company itself is organized into four departments that handle every campaign from product research to publish.
 
-Phase 1 is mock data only. No real APIs are connected. The dashboard shows how agents will work together once real integrations are built.
+Phase 1 is mock data only. No real APIs are connected. The dashboard shows how the company will work once real integrations are built in later phases.
 
 ---
 
-## 2. What Each Agent Does
+## 2. The Four Core Departments
 
-### Shared Agents (all platforms)
+The office is structured as a company with four departments. Every campaign flows through all of them.
 
-| Agent | Role |
-|---|---|
-| Product Scout | Finds and scores affiliate products from a URL or keyword |
-| Offer Analyst | Evaluates commission rate, offer strength, and selling angle |
-| Script Writer | Writes hooks, video scripts, and captions |
-| Visual Designer | Outputs visual concept briefs and thumbnail direction |
-| Clip Builder | Assembles video scene manifests and export packages |
-| Publisher | Formats posts per platform with caption and hashtags |
-| Compliance Checker | Scans for banned claims, missing disclosures, platform rule violations |
-| Growth Analyst | Tracks engagement, completion rate, CTR, and ROI across platforms |
-| Housekeeper | Cleans up stale files, duplicates, and archives old campaigns |
+| Department | Agent | Title |
+|---|---|---|
+| Executive | CEO / Campaign Director | Chief Executive Officer |
+| Research | Product & Trend Analyst | Head of Product Research |
+| Creative | Content Studio Agent | Creative Director & Content Producer |
+| Operations | Ops & Review Agent | Operations Manager & Compliance Officer |
 
-### TikTok-Specific Agents
+### CEO / Campaign Director
 
-| Agent | Role |
-|---|---|
-| TikTok Strategist | Lead agent — defines campaign angle, briefs the team |
-| Trend Scout | Analyzes FYP algorithm signals, trending sounds, and competitor formats |
-| TikTok Offer Analyst | Evaluates TikTok Shop commission rates and impulse-buy potential |
-| TikTok Script Writer | Writes 3-second hooks and pattern-interrupt scripts for short video |
-| TikTok Analytics AI | Tracks TikTok-specific KPIs: engagement >8%, completion >70%, ROI 4:1 |
-| UGC Manager | Matches products to nano/micro/macro creators for UGC campaigns |
+The final decision-maker. Sets weekly priorities, approves or rejects every campaign before it goes to publish, and monitors company-level KPIs (views, CTR, conversion, mock affiliate revenue).
+
+Does NOT write content. Does NOT research products. Delegates everything except final approval.
+
+### Product & Trend Analyst
+
+The intelligence department. Finds affiliate products worth promoting, scores them across five criteria (commission rate, rating, review count, price point, trend strength), maps competitor angles, and delivers a research brief to the Content Studio.
+
+Works across all platforms. Platform is just a tag on each product — the analyst evaluates platform fit as part of the brief.
+
+### Content Studio Agent
+
+The creative engine. Takes a research brief and produces a complete content package: 3-second hook, full video script with pattern interrupts, caption, hashtags, thumbnail brief, and optionally a UGC creator brief.
+
+Adapts tone per platform: TikTok (authentic, fast, Gen Z), Shopee/Lazada (deal-focused, trust-building).
+
+The 3-second hook is the most critical output. Everything else depends on it.
+
+### Ops & Review Agent
+
+The operational backbone. Every content package passes through Ops & Review before the CEO sees it. Runs a full compliance scan, manages the content queue, prepares export packages, and tracks post-publish performance.
+
+Has auto-block authority for health claims, missing disclosures, and price mismatches. Everything else goes to the CEO.
 
 ---
 
-## 3. How TikTok Affiliate Fits In
+## 3. Campaign Pipeline
 
-The TikTok workflow is designed around the 3-second attention rule and the FYP algorithm:
+Every campaign follows the same seven-stage pipeline:
 
 ```
-Trend/Product Idea
-       ↓
-TikTok Strategist   ← defines angle, hook style, format
-       ↓
-Trend Scout         ← trending sounds, hashtags, competitor formats
-       ↓
-TikTok Offer Analyst ← commission rate, impulse score, visual appeal
-       ↓
-TikTok Script Writer ← hook + script beats with pattern interrupts
-       ↓
-Visual Designer     ← thumbnail concept, color palette
-       ↓
-Compliance Checker  ← platform rules, #ad disclosure, banned claims
-       ↓
-TikTok Analytics AI ← monitors KPIs after publish
+Campaign Brief
+      ↓
+Product Research       ← Product & Trend Analyst
+      ↓
+Content Creation       ← Content Studio Agent
+      ↓
+Review & Compliance    ← Ops & Review Agent
+      ↓
+CEO Approval           ← CEO / Campaign Director
+      ↓
+Export / Publish Ready ← Ops & Review Agent
+      ↓
+Performance Feedback   ← Ops & Review Agent → CEO
 ```
 
----
+Campaigns can move backwards (e.g., compliance flag → back to Content Studio) but never skip stages.
 
-## 4. How the tiktok_strategist.py Prototype Was Used
+### Stage ownership
 
-The file at `prototypes/tiktok_strategist.py` is a reference recreation of a prototype from another repository.
-
-**It is NOT wired into production.** It was used only to extract these concepts:
-
-| Prototype Concept | Where It Lives Now |
+| Stage | Owner |
 |---|---|
-| 3-second hook rule | `tiktok-script-writer.md`, `agentRegistry.ts` mock data |
-| 4 sub-agent team structure | `.claude/agents/` — 6 TikTok-specific agents |
-| MessageBus with JSONL | `agentTaskRouter.ts` — workflow step routing |
-| KPI targets (engagement >8%, completion >70%, ROI 4:1) | `tiktok-analytics-ai.md`, `agentRegistry.ts` |
-| Creator tier system (nano → top-tier) | `ugc-manager.md` |
-| FYP algorithm optimization | `trend-scout.md` |
+| Campaign Brief | CEO / Campaign Director |
+| Product Research | Product & Trend Analyst |
+| Content Creation | Content Studio Agent |
+| Review & Compliance | Ops & Review Agent |
+| CEO Approval | CEO / Campaign Director |
+| Export / Publish Ready | Ops & Review Agent |
+| Performance Feedback | Ops & Review Agent |
 
 ---
 
-## 5. What is Mock vs Real
+## 4. Platforms — Tags, Not Departments
+
+Shopee, Lazada, TikTok, and Multi-platform are **campaign tags**, not departments.
+
+The platform filter in the dashboard filters the campaign pipeline view to show only campaigns targeting a specific platform. It does not change which agents are shown — all four departments work on every platform.
+
+Each platform has its own content requirements:
+
+| Platform | Content format | Key rule |
+|---|---|---|
+| TikTok | Short video 15–60s | 3-second hook mandatory |
+| Shopee | Feed post + video | Deal angle, trust-building |
+| Lazada | Feed post + video | Bundle and discount focus |
+| Multi | Adapted per platform | Each version must be platform-native |
+
+---
+
+## 5. Mock Campaigns (Phase 1)
+
+| Campaign | Platform | Stage |
+|---|---|---|
+| Wireless Earbuds under 500 THB | TikTok | Content Creation |
+| Home Office Desk Lamp | Shopee | Product Research |
+| Portable Blender | Lazada | Review & Compliance |
+| Skincare Travel Pouch | Multi-platform | CEO Approval |
+
+All mock data. No real products, no real affiliate links, no real API calls.
+
+---
+
+## 6. What is Mock vs Real
 
 | Thing | Phase 1 Status |
 |---|---|
-| Agent UI cards and status | Mock data in `agentRegistry.ts` |
-| Workflow pipelines | Mock steps in `agentTaskRouter.ts` and `agentSessionStore.ts` |
+| Agent department cards and status | Mock data in `agentRegistry.ts` |
+| Campaign pipeline | Mock campaigns in `campaignRegistry.ts` |
 | Activity log | Static mock entries in `agentSessionStore.ts` |
+| Pipeline routing logic | Defined in `agentTaskRouter.ts` — mock only |
 | Shopee API | NOT connected |
 | Lazada API | NOT connected |
 | TikTok API | NOT connected |
@@ -97,80 +130,89 @@ The file at `prototypes/tiktok_strategist.py` is a reference recreation of a pro
 | Auto-posting | NOT implemented |
 | AI model calls inside app | NOT implemented |
 | Compliance scanning | Mock flags only |
-| Analytics data | Mock numbers only |
+| Performance data | Mock numbers only |
 
 ---
 
-## 6. How to Add a New Agent
+## 7. How to Add a New Campaign
 
-1. Create `.claude/agents/<agent-name>.md` following the existing template (name, description, role, platform, what it does, what it must NOT do, expected output format, risks, when to ask for human review).
-
-2. Add the agent definition to `src/agents/agentRegistry.ts`:
+1. Add a campaign object to `src/agents/campaignRegistry.ts`:
 ```typescript
 {
-  id: 'my-new-agent',
-  name: 'My New Agent',
-  role: 'Does X for Y',
-  platform: 'shopee', // or lazada | tiktok | shared
-  status: 'idle',
-  currentTask: 'No active task',
+  id: 'camp-005',
+  name: 'Your Campaign Name',
+  platform: 'shopee',        // or lazada | tiktok | multi
+  category: 'Category',
+  targetPrice: '$X–$Y',
+  stage: 'product_research', // starting stage
   progress: 0,
-  recentOutput: '',
-  risks: [],
-  nextAction: 'Waiting for input',
+  assignedAgentId: 'product-analyst',
+  brief: 'Your campaign brief here.',
+  targetMetrics: { views: '30,000', ctr: '2%', conversion: '1.5%', mockRevenue: '$100' },
+  notes: 'Any notes.',
+  riskFlag: null,
 }
 ```
 
-3. If it's platform-specific, add it to `platformRegistry.ts` if needed.
-
-4. Add it to the relevant workflow template in `agentTaskRouter.ts`:
-```typescript
-steps: ['product-scout', 'my-new-agent', 'compliance-checker'],
-```
-
-5. The dashboard will display it automatically — no UI code changes needed for a basic card.
+2. The pipeline and dashboard will display it automatically.
 
 ---
 
-## 7. How Task Routing Works
+## 8. How to Add a New Department Agent
 
-`agentTaskRouter.ts` defines workflow templates: ordered lists of agent IDs.
+This is only needed if the company grows beyond 4 departments.
 
-In Phase 1, routing is purely descriptive (mock display). In Phase 2, each step would:
-1. Check the current agent's status is `done`
-2. Call `getNextAgent(workflowId, currentAgentId)` to find the next agent
-3. Pass the output JSON from the current agent as input to the next
-4. Update the session store
-
-The MessageBus concept (from the prototype) would work like this in future:
-- Each agent reads from its own inbox
-- Each agent writes its output to the next agent's inbox
-- The session store tracks which step is active
+1. Create `.claude/agents/<agent-name>.md` following the existing template.
+2. Add the agent to `src/agents/agentRegistry.ts` following the existing schema.
+3. Add routing logic to `src/agents/agentTaskRouter.ts` if the new agent owns a pipeline stage.
+4. Add a new card to `AgentOffice.tsx` — the grid auto-adjusts.
 
 ---
 
-## 8. Future Integrations Needed
+## 9. How Claude Code Handles Agent Logic
 
-| Integration | Phase | Notes |
+The `.claude/agents/` directory contains instruction files for each department:
+- `ceo-director.md` — executive decision authority
+- `product-analyst.md` — research and scoring logic
+- `content-studio.md` — creative rules and hook formula
+- `ops-review.md` — compliance checklist and queue management
+
+These are the primary agent instruction files Claude Code uses when operating the office. The older files (product-scout, offer-analyst, etc.) remain as sub-tools that the main departments can reference.
+
+---
+
+## 10. The tiktok_strategist.py Prototype
+
+The file at `prototypes/tiktok_strategist.py` is a reference recreation of an earlier prototype. It is not wired into production.
+
+Concepts extracted and integrated into the current system:
+- 3-second attention rule → Content Studio Agent hook formula
+- KPI targets (engagement >8%, completion >70%, ROI 4:1) → Ops & Review performance tracking
+- Creator tier system → Content Studio UGC briefs
+- MessageBus concept → `agentTaskRouter.ts` pipeline routing
+
+---
+
+## 11. Future Integrations (Phase 2+)
+
+| Integration | Priority | Notes |
 |---|---|---|
 | Shopee Affiliate API | Phase 2 | Product data, commission rates |
 | Lazada Affiliate API | Phase 2 | Product data, commission rates |
 | TikTok Shop API | Phase 2 | Product catalog, commission, shop data |
 | TikTok Analytics API | Phase 2 | Views, engagement, completion rate, CTR |
-| Real AI model calls (Claude API) | Phase 2 | Script generation, compliance checking |
-| Auto-publish to platforms | Phase 3 | Requires OAuth and platform approvals |
-| Creator outreach (UGC Manager) | Phase 3 | CRM / email integration needed |
-| Real-time trend data | Phase 2 | TikTok Creative Center API or third-party |
+| Claude API for content generation | Phase 2 | Replace mock scripts with real AI generation |
+| Auto-publish | Phase 3 | Requires OAuth + platform approvals |
+| Real creator outreach | Phase 3 | CRM / email integration |
 
 ---
 
-## 9. How to Add Codex Support Later
+## 12. How to Add Codex Support Later
 
 When Codex repository access is working:
 
 1. Create `.codex/agents/` directory.
-2. Mirror the relevant `.claude/agents/` files there, adapting format if Codex requires different headers.
-3. Add a note to `CLAUDE.md` explaining which agents are supported in both tools.
-4. Do not duplicate backend logic — the `src/agents/` TypeScript files are tool-agnostic.
-
-No `.codex/` files should be created until Codex access is confirmed working.
+2. Mirror the four department files there: `ceo-director.md`, `product-analyst.md`, `content-studio.md`, `ops-review.md`.
+3. Codex can assist with: backend API integration, UI testing, data pipeline automation, and build tooling.
+4. Claude Code handles: agent logic, content strategy, campaign decisions, and creative output.
+5. Do not create `.codex/` files until Codex access is confirmed working.

@@ -1,253 +1,157 @@
 import { useState } from 'react'
-import { agents, getAgentsByPlatform } from '../../agents/agentRegistry'
-import type { AgentPlatform } from '../../agents/agentRegistry'
-import { platforms } from '../../agents/platformRegistry'
-import { workflowTemplates } from '../../agents/agentTaskRouter'
-import AgentStatusCard from './AgentStatusCard'
-import AgentDesk from './AgentDesk'
+import { agents } from '../../agents/agentRegistry'
+import type { DepartmentId } from '../../agents/agentRegistry'
+import { campaigns, PLATFORM_CONFIG } from '../../agents/campaignRegistry'
+import type { CampaignPlatform } from '../../agents/campaignRegistry'
+import AgentDepartmentCard from './AgentDepartmentCard'
+import AgentDetailPanel from './AgentDetailPanel'
+import CampaignPipeline from './CampaignPipeline'
 import AgentActivityLog from './AgentActivityLog'
 
-type FilterOption = 'all' | AgentPlatform
+type FilterOption = 'all' | CampaignPlatform
 
 const FILTER_TABS: { id: FilterOption; label: string }[] = [
-  { id: 'all',     label: 'ALL' },
-  { id: 'shopee',  label: 'SHOPEE' },
-  { id: 'lazada',  label: 'LAZADA' },
-  { id: 'tiktok',  label: 'TIKTOK' },
-  { id: 'shared',  label: 'SHARED' },
+  { id: 'all',    label: 'ALL PLATFORMS' },
+  { id: 'shopee', label: 'SHOPEE' },
+  { id: 'lazada', label: 'LAZADA' },
+  { id: 'tiktok', label: 'TIKTOK' },
+  { id: 'multi',  label: 'MULTI' },
 ]
 
-const STATUS_COUNTS = {
-  total:   agents.length,
-  working: agents.filter(a => a.status === 'working').length,
-  blocked: agents.filter(a => a.status === 'blocked' || a.status === 'needs_review').length,
-  done:    agents.filter(a => a.status === 'done').length,
+// Company-level stats derived from mock data
+const STATS = {
+  active:        campaigns.length,
+  pendingReview: campaigns.filter(c => c.stage === 'review_compliance').length,
+  ceoApproval:   campaigns.filter(c => c.stage === 'ceo_approval').length,
+  readyPublish:  campaigns.filter(c => c.stage === 'export_publish').length,
+  mockRevenue:   campaigns.reduce((sum, c) => {
+    const n = parseFloat(c.targetMetrics.mockRevenue.replace('$', ''))
+    return sum + (isNaN(n) ? 0 : n)
+  }, 0),
 }
 
 export default function AgentOffice() {
   const [activeFilter, setActiveFilter] = useState<FilterOption>('all')
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>('tiktok-strategist')
+  const [selectedAgentId, setSelectedAgentId] = useState<DepartmentId | null>('ceo-director')
 
-  const filteredAgents = getAgentsByPlatform(activeFilter)
   const selectedAgent = agents.find(a => a.id === selectedAgentId) ?? null
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#06090f',
-        color: '#e8eaf6',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Top Bar */}
-      <header
-        style={{
-          background: '#0a0e1a',
-          borderBottom: '2px solid #1a2540',
-          padding: '10px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div
-            style={{
-              fontFamily: 'VT323, monospace',
-              fontSize: 26,
-              color: '#00ff9f',
-              letterSpacing: 3,
-              lineHeight: 1,
-            }}
-          >
-            ░▒▓ AGENT OFFICE v1.0 ▓▒░
+    <div style={{ minHeight: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column' }}>
+
+      {/* ── Top Bar ── */}
+      <header style={{ background: '#0a0e1a', borderBottom: '2px solid #1a2540', padding: '10px 20px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          {/* Brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ fontFamily: 'VT323, monospace', fontSize: 24, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
+              ░▒▓ AGENT OFFICE v1.1 ▓▒░
+            </div>
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#00e5ff', background: '#00e5ff11', padding: '2px 10px', border: '1px solid #00e5ff33', letterSpacing: 1 }}>
+              AI AFFILIATE CONTENT COMPANY
+            </div>
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#ffb300', background: '#ffb30011', padding: '2px 8px', borderLeft: '2px solid #ffb300' }}>
+              PHASE 1 — MOCK DATA
+            </div>
           </div>
-          <div
-            style={{
-              fontFamily: 'Share Tech Mono, monospace',
-              fontSize: 10,
-              color: '#ffb300',
-              background: '#ffb30011',
-              padding: '2px 8px',
-              borderLeft: '2px solid #ffb300',
-            }}
-          >
-            PHASE 1 — MOCK DATA
+
+          {/* Company KPI strip */}
+          <div style={{ display: 'flex', gap: 16 }}>
+            <KpiChip label="ACTIVE CAMPAIGNS"  value={STATS.active}        color="#e8eaf6" />
+            <KpiChip label="PENDING REVIEW"    value={STATS.pendingReview} color="#ffb300" />
+            <KpiChip label="CEO APPROVAL"      value={STATS.ceoApproval}   color="#ff9800" />
+            <KpiChip label="READY TO PUBLISH"  value={STATS.readyPublish}  color="#00ff9f" />
+            <KpiChip label="MOCK REVENUE"      value={`$${STATS.mockRevenue}`} color="#00e5ff" />
           </div>
         </div>
 
-        {/* System stats */}
-        <div style={{ display: 'flex', gap: 20 }}>
-          <Stat label="AGENTS" value={STATUS_COUNTS.total} color="#e8eaf6" />
-          <Stat label="WORKING" value={STATUS_COUNTS.working} color="#00ff9f" />
-          <Stat label="ATTENTION" value={STATUS_COUNTS.blocked} color="#ff5252" />
-          <Stat label="DONE" value={STATUS_COUNTS.done} color="#00e5ff" />
+        {/* Platform filter tabs */}
+        <div style={{ display: 'flex', gap: 0, borderTop: '1px solid #1a2540', paddingTop: 0 }}>
+          {FILTER_TABS.map(tab => {
+            const platformCfg = tab.id !== 'all' ? PLATFORM_CONFIG[tab.id] : null
+            const isActive = activeFilter === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                style={{
+                  fontFamily: 'VT323, monospace',
+                  fontSize: 13,
+                  letterSpacing: 2,
+                  padding: '7px 18px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: isActive
+                    ? `2px solid ${platformCfg?.color ?? '#00ff9f'}`
+                    : '2px solid transparent',
+                  color: isActive
+                    ? (platformCfg?.color ?? '#00ff9f')
+                    : '#2a3560',
+                  cursor: 'pointer',
+                  transition: 'color 0.1s',
+                }}
+              >
+                {tab.label}
+              </button>
+            )
+          })}
         </div>
       </header>
 
-      {/* Platform filter tabs */}
-      <div
-        style={{
-          background: '#0a0e1a',
-          borderBottom: '1px solid #1a2540',
-          padding: '0 20px',
-          display: 'flex',
-          gap: 0,
-          flexShrink: 0,
-        }}
-      >
-        {FILTER_TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveFilter(tab.id)}
-            style={{
-              fontFamily: 'VT323, monospace',
-              fontSize: 14,
-              letterSpacing: 2,
-              padding: '8px 20px',
-              background: 'none',
-              border: 'none',
-              borderBottom: activeFilter === tab.id ? '2px solid #00ff9f' : '2px solid transparent',
-              color: activeFilter === tab.id ? '#00ff9f' : '#4a5680',
-              cursor: 'pointer',
-              transition: 'color 0.1s',
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      {/* ── Main layout ── */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: selectedAgent ? '1fr 320px' : '1fr', overflow: 'hidden' }}>
 
-        {/* Workflow templates on the right */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: '#2a3560', letterSpacing: 1 }}>
-            WORKFLOWS:
-          </span>
-          {workflowTemplates.map(wf => (
-            <span
-              key={wf.id}
-              style={{
-                fontFamily: 'VT323, monospace',
-                fontSize: 12,
-                color: '#2a3560',
-                background: '#0c1425',
-                padding: '2px 8px',
-                border: '1px solid #1a2540',
-                letterSpacing: 1,
-              }}
-              title={wf.description}
-            >
-              {wf.name.toUpperCase()}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div
-        style={{
-          flex: 1,
-          display: 'grid',
-          gridTemplateColumns: selectedAgent ? '1fr 300px' : '1fr',
-          gap: 0,
-          overflow: 'hidden',
-        }}
-      >
-        {/* Left: agent grid + activity log */}
+        {/* Left: office floor */}
         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {/* Agent grid */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: 16,
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-              gap: 10,
-              alignContent: 'start',
-            }}
-          >
-            {filteredAgents.length === 0 ? (
-              <div style={{ fontFamily: 'VT323, monospace', color: '#2a3560', fontSize: 16, gridColumn: '1/-1', padding: 20 }}>
-                NO AGENTS FOR THIS FILTER
-              </div>
-            ) : (
-              filteredAgents.map(agent => (
-                <AgentStatusCard
+
+          {/* Department cards — 4 equal columns */}
+          <div style={{ padding: '14px 16px 10px', flexShrink: 0 }}>
+            <div style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: '#2a3560', letterSpacing: 3, marginBottom: 8 }}>
+              DEPARTMENTS — CLICK A DESK TO OPEN DETAIL
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+              {agents.map(agent => (
+                <AgentDepartmentCard
                   key={agent.id}
                   agent={agent}
                   selected={selectedAgentId === agent.id}
                   onClick={() => setSelectedAgentId(selectedAgentId === agent.id ? null : agent.id)}
                 />
-              ))
-            )}
+              ))}
+            </div>
           </div>
 
-          {/* Activity log panel */}
-          <div
-            style={{
-              height: 220,
-              borderTop: '2px solid #1a2540',
-              padding: 12,
-              flexShrink: 0,
-            }}
-          >
-            <AgentActivityLog />
+          {/* Campaign pipeline */}
+          <div style={{ padding: '0 16px 10px', flexShrink: 0 }}>
+            <CampaignPipeline platformFilter={activeFilter} />
+          </div>
+
+          {/* Activity log + console */}
+          <div style={{ flex: 1, padding: '0 16px 12px', minHeight: 0 }}>
+            <div style={{ height: '100%', minHeight: 180 }}>
+              <AgentActivityLog />
+            </div>
           </div>
         </div>
 
-        {/* Right: selected agent detail panel */}
+        {/* Right: agent detail panel */}
         {selectedAgent && (
-          <div
-            style={{
-              borderLeft: '2px solid #1a2540',
-              background: '#0a0e1a',
-              padding: 16,
-              overflowY: 'auto',
-              flexShrink: 0,
-            }}
-          >
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedAgentId(null)}
-              style={{
-                fontFamily: 'VT323, monospace',
-                fontSize: 12,
-                color: '#4a5680',
-                background: 'none',
-                border: '1px solid #1a2540',
-                padding: '2px 8px',
-                cursor: 'pointer',
-                marginBottom: 12,
-                letterSpacing: 1,
-              }}
-            >
-              ✕ CLOSE
-            </button>
-
-            <AgentDesk agent={selectedAgent} />
+          <div style={{ borderLeft: '2px solid #1a2540', background: '#0a0e1a', padding: 16, overflowY: 'auto', flexShrink: 0 }}>
+            <AgentDetailPanel
+              agent={selectedAgent}
+              onClose={() => setSelectedAgentId(null)}
+            />
           </div>
         )}
       </div>
 
-      {/* Platform status bar */}
-      <footer
-        style={{
-          background: '#0a0e1a',
-          borderTop: '1px solid #1a2540',
-          padding: '6px 20px',
-          display: 'flex',
-          gap: 20,
-          flexShrink: 0,
-        }}
-      >
-        {platforms.map(p => (
-          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 6, height: 6, background: p.color }} />
+      {/* ── Footer status bar ── */}
+      <footer style={{ background: '#0a0e1a', borderTop: '1px solid #1a2540', padding: '5px 20px', display: 'flex', gap: 20, flexShrink: 0, alignItems: 'center' }}>
+        {Object.entries(PLATFORM_CONFIG).map(([id, cfg]) => (
+          <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 5, height: 5, background: cfg.color }} />
             <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#2a3560', letterSpacing: 1 }}>
-              {p.label.toUpperCase()} API: NOT CONNECTED
+              {cfg.label} API: NOT CONNECTED
             </span>
           </div>
         ))}
@@ -259,11 +163,11 @@ export default function AgentOffice() {
   )
 }
 
-function Stat({ label, value, color }: { label: string; value: number; color: string }) {
+function KpiChip({ label, value, color }: { label: string; value: string | number; color: string }) {
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div style={{ textAlign: 'center', minWidth: 70 }}>
       <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#2a3560', letterSpacing: 1 }}>{label}</div>
+      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#2a3560', letterSpacing: 0.5, marginTop: 1 }}>{label}</div>
     </div>
   )
 }

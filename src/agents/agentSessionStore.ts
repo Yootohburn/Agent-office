@@ -5,122 +5,87 @@ export interface ActivityLogEntry {
   agentName: string
   message: string
   type: 'info' | 'warning' | 'error' | 'success' | 'system'
-}
-
-export interface WorkflowStep {
-  agentId: string
-  agentName: string
-  status: 'pending' | 'active' | 'done' | 'blocked'
-  output?: string
-}
-
-export interface ActiveWorkflow {
-  id: string
-  name: string
-  platform: string
-  startedAt: string
-  steps: WorkflowStep[]
-  currentStepIndex: number
+  campaignId?: string
 }
 
 export const mockActivityLog: ActivityLogEntry[] = [
   {
     id: '1',
-    timestamp: '10:42:03',
+    timestamp: '09:00:01',
     agentId: 'system',
     agentName: 'SYSTEM',
-    message: 'Agent Office v1.0 initialized. All agents online.',
+    message: 'Agent Office v1.1 initialized. AI Affiliate Content Company online. 4 agents ready.',
     type: 'system',
   },
   {
     id: '2',
-    timestamp: '10:42:08',
-    agentId: 'product-scout',
-    agentName: 'Product Scout',
-    message: 'Started scan — Shopee Electronics category. Target: 5 products.',
+    timestamp: '09:01:14',
+    agentId: 'ceo-director',
+    agentName: 'CEO / Campaign Director',
+    message: 'Weekly priority set: TikTok Electronics → Shopee Home Office → Lazada Kitchen → Multi Skincare.',
     type: 'info',
   },
   {
     id: '3',
-    timestamp: '10:43:15',
-    agentId: 'compliance-checker',
-    agentName: 'Compliance Checker',
-    message: 'FLAGGED: "clinically proven" in Lazada Skincare script line 4. Routing back to Script Writer.',
-    type: 'warning',
+    timestamp: '09:02:30',
+    agentId: 'product-analyst',
+    agentName: 'Product & Trend Analyst',
+    message: '[camp-001] TikTok Earbuds research complete. Score 84/100, commission 8.5%, trend RISING. Brief sent to Content Studio.',
+    type: 'success',
+    campaignId: 'camp-001',
   },
   {
     id: '4',
-    timestamp: '10:44:02',
-    agentId: 'trend-scout',
-    agentName: 'Trend Scout',
-    message: 'Trend report complete. Electronics FYP trend: RISING. Recommended window: 48h.',
-    type: 'success',
+    timestamp: '09:04:00',
+    agentId: 'content-studio',
+    agentName: 'Content Studio Agent',
+    message: '[camp-001] TikTok Earbuds script started. Hook: "POV: you just found out your $200 earbuds were a scam". Format: POV unboxing.',
+    type: 'info',
+    campaignId: 'camp-001',
   },
   {
     id: '5',
-    timestamp: '10:44:30',
-    agentId: 'tiktok-offer-analyst',
-    agentName: 'TikTok Offer Analyst',
-    message: 'Offer rated STRONG. Commission 8.5%, impulse score 78/100. Brief sent to Strategist.',
+    timestamp: '09:05:22',
+    agentId: 'product-analyst',
+    agentName: 'Product & Trend Analyst',
+    message: '[camp-003] Lazada Blender research complete. Score 71/100. Brief passed. Started Shopee Desk Lamp research.',
     type: 'success',
+    campaignId: 'camp-003',
   },
   {
     id: '6',
-    timestamp: '10:45:11',
-    agentId: 'ugc-manager',
-    agentName: 'UGC Manager',
-    message: 'BLOCKED: Creator budget approval required. Est. budget: $300 for 3 micro-creators.',
-    type: 'error',
+    timestamp: '09:08:45',
+    agentId: 'ops-review',
+    agentName: 'Ops & Review Agent',
+    message: '[camp-003] FLAGGED: "boost your metabolism" — unverified health claim in Lazada Blender script line 3. Returned to Content Studio.',
+    type: 'warning',
+    campaignId: 'camp-003',
   },
   {
     id: '7',
-    timestamp: '10:46:00',
-    agentId: 'publisher',
-    agentName: 'Publisher',
-    message: 'Post package ready for Shopee Electronics campaign. Needs human review before publish.',
-    type: 'warning',
+    timestamp: '09:12:10',
+    agentId: 'ops-review',
+    agentName: 'Ops & Review Agent',
+    message: '[camp-001] TikTok Earbuds compliance: PASSED. All checks clear. Package queued for CEO approval.',
+    type: 'success',
+    campaignId: 'camp-001',
   },
   {
     id: '8',
-    timestamp: '10:46:45',
-    agentId: 'housekeeper',
-    agentName: 'Housekeeper',
-    message: 'Weekly cleanup done. Archived 12 files. Workspace health: GOOD.',
+    timestamp: '09:14:00',
+    agentId: 'ceo-director',
+    agentName: 'CEO / Campaign Director',
+    message: '[camp-004] Skincare Travel Pouch campaign package received. Under review — Lazada version has minor disclosure issue.',
     type: 'info',
-  },
-]
-
-export const mockWorkflows: ActiveWorkflow[] = [
-  {
-    id: 'wf-shopee-001',
-    name: 'Shopee Electronics Campaign',
-    platform: 'shopee',
-    startedAt: '10:42:08',
-    currentStepIndex: 3,
-    steps: [
-      { agentId: 'product-scout', agentName: 'Product Scout', status: 'done', output: 'Top pick: Wireless Earbuds X9, score 84/100' },
-      { agentId: 'offer-analyst', agentName: 'Offer Analyst', status: 'done', output: 'Offer: STRONG — bundle angle' },
-      { agentId: 'script-writer', agentName: 'Script Writer', status: 'done', output: '28s script + hook ready' },
-      { agentId: 'visual-designer', agentName: 'Visual Designer', status: 'active', output: 'Unboxing style brief in progress...' },
-      { agentId: 'clip-builder', agentName: 'Clip Builder', status: 'pending' },
-      { agentId: 'compliance-checker', agentName: 'Compliance Checker', status: 'pending' },
-      { agentId: 'publisher', agentName: 'Publisher', status: 'pending' },
-    ],
+    campaignId: 'camp-004',
   },
   {
-    id: 'wf-tiktok-001',
-    name: 'TikTok Earbuds Campaign',
-    platform: 'tiktok',
-    startedAt: '10:44:00',
-    currentStepIndex: 2,
-    steps: [
-      { agentId: 'tiktok-strategist', agentName: 'TikTok Strategist', status: 'active', output: 'Strategy: curiosity hook, POV format' },
-      { agentId: 'trend-scout', agentName: 'Trend Scout', status: 'done', output: 'RISING trend — 48h window' },
-      { agentId: 'tiktok-offer-analyst', agentName: 'TikTok Offer Analyst', status: 'done', output: 'STRONG — 8.5% commission' },
-      { agentId: 'tiktok-script-writer', agentName: 'TikTok Script Writer', status: 'active', output: 'Script 70% complete...' },
-      { agentId: 'visual-designer', agentName: 'Visual Designer', status: 'pending' },
-      { agentId: 'compliance-checker', agentName: 'Compliance Checker', status: 'pending' },
-      { agentId: 'tiktok-analytics-ai', agentName: 'TikTok Analytics AI', status: 'pending' },
-    ],
+    id: '9',
+    timestamp: '09:15:33',
+    agentId: 'product-analyst',
+    agentName: 'Product & Trend Analyst',
+    message: '[camp-002] Desk Lamp category: 12 active affiliate competitors detected. Researching differentiation angle — eye care + aesthetic.',
+    type: 'warning',
+    campaignId: 'camp-002',
   },
 ]

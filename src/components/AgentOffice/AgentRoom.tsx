@@ -53,22 +53,22 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
         {/* Name + channel badge */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: 'VT323, monospace', fontSize: 15, color: '#e8eaf6', lineHeight: 1.15, wordBreak: 'break-word' }}>
+            <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: '#e8eaf6', lineHeight: 1.15, wordBreak: 'break-word' }}>
               {agent.thaiName}
             </div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#2a3560', letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>
               {agent.title}
             </div>
           </div>
           {channelCfg && (
-            <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: channelCfg.color, background: `${channelCfg.color}22`, padding: '1px 5px', flexShrink: 0, letterSpacing: 1 }}>
+            <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: channelCfg.color, background: `${channelCfg.color}22`, padding: '1px 5px', flexShrink: 0, letterSpacing: 1 }}>
               {channelCfg.label.toUpperCase()}
             </span>
           )}
         </div>
 
         {/* Current task (short) */}
-        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#8892b0', lineHeight: 1.4, flex: 1 }}>
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#8892b0', lineHeight: 1.4, flex: 1 }}>
           {agent.currentTask.length > 60
             ? agent.currentTask.substring(0, 60) + '…'
             : agent.currentTask}
@@ -85,8 +85,8 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
         {/* Progress bar */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-            <span style={{ fontFamily: 'VT323, monospace', fontSize: 9, color: '#2a3560', letterSpacing: 1 }}>PROGRESS</span>
-            <span style={{ fontFamily: 'VT323, monospace', fontSize: 9, color: meta.accent }}>{agent.progress}%</span>
+            <span style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: '#2a3560', letterSpacing: 1 }}>PROGRESS</span>
+            <span style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: meta.accent }}>{agent.progress}%</span>
           </div>
           <div style={{ background: '#1a2540', height: 3 }}>
             <div style={{ background: meta.accent, height: '100%', width: `${agent.progress}%` }} />
@@ -97,12 +97,12 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
         {(agent.decisionNeeded || agent.risks.length > 0) && (
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
             {agent.decisionNeeded && (
-              <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: '#ff9800', background: '#ff980011', padding: '1px 6px', border: '1px solid #ff980033', letterSpacing: 0.5 }}>
+              <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: '#ff9800', background: '#ff980011', padding: '1px 6px', border: '1px solid #ff980033', letterSpacing: 0.5 }}>
                 ◆ ต้องตัดสินใจ
               </span>
             )}
             {agent.risks.length > 0 && (
-              <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: '#ffb300', background: '#ffb30011', padding: '1px 6px', border: '1px solid #ffb30033', letterSpacing: 0.5 }}>
+              <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: '#ffb300', background: '#ffb30011', padding: '1px 6px', border: '1px solid #ffb30033', letterSpacing: 0.5 }}>
                 ⚠ {agent.risks.length} ความเสี่ยง
               </span>
             )}
@@ -110,7 +110,7 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
         )}
 
         {/* Next action (short) */}
-        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#00e5ff', lineHeight: 1.4 }}>
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#00e5ff', lineHeight: 1.4 }}>
           → {agent.nextAction.length > 60 ? agent.nextAction.substring(0, 60) + '…' : agent.nextAction}
         </div>
 
@@ -552,8 +552,8 @@ function FinanceScene({ accent, screenGlow, isWorking }: { accent: string; scree
 function MiniStat({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{ background: '#060d1a', padding: '3px 6px', border: '1px solid #1a2540' }}>
-      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#2a3560', marginBottom: 1 }}>{label}</div>
-      <div style={{ fontFamily: 'VT323, monospace', fontSize: 13, color }}>{value}</div>
+      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', marginBottom: 1 }}>{label}</div>
+      <div style={{ fontFamily: 'VT323, monospace', fontSize: 15, color }}>{value}</div>
     </div>
   )
 }

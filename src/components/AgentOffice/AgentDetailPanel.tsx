@@ -29,10 +29,10 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
       <div style={{ borderBottom: '1px solid #1a2540', paddingBottom: 10, marginBottom: 14, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
         <PixelAgentAvatar agentId={agent.id} status={agent.status} scale={1.4} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: '#00ff9f', lineHeight: 1.2, marginBottom: 2 }}>
+          <div style={{ fontFamily: 'VT323, monospace', fontSize: 20, color: '#00ff9f', lineHeight: 1.2, marginBottom: 2 }}>
             ▶ {agent.thaiName}
           </div>
-          <div style={{ fontSize: 8, color: '#4a5680', letterSpacing: 1, textTransform: 'uppercase' }}>
+          <div style={{ fontSize: 11, color: '#4a5680', letterSpacing: 1, textTransform: 'uppercase' }}>
             {agent.title} · {agent.codeName}
           </div>
         </div>
@@ -54,24 +54,24 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
             <FinRow label="ROAS เฉลี่ย"        value={`${companySummary.avgRoas}x`}               color={companySummary.avgRoas >= 4 ? '#00ff9f' : '#ffb300'} bold />
             <FinRow label="ยอดรอรับเงิน"      value={formatTHB(companySummary.totalPendingPayout)} color="#8892b0" />
           </div>
-          <div style={{ fontSize: 9, color: '#4a5680', marginBottom: 4, letterSpacing: 1 }}>ช่องทางแยก</div>
+          <div style={{ fontSize: 12, color: '#4a5680', marginBottom: 4, letterSpacing: 1 }}>ช่องทางแยก</div>
           {channelSummaries.map(s => {
             const cfg = CHANNEL_CONFIG[s.channel]
             const rec = RECOMMENDATION_CONFIG[s.recommendation]
             return (
               <div key={s.channel} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0', borderBottom: '1px solid #0f1a2e' }}>
-                <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: cfg.color }}>{cfg.label}</span>
-                <span style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: s.netProfit < 0 ? '#ff5252' : '#00ff9f' }}>{formatTHB(s.netProfit)}</span>
-                <span style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: s.roas >= 4 ? '#00ff9f' : '#ffb300' }}>{s.roas}x</span>
-                <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: rec.color }}>{rec.label}</span>
+                <span style={{ fontFamily: 'VT323, monospace', fontSize: 15, color: cfg.color }}>{cfg.label}</span>
+                <span style={{ fontFamily: 'VT323, monospace', fontSize: 14, color: s.netProfit < 0 ? '#ff5252' : '#00ff9f' }}>{formatTHB(s.netProfit)}</span>
+                <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: s.roas >= 4 ? '#00ff9f' : '#ffb300' }}>{s.roas}x</span>
+                <span style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: rec.color }}>{rec.label}</span>
               </div>
             )
           })}
 
           {/* Finance recommendations */}
-          <div style={{ marginTop: 10, fontSize: 9, color: '#4a5680', letterSpacing: 1, marginBottom: 4 }}>คำแนะนำ Finance Controller</div>
+          <div style={{ marginTop: 10, fontSize: 12, color: '#4a5680', letterSpacing: 1, marginBottom: 4 }}>คำแนะนำ Finance Controller</div>
           {companySummary.activeWarnings.map((w, i) => (
-            <div key={i} style={{ fontSize: 9, color: '#ff5252', background: '#ff525211', padding: '3px 8px', borderLeft: '2px solid #ff5252', marginBottom: 3, lineHeight: 1.4 }}>
+            <div key={i} style={{ fontSize: 12, color: '#ff5252', background: '#ff525211', padding: '3px 8px', borderLeft: '2px solid #ff5252', marginBottom: 3, lineHeight: 1.4 }}>
               ⚠ {w}
             </div>
           ))}
@@ -82,15 +82,15 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
       {campaign && channelCfg && (
         <Section title="แคมเปญปัจจุบัน">
           <div style={{ background: `${channelCfg.color}11`, border: `1px solid ${channelCfg.color}33`, padding: 10, marginBottom: 8 }}>
-            <div style={{ fontFamily: 'VT323, monospace', fontSize: 15, color: channelCfg.color, marginBottom: 4 }}>
+            <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: channelCfg.color, marginBottom: 4 }}>
               {campaign.name}
             </div>
-            <div style={{ fontSize: 9, color: '#4a5680', marginBottom: 6 }}>
+            <div style={{ fontSize: 12, color: '#4a5680', marginBottom: 6 }}>
               Channel: <span style={{ color: channelCfg.color }}>{channelCfg.label}</span>
               &nbsp;&nbsp;·&nbsp;&nbsp;{campaign.category}
               &nbsp;&nbsp;·&nbsp;&nbsp;{campaign.targetPrice}
             </div>
-            <div style={{ fontSize: 9, color: '#8892b0', lineHeight: 1.4, marginBottom: 8 }}>{campaign.brief}</div>
+            <div style={{ fontSize: 12, color: '#8892b0', lineHeight: 1.4, marginBottom: 8 }}>{campaign.brief}</div>
 
             {/* Pipeline mini */}
             <div style={{ display: 'flex', gap: 2 }}>
@@ -98,7 +98,7 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
                 <div key={stage.id} title={stage.label} style={{ flex: 1, height: 6, background: i < activeStageIdx ? `${channelCfg.color}55` : i === activeStageIdx ? channelCfg.color : '#1a2540' }} />
               ))}
             </div>
-            <div style={{ fontSize: 9, color: channelCfg.color, marginTop: 4 }}>
+            <div style={{ fontSize: 12, color: channelCfg.color, marginTop: 4 }}>
               {PIPELINE_STAGES[activeStageIdx]?.label ?? '—'}
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
 
           {/* Finance warnings */}
           {campaign.financeWarnings.length > 0 && campaign.financeWarnings.map((w, i) => (
-            <div key={i} style={{ fontSize: 9, color: '#ff5252', background: '#ff525211', padding: '3px 8px', borderLeft: '2px solid #ff5252', marginBottom: 3, lineHeight: 1.4 }}>
+            <div key={i} style={{ fontSize: 12, color: '#ff5252', background: '#ff525211', padding: '3px 8px', borderLeft: '2px solid #ff5252', marginBottom: 3, lineHeight: 1.4 }}>
               ⚠ {w}
             </div>
           ))}
@@ -123,7 +123,7 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
       {/* Decision needed */}
       {agent.decisionNeeded && (
         <Section title="รอการตัดสินใจ">
-          <div style={{ fontSize: 10, color: '#ff9800', background: '#ff980011', padding: 8, borderLeft: '2px solid #ff9800', lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, color: '#ff9800', background: '#ff980011', padding: 8, borderLeft: '2px solid #ff9800', lineHeight: 1.5 }}>
             ◆ {agent.decisionNeeded}
           </div>
         </Section>
@@ -131,12 +131,12 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
 
       {/* Current task */}
       <Section title="งานปัจจุบัน">
-        <p style={{ margin: 0, fontSize: 10, color: '#8892b0', lineHeight: 1.5 }}>{agent.currentTask}</p>
+        <p style={{ margin: 0, fontSize: 12, color: '#8892b0', lineHeight: 1.5 }}>{agent.currentTask}</p>
       </Section>
 
       {/* Recent output */}
       <Section title="ผลลัพธ์ล่าสุด">
-        <p style={{ margin: 0, fontSize: 10, color: '#00ff9f', background: '#00ff9f08', padding: 8, borderLeft: '2px solid #00ff9f', lineHeight: 1.5 }}>
+        <p style={{ margin: 0, fontSize: 12, color: '#00ff9f', background: '#00ff9f08', padding: 8, borderLeft: '2px solid #00ff9f', lineHeight: 1.5 }}>
           {agent.recentOutput}
         </p>
       </Section>
@@ -145,7 +145,7 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
       {agent.risks.length > 0 && (
         <Section title="ความเสี่ยง">
           {agent.risks.map((r, i) => (
-            <div key={i} style={{ fontSize: 10, color: '#ffb300', background: '#ffb30011', padding: '4px 8px', borderLeft: '2px solid #ffb300', marginBottom: 4, lineHeight: 1.4 }}>
+            <div key={i} style={{ fontSize: 12, color: '#ffb300', background: '#ffb30011', padding: '4px 8px', borderLeft: '2px solid #ffb300', marginBottom: 4, lineHeight: 1.4 }}>
               ⚠ {r}
             </div>
           ))}
@@ -154,7 +154,7 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
 
       {/* Next action */}
       <Section title="ขั้นตอนต่อไป">
-        <p style={{ margin: 0, fontSize: 10, color: '#00e5ff' }}>→ {agent.nextAction}</p>
+        <p style={{ margin: 0, fontSize: 12, color: '#00e5ff' }}>→ {agent.nextAction}</p>
       </Section>
 
       {/* HTML detail */}
@@ -170,8 +170,8 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ fontSize: 8, color: '#4a5680', letterSpacing: 1, marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 11, color: '#e8eaf6' }}>{value}</div>
+      <div style={{ fontSize: 11, color: '#4a5680', letterSpacing: 1, marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 13, color: '#e8eaf6' }}>{value}</div>
     </div>
   )
 }
@@ -179,8 +179,8 @@ function Field({ label, value }: { label: string; value: string }) {
 function MetricChip({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{ background: '#060d1a', padding: '4px 8px', border: '1px solid #1a2540' }}>
-      <div style={{ fontSize: 8, color: '#2a3560', letterSpacing: 1, marginBottom: 1 }}>{label}</div>
-      <div style={{ fontSize: 13, color, fontFamily: 'VT323, monospace' }}>{value}</div>
+      <div style={{ fontSize: 11, color: '#2a3560', letterSpacing: 1, marginBottom: 1 }}>{label}</div>
+      <div style={{ fontSize: 15, color, fontFamily: 'VT323, monospace' }}>{value}</div>
     </div>
   )
 }
@@ -188,8 +188,8 @@ function MetricChip({ label, value, color }: { label: string; value: string; col
 function FinRow({ label, value, color, bold }: { label: string; value: string; color: string; bold?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ fontSize: 9, color: '#4a5680' }}>{label}</span>
-      <span style={{ fontFamily: 'VT323, monospace', fontSize: bold ? 15 : 13, color, letterSpacing: 0.5 }}>{value}</span>
+      <span style={{ fontSize: 12, color: '#4a5680' }}>{label}</span>
+      <span style={{ fontFamily: 'VT323, monospace', fontSize: bold ? 17 : 15, color, letterSpacing: 0.5 }}>{value}</span>
     </div>
   )
 }
@@ -197,7 +197,7 @@ function FinRow({ label, value, color, bold }: { label: string; value: string; c
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: '#4a5680', letterSpacing: 2, marginBottom: 6, borderBottom: '1px solid #1a2540', paddingBottom: 3 }}>
+      <div style={{ fontFamily: 'VT323, monospace', fontSize: 15, color: '#4a5680', letterSpacing: 2, marginBottom: 6, borderBottom: '1px solid #1a2540', paddingBottom: 3 }}>
         {title}
       </div>
       {children}

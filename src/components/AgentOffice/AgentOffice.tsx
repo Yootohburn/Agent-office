@@ -64,10 +64,10 @@ export default function AgentOffice() {
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
               ░▒▓ AGENT OFFICE v2.1 ▓▒░
             </div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#00e5ff', background: '#00e5ff11', padding: '2px 8px', border: '1px solid #00e5ff22', letterSpacing: 1 }}>
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#00e5ff', background: '#00e5ff11', padding: '2px 8px', border: '1px solid #00e5ff22', letterSpacing: 1 }}>
               AI AFFILIATE CONTENT CO.
             </div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#ffb300', background: '#ffb30011', padding: '2px 8px', borderLeft: '2px solid #ffb300' }}>
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#ffb300', background: '#ffb30011', padding: '2px 8px', borderLeft: '2px solid #ffb300' }}>
               PHASE 1 — MOCK DATA
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function AgentOffice() {
             onClick={() => setActiveView(item.id)}
             style={{
               fontFamily: 'VT323, monospace',
-              fontSize: 13,
+              fontSize: 16,
               color: activeView === item.id ? '#00ff9f' : '#4a5680',
               background: 'none',
               border: 'none',
@@ -108,7 +108,7 @@ export default function AgentOffice() {
             {item.label}
           </button>
         ))}
-        <span style={{ marginLeft: 'auto', fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#1a2540', letterSpacing: 1 }}>
+        <span style={{ marginLeft: 'auto', fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#1a2540', letterSpacing: 1 }}>
           Shopee · Lazada · TikTok = revenue channels
         </span>
       </nav>
@@ -167,12 +167,12 @@ export default function AgentOffice() {
         ].map(p => (
           <div key={p.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 5, height: 5, background: p.color }} />
-            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#2a3560', letterSpacing: 1 }}>
+            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#2a3560', letterSpacing: 1 }}>
               {p.label}: NOT CONNECTED
             </span>
           </div>
         ))}
-        <span style={{ marginLeft: 'auto', fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#1a2540' }}>
+        <span style={{ marginLeft: 'auto', fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#1a2540' }}>
           PHASE 1 — MOCK DATA ONLY — Shopee / Lazada / TikTok เป็น revenue channels
         </span>
       </footer>
@@ -188,7 +188,7 @@ export default function AgentOffice() {
 function AgentRoomsGrid({ selectedId, onSelect }: { selectedId: DepartmentId | null; onSelect: (id: DepartmentId) => void }) {
   return (
     <div>
-      <div style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: '#2a3560', letterSpacing: 2, marginBottom: 8 }}>
+      <div style={{ fontFamily: 'VT323, monospace', fontSize: 14, color: '#2a3560', letterSpacing: 2, marginBottom: 8 }}>
         ▶ 5 ห้องแผนกหลักของบริษัท — คลิกเพื่อดูรายละเอียด
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
@@ -209,7 +209,7 @@ function KpiChip({ label, value, color }: { label: string; value: string | numbe
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontFamily: 'VT323, monospace', fontSize: 24, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 7, color: '#2a3560', letterSpacing: 0.3, marginTop: 2, whiteSpace: 'nowrap' }}>{label}</div>
+      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 0.3, marginTop: 2, whiteSpace: 'nowrap' }}>{label}</div>
     </div>
   )
 }

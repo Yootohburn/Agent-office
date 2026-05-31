@@ -28,7 +28,7 @@ export default function RoomStatusIndicator({ status }: Props) {
       }} />
       <span style={{
         fontFamily: 'VT323, monospace',
-        fontSize: 10,
+        fontSize: 13,
         color: cfg.color,
         letterSpacing: 1,
       }}>

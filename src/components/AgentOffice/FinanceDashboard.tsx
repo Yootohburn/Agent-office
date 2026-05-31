@@ -13,16 +13,16 @@ export default function FinanceDashboard({ compact = false }: Props) {
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: compact ? 8 : 12, borderBottom: '1px solid #1a2540', paddingBottom: compact ? 6 : 8 }}>
-        <div style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: '#00ff9f', letterSpacing: 2 }}>
+        <div style={{ fontFamily: 'VT323, monospace', fontSize: 16, color: '#00ff9f', letterSpacing: 2 }}>
           ▶ รายได้แยกตาม CHANNEL — ข้อมูลจำลอง
         </div>
         {!compact && (
           <div style={{ display: 'flex', gap: 12 }}>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#00ff9f' }}>
+            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#00ff9f' }}>
               ช่องทางดีที่สุด: <span style={{ color: CHANNEL_CONFIG[companySummary.bestChannel].color }}>{CHANNEL_CONFIG[companySummary.bestChannel].label}</span>
             </div>
             {companySummary.worstChannel && (
-              <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#ff5252' }}>
+              <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#ff5252' }}>
                 ช่องทางขาดทุน: <span style={{ color: CHANNEL_CONFIG[companySummary.worstChannel].color }}>{CHANNEL_CONFIG[companySummary.worstChannel].label}</span>
               </div>
             )}
@@ -47,7 +47,7 @@ export default function FinanceDashboard({ compact = false }: Props) {
             <TotalChip label="ROAS เฉลี่ย"       value={`${companySummary.avgRoas}x`}              color={companySummary.avgRoas >= 4 ? '#00ff9f' : '#ffb300'} />
             <TotalChip label="ยอดรอรับเงินรวม"  value={formatTHB(companySummary.totalPendingPayout)} color="#8892b0" />
             {companySummary.activeWarnings.slice(0, 2).map((w, i) => (
-              <div key={i} style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#ff5252', background: '#ff525211', padding: '2px 8px', borderLeft: '2px solid #ff5252' }}>
+              <div key={i} style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#ff5252', background: '#ff525211', padding: '2px 8px', borderLeft: '2px solid #ff5252' }}>
                 ⚠ {w}
               </div>
             ))}
@@ -59,7 +59,7 @@ export default function FinanceDashboard({ compact = false }: Props) {
               const recCfg = RECOMMENDATION_CONFIG[s.recommendation]
               const chCfg  = CHANNEL_CONFIG[s.channel]
               return (
-                <div key={s.channel} style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: recCfg.color, background: `${recCfg.color}11`, padding: '3px 10px', border: `1px solid ${recCfg.color}44`, letterSpacing: 1 }}>
+                <div key={s.channel} style={{ fontFamily: 'VT323, monospace', fontSize: 14, color: recCfg.color, background: `${recCfg.color}11`, padding: '3px 10px', border: `1px solid ${recCfg.color}44`, letterSpacing: 1 }}>
                   <span style={{ color: chCfg.color }}>{chCfg.label}</span>
                   {' → '}
                   {recCfg.label}
@@ -77,7 +77,7 @@ function TotalChip({ label, value, color }: { label: string; value: string; colo
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 8, color: '#2a3560', letterSpacing: 0.5, marginTop: 1 }}>{label}</div>
+      <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#2a3560', letterSpacing: 0.5, marginTop: 1 }}>{label}</div>
     </div>
   )
 }

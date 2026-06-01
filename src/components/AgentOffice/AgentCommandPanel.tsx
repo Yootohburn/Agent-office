@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import type { Agent, DepartmentId } from '../../agents/agentRegistry'
 import { getCampaignById, CHANNEL_CONFIG } from '../../agents/campaignRegistry'
+import type { AgentOutput } from '../../agents/campaignRegistry'
 import { getMockResponse, getInitialGreeting } from '../../agents/agentChatRouter'
 import type { ChatMessage } from '../../agents/agentConversationStore'
 import { getConversation, addMessage, createMessage } from '../../agents/agentConversationStore'
@@ -26,6 +27,8 @@ const QUICK_PROMPTS = [
 interface Props {
   agent: Agent
   onClose: () => void
+  currentStageLabel?: string
+  latestOutput?: AgentOutput
 }
 
 function initConversation(agentId: DepartmentId): ChatMessage[] {
@@ -36,7 +39,7 @@ function initConversation(agentId: DepartmentId): ChatMessage[] {
   return [greeting]
 }
 
-export default function AgentCommandPanel({ agent, onClose }: Props) {
+export default function AgentCommandPanel({ agent, onClose, currentStageLabel, latestOutput }: Props) {
   const campaign = agent.currentCampaignId ? getCampaignById(agent.currentCampaignId) : null
   const channelCfg = campaign ? CHANNEL_CONFIG[campaign.channel] : null
   const accent = AGENT_ACCENT[agent.id]
@@ -138,6 +141,28 @@ export default function AgentCommandPanel({ agent, onClose }: Props) {
         {agent.decisionNeeded && (
           <div style={{ background: '#ff980011', border: '1px solid #ff980033', borderLeft: '3px solid #ff9800', padding: '6px 10px', marginTop: 6, fontSize: 13, color: '#ff9800', lineHeight: 1.4 }}>
             ◆ {agent.decisionNeeded.length > 90 ? agent.decisionNeeded.slice(0, 90) + '…' : agent.decisionNeeded}
+          </div>
+        )}
+
+        {/* Stage chip + latest output */}
+        {(currentStageLabel || latestOutput) && (
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {currentStageLabel && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 1 }}>STAGE</span>
+                <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: accent, background: `${accent}14`, padding: '1px 8px', border: `1px solid ${accent}33`, letterSpacing: 1 }}>
+                  {currentStageLabel}
+                </span>
+              </div>
+            )}
+            {latestOutput && (
+              <div style={{ background: '#06090f', border: '1px solid #1a2540', borderLeft: `2px solid ${accent}`, padding: '5px 8px' }}>
+                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 1, marginBottom: 2 }}>ผลลัพธ์ล่าสุด</div>
+                <div style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 12, color: '#6878a0', lineHeight: 1.4 }}>
+                  {latestOutput.summary.length > 85 ? latestOutput.summary.slice(0, 85) + '…' : latestOutput.summary}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

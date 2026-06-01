@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { agents as initialAgents } from '../../agents/agentRegistry'
 import type { Agent, DepartmentId } from '../../agents/agentRegistry'
-import { campaigns as initialCampaigns, formatTHB } from '../../agents/campaignRegistry'
-import type { Campaign } from '../../agents/campaignRegistry'
+import { campaigns as initialCampaigns, formatTHB, PIPELINE_STAGES } from '../../agents/campaignRegistry'
+import type { Campaign, CampaignChannel } from '../../agents/campaignRegistry'
 import { mockActivityLog, initialTeamChat } from '../../agents/agentSessionStore'
 import type { ActivityLogEntry, TeamChatMessage } from '../../agents/agentSessionStore'
 import { runWorkflowAction } from '../../agents/mockWorkflowEngine'
@@ -10,6 +10,7 @@ import type { WorkflowAction } from '../../agents/campaignWorkflow'
 import { companySummary } from '../../agents/financeRegistry'
 import AgentCommandPanel from './AgentCommandPanel'
 import CampaignDetailPanel from './CampaignDetailPanel'
+import ChannelDetailPanel from './ChannelDetailPanel'
 import CampaignFocusSection from './CampaignFocusSection'
 import FinanceDashboard from './FinanceDashboard'
 import CampaignPipeline from './CampaignPipeline'
@@ -32,6 +33,7 @@ export default function AgentOffice() {
   const [activeView,         setActiveView]         = useState<NavView>('overview')
   const [selectedAgentId,    setSelectedAgentId]    = useState<DepartmentId | null>(null)
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
+  const [selectedChannelId,  setSelectedChannelId]  = useState<CampaignChannel | null>(null)
 
   // Live mutable state — forked from static registry data at mount
   const [liveCampaigns, setLiveCampaigns] = useState<Campaign[]>(() => initialCampaigns.map(c => ({ ...c })))
@@ -42,7 +44,18 @@ export default function AgentOffice() {
 
   const selectedAgent    = selectedAgentId    ? (liveAgents.find(a => a.id === selectedAgentId) ?? null)       : null
   const selectedCampaign = selectedCampaignId ? (liveCampaigns.find(c => c.id === selectedCampaignId) ?? null) : null
-  const hasPanel         = selectedAgent !== null || selectedCampaign !== null
+  const hasPanel         = selectedAgent !== null || selectedCampaign !== null || selectedChannelId !== null
+
+  // Compute agent's current stage label + latest output for AgentCommandPanel
+  const selectedAgentCampaign = selectedAgent?.currentCampaignId
+    ? liveCampaigns.find(c => c.id === selectedAgent.currentCampaignId)
+    : null
+  const agentCurrentStageLabel = selectedAgentCampaign
+    ? (PIPELINE_STAGES.find(s => s.id === selectedAgentCampaign.stage)?.label ?? '')
+    : ''
+  const agentLatestOutput = (selectedAgentCampaign?.outputs?.length ?? 0) > 0
+    ? selectedAgentCampaign!.outputs[selectedAgentCampaign!.outputs.length - 1]
+    : undefined
 
   // Dynamic KPI counts
   const activeCount    = liveCampaigns.length
@@ -52,16 +65,25 @@ export default function AgentOffice() {
   function handleSelectAgent(id: DepartmentId) {
     setSelectedAgentId(prev => prev === id ? null : id)
     setSelectedCampaignId(null)
+    setSelectedChannelId(null)
   }
 
   function handleSelectCampaign(id: string) {
     setSelectedCampaignId(prev => prev === id ? null : id)
     setSelectedAgentId(null)
+    setSelectedChannelId(null)
+  }
+
+  function handleSelectChannel(channelId: CampaignChannel) {
+    setSelectedChannelId(prev => prev === channelId ? null : channelId)
+    setSelectedAgentId(null)
+    setSelectedCampaignId(null)
   }
 
   function closePanel() {
     setSelectedAgentId(null)
     setSelectedCampaignId(null)
+    setSelectedChannelId(null)
   }
 
   function handleWorkflowAction(campaignId: string, action: WorkflowAction) {
@@ -91,7 +113,7 @@ export default function AgentOffice() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
-              ░▒▓ AGENT OFFICE v2.4 ▓▒░
+              ░▒▓ AGENT OFFICE v2.4.1 ▓▒░
             </div>
             <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#00e5ff', background: '#00e5ff11', padding: '2px 10px', border: '1px solid #00e5ff22', letterSpacing: 1 }}>
               AI AFFILIATE CONTENT CO.
@@ -174,7 +196,10 @@ export default function AgentOffice() {
 
           {activeView === 'finance' && (
             <div style={{ padding: '14px 16px' }}>
-              <FinanceDashboard />
+              <FinanceDashboard
+                onSelectChannel={handleSelectChannel}
+                selectedChannelId={selectedChannelId}
+              />
             </div>
           )}
 
@@ -193,7 +218,12 @@ export default function AgentOffice() {
             display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0,
           }}>
             {selectedAgent && (
-              <AgentCommandPanel agent={selectedAgent} onClose={closePanel} />
+              <AgentCommandPanel
+                agent={selectedAgent}
+                onClose={closePanel}
+                currentStageLabel={agentCurrentStageLabel}
+                latestOutput={agentLatestOutput}
+              />
             )}
             {selectedCampaign && (
               <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
@@ -201,6 +231,14 @@ export default function AgentOffice() {
                   campaign={selectedCampaign}
                   onClose={closePanel}
                   onAction={handleWorkflowAction}
+                />
+              </div>
+            )}
+            {selectedChannelId && (
+              <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
+                <ChannelDetailPanel
+                  channelId={selectedChannelId}
+                  onClose={closePanel}
                 />
               </div>
             )}

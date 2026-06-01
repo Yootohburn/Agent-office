@@ -87,3 +87,20 @@ export const RECOMMENDATION_CONFIG = {
   stop:     { label: 'ควรหยุดยิงแอด', color: '#ff5252' },
   review:   { label: 'รอรีวิว',      color: '#ffb300' },
 } as const
+
+export const MONTHLY_GOALS = {
+  revenueTarget:    50_000,
+  profitTarget:     15_000,
+  roasTarget:       5.0,
+  campaignsTarget:  8,
+} as const
+
+export const AD_BUDGET = {
+  totalBudget:   5_000,
+  spent:         2_450,
+  remaining:     2_550,
+  breakEvenRoas: 2.5,
+  targetRoas:    5.0,
+  scale:  ['camp-004', 'camp-002'],
+  pause:  ['camp-003'],
+} as const

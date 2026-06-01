@@ -1,7 +1,6 @@
 import type { Agent, AgentStatus, DepartmentId } from '../../agents/agentRegistry'
 import { getCampaignById, CHANNEL_CONFIG, formatTHB } from '../../agents/campaignRegistry'
 import { companySummary } from '../../agents/financeRegistry'
-import RoomStatusIndicator from './RoomStatusIndicator'
 import DeskSceneSVG from './DeskSceneSVG'
 
 const ROOM_META: Record<DepartmentId, { label: string; accent: string; avatarLeft: string }> = {
@@ -19,19 +18,45 @@ interface Props {
   onClick: () => void
 }
 
+const STATUS_BADGE: Record<AgentStatus, { label: string; color: string; icon: string }> = {
+  working:      { label: 'WORKING',      icon: '●', color: '' },   // color set from accent
+  needs_review: { label: 'NEEDS REVIEW', icon: '⚠', color: '#ffb300' },
+  blocked:      { label: 'BLOCKED',      icon: '⛔', color: '#ff5252' },
+  failed:       { label: 'FAILED',       icon: '⛔', color: '#ff5252' },
+  done:         { label: 'DONE',         icon: '✓', color: '#00ff9f' },
+  idle:         { label: 'IDLE',         icon: '○', color: '#2a3560' },
+  waiting:      { label: 'WAITING',      icon: '◌', color: '#4a5680' },
+}
+
+function getCardBorder(status: AgentStatus, accent: string, selected: boolean) {
+  if (selected) return { border: `2px solid ${accent}`, borderTop: `4px solid ${accent}` }
+  switch (status) {
+    case 'working':      return { border: `2px solid ${accent}44`, borderTop: `4px solid ${accent}` }
+    case 'needs_review': return { border: `2px solid #ffb30055`, borderTop: `4px solid #ffb300` }
+    case 'blocked':
+    case 'failed':       return { border: `2px solid #ff525255`, borderTop: `4px solid #ff5252` }
+    case 'done':         return { border: `2px solid #00ff9f33`, borderTop: `4px solid #00ff9f55` }
+    case 'waiting':      return { border: `2px solid #4a568033`, borderTop: `4px solid #4a5680` }
+    default:             return { border: `2px solid #1a2540`, borderTop: `4px solid ${accent}44` }
+  }
+}
+
 export default function AgentRoom({ agent, selected, onClick }: Props) {
   const meta       = ROOM_META[agent.id]
   const campaign   = agent.currentCampaignId ? getCampaignById(agent.currentCampaignId) : null
   const channelCfg = campaign ? CHANNEL_CONFIG[campaign.channel] : null
   const isFinance  = agent.id === 'finance-controller'
+  const statusBadge = STATUS_BADGE[agent.status]
+  const badgeColor  = agent.status === 'working' ? meta.accent : statusBadge.color
+  const borders     = getCardBorder(agent.status, meta.accent, selected)
 
   return (
     <div
       onClick={onClick}
       style={{
         background: selected ? '#0f1a2e' : '#0c1425',
-        border: `2px solid ${selected ? meta.accent : '#1a2540'}`,
-        borderTop: `4px solid ${meta.accent}`,
+        border: borders.border,
+        borderTop: borders.borderTop,
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
@@ -53,35 +78,49 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
             isActive={agent.status === 'working' || agent.status === 'needs_review'}
           />
         </div>
-        <div style={{ position: 'absolute', top: 6, right: 8 }}>
-          <RoomStatusIndicator status={agent.status} />
-        </div>
+      </div>
+
+      {/* ── Status badge bar ── */}
+      <div style={{
+        background: `${badgeColor}0d`,
+        borderBottom: `1px solid ${badgeColor}33`,
+        padding: '4px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+      }}>
+        <span style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: badgeColor, lineHeight: 1 }}>
+          {statusBadge.icon}
+        </span>
+        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: badgeColor, letterSpacing: 1.5, fontWeight: 'bold' }}>
+          {statusBadge.label}
+        </span>
+        {campaign && (
+          <span style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 11, color: `${badgeColor}88`, marginLeft: 'auto', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
+            {campaign.name.length > 16 ? campaign.name.slice(0, 16) + '…' : campaign.name}
+          </span>
+        )}
       </div>
 
       {/* ── Info section ── */}
       <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
 
         {/* Name + channel badge */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: 'VT323, monospace', fontSize: 20, color: '#e8eaf6', lineHeight: 1.1, wordBreak: 'break-word' }}>
-              {agent.thaiName}
-            </div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>
-              {agent.title}
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 4 }}>
+          <div style={{ fontFamily: 'VT323, monospace', fontSize: 20, color: '#e8eaf6', lineHeight: 1.1, wordBreak: 'break-word', minWidth: 0 }}>
+            {agent.thaiName}
           </div>
           {channelCfg && (
-            <span style={{ fontFamily: 'VT323, monospace', fontSize: 13, color: channelCfg.color, background: `${channelCfg.color}22`, padding: '1px 6px', flexShrink: 0, letterSpacing: 1 }}>
-              {channelCfg.label.toUpperCase()}
+            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: channelCfg.color, background: `${channelCfg.color}22`, padding: '1px 6px', flexShrink: 0, letterSpacing: 1, border: `1px solid ${channelCfg.color}44` }}>
+              {channelCfg.label}
             </span>
           )}
         </div>
 
         {/* Current task */}
         <div style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 14, color: '#8892b0', lineHeight: 1.4, flex: 1 }}>
-          {agent.currentTask.length > 65
-            ? agent.currentTask.substring(0, 65) + '…'
+          {agent.currentTask.length > 70
+            ? agent.currentTask.substring(0, 70) + '…'
             : agent.currentTask}
         </div>
 

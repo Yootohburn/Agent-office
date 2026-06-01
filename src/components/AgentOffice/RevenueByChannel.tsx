@@ -5,6 +5,8 @@ interface Props {
   summary: ChannelFinanceSummary
   /** compact — show only 4 key metrics + status badge. Used in overview view. */
   compact?: boolean
+  onSelect?: () => void
+  isSelected?: boolean
 }
 
 const COMPACT_BADGE: Record<ChannelFinanceSummary['recommendation'], { label: string; color: string }> = {
@@ -14,7 +16,7 @@ const COMPACT_BADGE: Record<ChannelFinanceSummary['recommendation'], { label: st
   review:   { label: 'ระวัง',   color: '#ffb300' },
 }
 
-export default function RevenueByChannel({ summary, compact = false }: Props) {
+export default function RevenueByChannel({ summary, compact = false, onSelect, isSelected = false }: Props) {
   const cfg    = CHANNEL_CONFIG[summary.channel]
   const isLoss = summary.netProfit < 0
   const roasColor = summary.roas >= 4 ? '#00ff9f' : summary.roas >= 2 ? '#ffb300' : '#ff5252'
@@ -62,14 +64,19 @@ export default function RevenueByChannel({ summary, compact = false }: Props) {
 
   // ── Full mode (การเงิน view) ──────────────────────────────────
   return (
-    <div style={{
-      background: '#0c1425',
-      border: `1px solid ${isLoss ? '#ff525244' : '#1a2540'}`,
-      borderTop: `3px solid ${cfg.color}`,
-      padding: 12,
-      flex: 1,
-      minWidth: 0,
-    }}>
+    <div
+      onClick={onSelect}
+      style={{
+        background: isSelected ? '#0f1a2e' : '#0c1425',
+        border: isSelected ? `1px solid ${cfg.color}66` : `1px solid ${isLoss ? '#ff525244' : '#1a2540'}`,
+        borderTop: isSelected ? `3px solid ${cfg.color}` : `3px solid ${cfg.color}`,
+        padding: 12,
+        flex: 1,
+        minWidth: 0,
+        cursor: onSelect ? 'pointer' : 'default',
+        transition: 'background 0.1s',
+      }}
+    >
       {/* Channel header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={{ fontFamily: 'VT323, monospace', fontSize: 18, color: cfg.color, letterSpacing: 1 }}>
@@ -119,6 +126,12 @@ export default function RevenueByChannel({ summary, compact = false }: Props) {
               ⚠ {w}
             </div>
           ))}
+        </div>
+      )}
+
+      {onSelect && (
+        <div style={{ marginTop: 8, fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: isSelected ? cfg.color : '#2a3560', textAlign: 'center', letterSpacing: 1 }}>
+          {isSelected ? '▶ ดูรายละเอียด' : '→ คลิกเพื่อดูรายละเอียด'}
         </div>
       )}
     </div>

@@ -226,6 +226,89 @@ When Codex repository access is working:
 
 ---
 
+## Agent Office v2.4.1 — Finance Goal Board + Agent Visibility Upgrade
+
+### What changed in v2.4.1
+
+#### Part A — Finance Goal Board (การเงิน tab)
+
+`FinanceDashboard.tsx` expanded from 84 lines to ~280 lines. Six sections now fill the page:
+
+1. **Monthly Goal Board** — progress bars for revenue (เป้า ฿50,000) and profit (เป้า ฿15,000), ROAS vs target, campaign count
+2. **Channel P&L Cards** — existing channel cards now clickable; click opens ChannelDetailPanel in right panel
+3. **Campaign Profit Table** — all 4 campaigns shown in a table: revenue / ad spend / commission / net profit / ROAS / recommendation
+4. **Ad Budget Control Panel** — total budget / spent / remaining bar; scale list; pause list; break-even and target ROAS
+5. **Finance Alerts** — color-coded rows for loss, low ROAS, pending payout, margin warnings
+6. **Next Finance Actions** — 6 prioritized action items in Thai
+
+New mock data constants added to `financeRegistry.ts`:
+```ts
+export const MONTHLY_GOALS = { revenueTarget: 50_000, profitTarget: 15_000, roasTarget: 5.0, campaignsTarget: 8 }
+export const AD_BUDGET = { totalBudget: 5_000, spent: 2_450, remaining: 2_550, breakEvenRoas: 2.5, targetRoas: 5.0, scale: [...], pause: [...] }
+```
+
+New file `ChannelDetailPanel.tsx` — right panel shown when a channel card is clicked. Shows: channel P&L, diagnosis, campaign breakdown, next actions.
+
+#### Part B — Agent Visibility Upgrade
+
+`AgentRoom.tsx` changes:
+- **Status badge bar** between SVG scene and info section: large `WORKING / NEEDS REVIEW / BLOCKED / DONE / IDLE` label with icon, color-coded
+- **Status-driven borders**: `working` = accent top + dim accent sides; `needs_review` = amber; `blocked/failed` = red; `done` = dim green; `idle` = muted dark
+- Selected state always overrides to full accent border
+- Removed English title subtitle for cleaner hierarchy
+- Current campaign name shown in the badge bar when agent is active
+
+#### Part C — Right Panel Improvements
+
+`AgentCommandPanel.tsx` additions (optional props):
+- `currentStageLabel?: string` — pipeline stage chip shown in header area
+- `latestOutput?: AgentOutput` — one-line output summary shown below stage chip
+
+`AgentOffice.tsx` computes these from live campaign state and passes them when an agent is selected.
+
+`ChannelDetailPanel.tsx` (new) — right panel for finance channel selection with full P&L, diagnosis, campaign breakdown, next actions.
+
+#### Part D — UI/UX Subagent
+
+`.claude/agents/ui-ux-product-reviewer.md` created. Dev-only subagent for reviewing dashboard UI/UX. Includes checklist for readability, hierarchy, layout, 8-bit style, agent status visibility, and finance pages.
+
+#### Files changed in v2.4.1
+
+| File | Change |
+|---|---|
+| `src/agents/financeRegistry.ts` | Added `MONTHLY_GOALS`, `AD_BUDGET` constants |
+| `src/components/AgentOffice/FinanceDashboard.tsx` | Expanded to 6 sections; accepts `onSelectChannel`, `selectedChannelId` props |
+| `src/components/AgentOffice/RevenueByChannel.tsx` | Added `onSelect`, `isSelected` props; click-to-select in full mode |
+| `src/components/AgentOffice/AgentRoom.tsx` | Status badge bar; status-driven borders; removed title subtitle |
+| `src/components/AgentOffice/AgentCommandPanel.tsx` | Added `currentStageLabel`, `latestOutput` optional props |
+| `src/components/AgentOffice/AgentOffice.tsx` | Added `selectedChannelId` state; wired all new props; v2.4.1 version tag |
+| `src/components/AgentOffice/ChannelDetailPanel.tsx` | New file — right panel for channel finance detail |
+| `.claude/agents/ui-ux-product-reviewer.md` | New dev-only subagent instruction file |
+
+---
+
+## Agent Office v2.4 — Mock Run Task System
+
+### What changed in v2.4
+
+Campaigns now move through all 8 pipeline stages interactively. Clicking action buttons in `CampaignDetailPanel` triggers the workflow engine, updating campaign stage, agent status, generating Thai mock output, adding log entries, and adding team chat messages — all in React state.
+
+#### New files
+- `src/agents/campaignWorkflow.ts` — stage action definitions, progress map, mock output generator
+- `src/agents/mockWorkflowEngine.ts` — pure function `runWorkflowAction()` returns `WorkflowResult`
+
+#### State lifted to AgentOffice.tsx
+All mutable data (campaigns, agents, logs, teamChat) is React state. All child components accept live data as props.
+
+#### Extended Campaign model
+```ts
+riskLevel: 'low' | 'medium' | 'high' | 'critical'
+riskMessage: string
+outputs: AgentOutput[]
+```
+
+---
+
 ## Agent Office v2.2 — Executive Office Layout + Agent Chat
 
 ### What changed in v2.2

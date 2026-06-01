@@ -33,7 +33,7 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
   // CSS fallback — PixelAgentAvatar scaled up, no broken icon shown
   return (
     <div style={{ opacity: isIdle ? 0.4 : 1 }}>
-      <PixelAgentAvatar agentId={agentId} status={status} scale={2.8} />
+      <PixelAgentAvatar agentId={agentId} status={status} scale={4.0} />
     </div>
   )
 }

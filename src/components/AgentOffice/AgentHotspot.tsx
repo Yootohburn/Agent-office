@@ -47,7 +47,7 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, x, y
         gap:        3,
         cursor:    'pointer',
         zIndex:    selected ? 10 : 1,
-        width:     120,
+        width:     160,
         filter:    selected ? `drop-shadow(0 0 10px ${accent}77)` : 'none',
         transition: 'filter 0.15s',
         userSelect: 'none',
@@ -65,7 +65,7 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, x, y
         border:        `1px solid ${isBlocked ? '#ff525244' : isActive ? accent + '33' : '#1a2540'}`,
         padding:       '1px 6px',
         whiteSpace:    'nowrap',
-        maxWidth:      120,
+        maxWidth:      150,
         overflow:      'hidden',
         textOverflow:  'ellipsis',
         letterSpacing: 0.3,
@@ -81,13 +81,13 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, x, y
         display:    'flex',
         justifyContent: 'center',
         alignItems:     'flex-end',
-        minHeight:  96,
+        minHeight:  204,
       }}>
         <OfficeAgentSprite
           agentId={agent.id}
           status={agent.status}
           spriteSrc={spriteSrc}
-          height={88}
+          height={200}
         />
       </div>
 
@@ -98,14 +98,14 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, x, y
         color:       selected ? accent : '#8892b0',
         textAlign:   'center',
         lineHeight:  1.3,
-        maxWidth:    116,
+        maxWidth:    150,
         fontWeight:  selected ? 'bold' : 'normal',
       }}>
         {agent.thaiName}
       </div>
 
       {/* Progress bar */}
-      <div style={{ width: 80, height: 2, background: '#1a2540' }}>
+      <div style={{ width: 100, height: 2, background: '#1a2540' }}>
         <div style={{ width: `${agent.progress}%`, height: '100%', background: accent }}/>
       </div>
 

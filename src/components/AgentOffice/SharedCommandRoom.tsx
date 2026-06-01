@@ -14,12 +14,12 @@ interface Props {
 // At 35% the hotspot content (status→task→sprite) places the character feet
 // at roughly 60-65% of the container, aligning with the front-of-desk chair area.
 const AGENT_SCENE_POSITIONS: Record<DepartmentId, { x: number; y: number }> = {
-  'product-research':    { x: 17, y: 35 },
-  'offer-analyst':       { x: 50, y: 35 },
-  'content-strategy':    { x: 83, y: 35 },
-  'script-writer':       { x: 17, y: 68 },
-  'creative-production': { x: 50, y: 68 },
-  'social-performance':  { x: 83, y: 68 },
+  'product-research':    { x: 17, y: 12 },
+  'offer-analyst':       { x: 50, y: 12 },
+  'content-strategy':    { x: 83, y: 12 },
+  'script-writer':       { x: 17, y: 50 },
+  'creative-production': { x: 50, y: 50 },
+  'social-performance':  { x: 83, y: 50 },
 }
 
 // ── Sprite paths ─────────────────────────────────────────────────────────────
@@ -61,6 +61,7 @@ export default function SharedCommandRoom({ agents, selectedAgentId, onSelectAge
   return (
     <div style={{
       position:   'relative',
+      zIndex:     0,
       flex:       1,
       minHeight:  0,
       width:      '100%',

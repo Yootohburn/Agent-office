@@ -16,26 +16,37 @@ import FinanceDashboard from './FinanceDashboard'
 import CampaignPipeline from './CampaignPipeline'
 import AgentActivityLog from './AgentActivityLog'
 import PixelOfficeScene from './PixelOfficeScene'
+import SharedCommandRoom from './SharedCommandRoom'
 import OfficeSidebar from './OfficeSidebar'
 import SystemConsole from './SystemConsole'
 import TeamChatPanel from './TeamChatPanel'
 
-type NavView = 'overview' | 'campaigns' | 'finance' | 'log'
+// ── Nav ────────────────────────────────────────────────────────────────────
+type NavView = 'overview' | 'agents' | 'campaigns' | 'finance' | 'log'
 
 const NAV_ITEMS: { id: NavView; label: string }[] = [
-  { id: 'overview',  label: 'ภาพรวมบริษัท' },
-  { id: 'campaigns', label: 'แคมเปญ'       },
-  { id: 'finance',   label: 'การเงิน'       },
-  { id: 'log',       label: 'บันทึกการทำงาน' },
+  { id: 'overview',   label: 'ภาพรวมบริษัท'   },
+  { id: 'agents',     label: 'ห้อง Agent'       },
+  { id: 'campaigns',  label: 'แคมเปญ'           },
+  { id: 'finance',    label: 'การเงิน'          },
+  { id: 'log',        label: 'บันทึกการทำงาน'   },
 ]
 
+type RightTab = 'chat' | 'teamchat'
+
+const RIGHT_TABS: { id: RightTab; label: string }[] = [
+  { id: 'chat',     label: 'คุยกับ Agent' },
+  { id: 'teamchat', label: 'แชทีม'        },
+]
+
+// ── Main component ─────────────────────────────────────────────────────────
 export default function AgentOffice() {
   const [activeView,         setActiveView]         = useState<NavView>('overview')
   const [selectedAgentId,    setSelectedAgentId]    = useState<DepartmentId | null>(null)
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
   const [selectedChannelId,  setSelectedChannelId]  = useState<CampaignChannel | null>(null)
+  const [rightPanelTab,      setRightPanelTab]      = useState<RightTab>('teamchat')
 
-  // Live mutable state — forked from static registry data at mount
   const [liveCampaigns, setLiveCampaigns] = useState<Campaign[]>(() => initialCampaigns.map(c => ({ ...c })))
   const [liveAgents,    setLiveAgents]    = useState<Agent[]>(() => initialAgents.map(a => ({ ...a })))
   const [logs,          setLogs]          = useState<ActivityLogEntry[]>(() => [...mockActivityLog])
@@ -44,9 +55,7 @@ export default function AgentOffice() {
 
   const selectedAgent    = selectedAgentId    ? (liveAgents.find(a => a.id === selectedAgentId) ?? null)       : null
   const selectedCampaign = selectedCampaignId ? (liveCampaigns.find(c => c.id === selectedCampaignId) ?? null) : null
-  const hasPanel         = selectedAgent !== null || selectedCampaign !== null || selectedChannelId !== null
 
-  // Compute agent's current stage label + latest output for AgentCommandPanel
   const selectedAgentCampaign = selectedAgent?.currentCampaignId
     ? liveCampaigns.find(c => c.id === selectedAgent.currentCampaignId)
     : null
@@ -57,15 +66,24 @@ export default function AgentOffice() {
     ? selectedAgentCampaign!.outputs[selectedAgentCampaign!.outputs.length - 1]
     : undefined
 
-  // Dynamic KPI counts
-  const activeCount    = liveCampaigns.length
-  const pendingReview  = liveCampaigns.filter(c => c.stage === 'human_approved').length
-  const ceoApproval    = liveCampaigns.filter(c => c.stage === 'asset_ready').length
+  // Right panel: always visible on overview (team chat lives here);
+  // conditionally visible on other tabs when something is selected.
+  const hasSelection    = selectedAgent !== null || selectedCampaign !== null || selectedChannelId !== null
+  const showRightPanel  = activeView === 'overview' || hasSelection
 
+  // ── KPI counts ────────────────────────────────────────────────────────
+  const activeCount   = liveCampaigns.length
+  const pendingReview = liveCampaigns.filter(c => c.stage === 'human_approved').length
+  const ceoApproval   = liveCampaigns.filter(c => c.stage === 'asset_ready').length
+
+  // ── Handlers ──────────────────────────────────────────────────────────
   function handleSelectAgent(id: DepartmentId) {
-    setSelectedAgentId(prev => prev === id ? null : id)
+    const isDeselecting = selectedAgentId === id
+    setSelectedAgentId(isDeselecting ? null : id)
     setSelectedCampaignId(null)
     setSelectedChannelId(null)
+    // Auto-open agent panel when selecting on overview
+    if (!isDeselecting && activeView === 'overview') setRightPanelTab('chat')
   }
 
   function handleSelectCampaign(id: string) {
@@ -89,12 +107,8 @@ export default function AgentOffice() {
   function handleWorkflowAction(campaignId: string, action: WorkflowAction) {
     const campaign = liveCampaigns.find(c => c.id === campaignId)
     if (!campaign) return
-
     const result = runWorkflowAction(action, campaign, liveAgents, logCounter)
-
-    setLiveCampaigns(prev =>
-      prev.map(c => c.id === result.updatedCampaign.id ? result.updatedCampaign : c)
-    )
+    setLiveCampaigns(prev => prev.map(c => c.id === result.updatedCampaign.id ? result.updatedCampaign : c))
     setLiveAgents(prev => {
       const updatedMap = new Map(result.updatedAgents.map(a => [a.id, a]))
       return prev.map(a => updatedMap.get(a.id) ?? a)
@@ -104,16 +118,16 @@ export default function AgentOffice() {
     setLogCounter(n => n + 1)
   }
 
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh', height: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ── Header ── */}
       <header style={{ background: '#0a0e1a', borderBottom: '1px solid #1a2540', padding: '8px 20px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
-              ░▒▓ AGENT OFFICE v2.4.1 ▓▒░
+              ░▒▓ AGENT OFFICE v2.4.5 ▓▒░
             </div>
             <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#00e5ff', background: '#00e5ff11', padding: '2px 10px', border: '1px solid #00e5ff22', letterSpacing: 1 }}>
               AI AFFILIATE CONTENT CO.
@@ -122,7 +136,6 @@ export default function AgentOffice() {
               PHASE 1 — MOCK DATA
             </div>
           </div>
-
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end' }}>
             <KpiChip label="แคมเปญที่กำลังทำ"  value={activeCount}                              color="#e8eaf6" />
             <KpiChip label="รอรีวิว"            value={pendingReview}                            color="#ffb300" />
@@ -131,7 +144,6 @@ export default function AgentOffice() {
             <KpiChip label="กำไรสุทธิ"          value={formatTHB(companySummary.totalNetProfit)} color="#00ff9f" />
             <KpiChip label="ROAS เฉลี่ย"         value={`${companySummary.avgRoas}x`}             color={companySummary.avgRoas >= 4 ? '#00ff9f' : '#ffb300'} />
           </div>
-
         </div>
       </header>
 
@@ -142,12 +154,17 @@ export default function AgentOffice() {
             key={item.id}
             onClick={() => setActiveView(item.id)}
             style={{
-              fontFamily: 'VT323, monospace', fontSize: 17,
-              color: activeView === item.id ? '#00ff9f' : '#4a5680',
-              background: 'none', border: 'none',
+              fontFamily:   'VT323, monospace',
+              fontSize:     17,
+              color:        activeView === item.id ? '#00ff9f' : '#4a5680',
+              background:   'none',
+              border:       'none',
               borderBottom: `2px solid ${activeView === item.id ? '#00ff9f' : 'transparent'}`,
-              padding: '10px 20px', cursor: 'pointer', letterSpacing: 1,
-              transition: 'color 0.1s', marginBottom: -2,
+              padding:      '10px 20px',
+              cursor:       'pointer',
+              letterSpacing: 1,
+              transition:   'color 0.1s',
+              marginBottom: -2,
             }}
           >
             {item.label}
@@ -158,23 +175,38 @@ export default function AgentOffice() {
         </span>
       </nav>
 
-      {/* ── Main 3-column layout ── */}
+      {/* ── 3-column layout ── */}
       <div style={{
         flex: 1, display: 'grid', overflow: 'hidden', minHeight: 0,
-        gridTemplateColumns: hasPanel ? '220px 1fr 340px' : '220px 1fr',
+        gridTemplateColumns: showRightPanel ? '220px 1fr 340px' : '220px 1fr',
       }}>
 
-        {/* Left: Campaign sidebar — always visible */}
+        {/* ── Left: campaign sidebar ── */}
         <OfficeSidebar
           campaigns={liveCampaigns}
           selectedCampaignId={selectedCampaignId}
           onSelectCampaign={handleSelectCampaign}
         />
 
-        {/* Center: tab content */}
-        <div style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        {/* ── Center: tab content ── */}
+        <div style={{
+          overflowY:     activeView === 'overview' ? 'hidden' : 'auto',
+          display:       'flex',
+          flexDirection: 'column',
+          minHeight:     0,
+        }}>
 
+          {/* ภาพรวมบริษัท — shared command room */}
           {activeView === 'overview' && (
+            <SharedCommandRoom
+              agents={liveAgents}
+              selectedAgentId={selectedAgentId}
+              onSelectAgent={handleSelectAgent}
+            />
+          )}
+
+          {/* ห้อง Agent — detailed desk/card view */}
+          {activeView === 'agents' && (
             <PixelOfficeScene
               agents={liveAgents}
               selectedAgentId={selectedAgentId}
@@ -203,6 +235,7 @@ export default function AgentOffice() {
             </div>
           )}
 
+          {/* บันทึกการทำงาน — system log / audit trail only */}
           {activeView === 'log' && (
             <div style={{ padding: '14px 16px' }}>
               <AgentActivityLog campaigns={liveCampaigns} logs={logs} />
@@ -211,50 +244,99 @@ export default function AgentOffice() {
 
         </div>
 
-        {/* Right: detail/command panel */}
-        {hasPanel && (
+        {/* ── Right: command panel / team chat ── */}
+        {showRightPanel && (
           <div style={{
-            borderLeft: '2px solid #1a2540', background: '#0a0e1a',
-            display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0,
+            borderLeft:    '2px solid #1a2540',
+            background:    '#0a0e1a',
+            display:       'flex',
+            flexDirection: 'column',
+            overflow:      'hidden',
+            flexShrink:    0,
           }}>
-            {selectedAgent && (
-              <AgentCommandPanel
-                agent={selectedAgent}
-                onClose={closePanel}
-                currentStageLabel={agentCurrentStageLabel}
-                latestOutput={agentLatestOutput}
-              />
+
+            {activeView === 'overview' ? (
+              // ── Overview: tabbed panel (Agent command + Team chat) ──
+              <>
+                <div style={{ borderBottom: '1px solid #1a2540', display: 'flex', flexShrink: 0 }}>
+                  {RIGHT_TABS.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setRightPanelTab(tab.id)}
+                      style={{
+                        flex:         1,
+                        fontFamily:   'Sarabun, sans-serif',
+                        fontSize:     13,
+                        color:        rightPanelTab === tab.id ? '#00ff9f' : '#4a5680',
+                        background:   rightPanelTab === tab.id ? '#00ff9f0a' : 'none',
+                        border:       'none',
+                        borderBottom: `2px solid ${rightPanelTab === tab.id ? '#00ff9f' : 'transparent'}`,
+                        padding:      '9px 12px',
+                        cursor:       'pointer',
+                        letterSpacing: 0.5,
+                        marginBottom: -1,
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  {rightPanelTab === 'chat' && (
+                    selectedAgent
+                      ? <AgentCommandPanel
+                          agent={selectedAgent}
+                          onClose={closePanel}
+                          currentStageLabel={agentCurrentStageLabel}
+                          latestOutput={agentLatestOutput}
+                        />
+                      : <NoAgentSelected/>
+                  )}
+                  {rightPanelTab === 'teamchat' && (
+                    <TeamChatPanel messages={teamChat}/>
+                  )}
+                </div>
+              </>
+            ) : (
+              // ── Other tabs: agent / campaign / channel detail ──
+              <>
+                {selectedAgent && (
+                  <AgentCommandPanel
+                    agent={selectedAgent}
+                    onClose={closePanel}
+                    currentStageLabel={agentCurrentStageLabel}
+                    latestOutput={agentLatestOutput}
+                  />
+                )}
+                {selectedCampaign && (
+                  <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
+                    <CampaignDetailPanel
+                      campaign={selectedCampaign}
+                      onClose={closePanel}
+                      onAction={handleWorkflowAction}
+                    />
+                  </div>
+                )}
+                {selectedChannelId && (
+                  <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
+                    <ChannelDetailPanel
+                      channelId={selectedChannelId}
+                      onClose={closePanel}
+                    />
+                  </div>
+                )}
+              </>
             )}
-            {selectedCampaign && (
-              <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
-                <CampaignDetailPanel
-                  campaign={selectedCampaign}
-                  onClose={closePanel}
-                  onAction={handleWorkflowAction}
-                />
-              </div>
-            )}
-            {selectedChannelId && (
-              <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
-                <ChannelDetailPanel
-                  channelId={selectedChannelId}
-                  onClose={closePanel}
-                />
-              </div>
-            )}
+
           </div>
         )}
 
       </div>
 
-      {/* ── Bottom bar: System Console + Team Chat ── */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr',
-        height: 160, flexShrink: 0,
-        borderTop: '2px solid #1a2540',
-      }}>
+      {/* ── Bottom bar: System Log preview ── */}
+      <div style={{ height: 120, flexShrink: 0, borderTop: '2px solid #1a2540' }}>
         <SystemConsole logs={logs} />
-        <TeamChatPanel messages={teamChat} />
       </div>
 
     </div>
@@ -270,6 +352,26 @@ function KpiChip({ label, value, color }: { label: string; value: string | numbe
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontFamily: 'VT323, monospace', fontSize: 26, color, lineHeight: 1 }}>{value}</div>
       <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 0.3, marginTop: 2, whiteSpace: 'nowrap' }}>{label}</div>
+    </div>
+  )
+}
+
+function NoAgentSelected() {
+  return (
+    <div style={{
+      flex:           1,
+      display:        'flex',
+      flexDirection:  'column',
+      alignItems:     'center',
+      justifyContent: 'center',
+      gap:            10,
+      padding:        24,
+      opacity:        0.55,
+    }}>
+      <div style={{ fontFamily: 'VT323, monospace', fontSize: 28, color: '#2a3560', lineHeight: 1 }}>○</div>
+      <div style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 13, color: '#2a3560', textAlign: 'center', lineHeight: 1.6 }}>
+        คลิก Agent ในห้องควบคุม<br/>เพื่อดูรายละเอียดและส่งคำสั่ง
+      </div>
     </div>
   )
 }

@@ -519,3 +519,81 @@ Visual-only upgrade. No workflow logic, finance logic, campaign state machine, o
 - `PixelOfficeScene.tsx` — Added office banner ("AGENT OFFICE FLOOR 1"), row labels ("ROW A / ROW B"), subtle cubicle divider lines between desks, inset box shadow for depth.
 
 **Design intent:** The 6 desk scenes should feel like workstations on the same office floor — consistent desk height, consistent perspective, shared floor tiles, shared background color — while each agent's scene clearly communicates their role and current work status within 3 seconds of viewing.
+
+---
+
+## v2.4.4 — Shared Command Room Layout
+
+Visual/UX restructure. No workflow logic, finance logic, campaign state machine, or mock data was changed.
+
+**New tab structure (5 tabs):**
+
+| Tab | Thai label | Content |
+|---|---|---|
+| `overview` | ภาพรวมบริษัท | SharedCommandRoom — one shared office scene, 6 hotspot agents |
+| `agents` | ห้อง Agent | PixelOfficeScene — detailed per-agent desk/card view (moved here) |
+| `campaigns` | แคมเปญ | Campaign workflow, pipeline (unchanged) |
+| `finance` | การเงิน | Finance dashboard (unchanged) |
+| `log` | บันทึกการทำงาน | System log / audit trail only |
+
+**New components:**
+
+- `SharedCommandRoom.tsx` — container for the command room scene. Loads `shared-command-room.png` as background if present; falls back to CSS dark grid. Positions 6 agents using `AGENT_SCENE_POSITIONS` (percentage-based, easy to adjust when real art is added).
+- `AgentHotspot.tsx` — one clickable agent position in the scene. Shows sprite or CSS fallback, status bubble, task bubble, progress mini-bar, and risk badge.
+- `OfficeAgentSprite.tsx` — renders PNG sprite or `PixelAgentAvatar` CSS fallback. Uses `onError` handler so no broken icon is ever shown.
+- `AgentStatusBubble.tsx` — Thai status badge (กำลังทำงาน / เสร็จแล้ว / รอตรวจ / ติดปัญหา / ว่าง / ล้มเหลว).
+
+**Scene position config** (inside `SharedCommandRoom.tsx`):
+```ts
+const AGENT_SCENE_POSITIONS: Record<DepartmentId, { x: number; y: number }> = {
+  'product-research':    { x: 17, y: 10 },
+  'offer-analyst':       { x: 50, y: 10 },
+  'content-strategy':    { x: 83, y: 10 },
+  'script-writer':       { x: 17, y: 55 },
+  'creative-production': { x: 50, y: 55 },
+  'social-performance':  { x: 83, y: 55 },
+}
+```
+Adjust x/y values to match the background art once `shared-command-room.png` is added.
+
+**Sprite paths config** (also in `SharedCommandRoom.tsx`):
+```ts
+const AGENT_SPRITE_PATHS: Partial<Record<DepartmentId, string>> = {
+  'product-research':    '/assets/pixel-office/agents/product-research.png',
+  // add others as sprites are created
+}
+```
+If a file is missing, `OfficeAgentSprite` shows the CSS avatar fallback automatically.
+
+**Background asset:** `public/assets/pixel-office/backgrounds/shared-command-room.png`
+When present, it fills the scene container as a cover background. When absent, the CSS grid + ambient glow fallback renders instead. No code change needed to switch — just add the file.
+
+**Design intent:** ภาพรวมบริษัท should feel like a live office command room, not 6 isolated cards. All agents are visible at once in their fixed positions. The user sees at a glance who is working, who is blocked, and what the current task is — within 3 seconds.
+
+---
+
+## v2.4.5 — Team Chat / System Log Separation
+
+**What changed in `AgentOffice.tsx`:**
+
+1. **Team Chat moved to ภาพรวมบริษัท right panel.**
+   The right panel on the overview tab is always visible (340px) and contains two tabs:
+   - `คุยกับ Agent` — AgentCommandPanel when an agent is selected; "select an agent" placeholder otherwise.
+   - `แชทีม` — TeamChatPanel (live office communication).
+   Clicking an agent in the command room auto-switches to the `คุยกับ Agent` tab.
+
+2. **Team Chat removed from the bottom bar.**
+   The bottom bar now shows only the SystemConsole log preview (120px height, down from 160px).
+
+3. **บันทึกการทำงาน is system log / audit trail only.**
+   This tab shows `AgentActivityLog` (campaign pipeline progress + workflow event log). Team Chat does not appear here. The content is: campaign stage history, approval/rejection events, task run results, errors and warnings.
+
+**Clear separation:**
+
+| Feature | Location | Purpose |
+|---|---|---|
+| แชทีม | ภาพรวมบริษัท → right panel | Live office collaboration |
+| บันทึกระบบ | บันทึกการทำงาน | Workflow audit trail |
+| System log preview | Bottom bar | Quick operational status |
+
+Team chat and system log should never be mixed.

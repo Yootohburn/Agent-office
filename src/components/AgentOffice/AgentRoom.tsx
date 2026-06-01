@@ -69,7 +69,7 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
           status={agent.status}
           roomLabel={meta.label}
         />
-        <div style={{ position: 'absolute', top: 26, left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}>
+        <div style={{ position: 'absolute', top: 34, left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}>
           <TaskBubble
             text={agent.currentTask}
             status={agent.status}
@@ -188,34 +188,36 @@ function TaskBubble({ text, status, isActive }: { text: string; status: AgentSta
   const border    = isBlocked ? '#ff525244' : '#1e2e50'
   const txtColor  = isBlocked ? '#ff7070' : isDone ? '#00ff9f' : '#9baac8'
 
-  const short = text.length > 18 ? text.slice(0, 18) + '…' : text
-  const label = isBlocked ? `⚠ ${short}` : isDone ? `✓ done` : status === 'idle' ? 'idle...' : short
+  const short = text.length > 22 ? text.slice(0, 22) + '…' : text
+  const label = isBlocked ? `⚠ ${short}` : isDone ? `✓ เสร็จแล้ว` : status === 'idle' ? 'รอคิว…' : status === 'waiting' ? 'รอข้อมูล…' : short
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <div style={{
         background: bgColor,
         border: `1px solid ${border}`,
-        padding: '2px 6px',
-        display: 'flex', alignItems: 'center', gap: 3,
+        borderLeft: isBlocked ? '2px solid #ff5252' : isDone ? '2px solid #00ff9f' : `1px solid ${border}`,
+        padding: '3px 8px',
+        display: 'flex', alignItems: 'center', gap: 4,
         whiteSpace: 'nowrap',
+        boxShadow: isActive ? `0 0 6px ${txtColor}18` : 'none',
       }}>
-        <span style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 10, color: txtColor, lineHeight: 1.3 }}>
+        <span style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 12, color: txtColor, lineHeight: 1.3 }}>
           {label}
         </span>
         {isActive && !isBlocked && (
-          <span style={{ fontFamily: 'VT323, monospace', fontSize: 10, color: txtColor, lineHeight: 1, animation: 'blink 1s step-end infinite' }}>
+          <span style={{ fontFamily: 'VT323, monospace', fontSize: 12, color: txtColor, lineHeight: 1, animation: 'blink 1s step-end infinite' }}>
             ▮
           </span>
         )}
       </div>
       <div style={{
-        position: 'absolute', bottom: -4, left: '50%',
+        position: 'absolute', bottom: -5, left: '50%',
         transform: 'translateX(-50%)',
         width: 0, height: 0,
-        borderLeft: '4px solid transparent',
-        borderRight: '4px solid transparent',
-        borderTop: `4px solid ${border}`,
+        borderLeft: '5px solid transparent',
+        borderRight: '5px solid transparent',
+        borderTop: `5px solid ${border}`,
       }} />
     </div>
   )

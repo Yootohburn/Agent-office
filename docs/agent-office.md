@@ -508,3 +508,14 @@ No component changes required — only `agentChatRouter.ts` needs updating.
 | ทีมตรวจสอบ | Compliance rules, platform policies, queue | Risk-focused, checklist-style |
 | ฝ่ายการเงิน | ROAS, P&L, ad spend, budget reallocation | Numbers-first, actionable recommendations |
 
+
+## v2.4.3 — Shared Pixel Office Scene Upgrade
+
+Visual-only upgrade. No workflow logic, finance logic, campaign state machine, or mock data was changed.
+
+**What changed:**
+- `DeskSceneSVG.tsx` — SVG height expanded from 150 → 190px, giving ~36% larger character (head now 40×30px). Richer wall decor panels replaced tiny unreadable text with icon-based silhouettes: score bars, database cylinder, ฿ coin, bar chart, platform tags, storyboard grid, timeline bars, layout frames, color swatches, phone KPI panel. A status color strip runs across the bottom of each SVG, with role label and status text embedded. Screen content area expanded proportionally.
+- `AgentRoom.tsx` — TaskBubble enlarged (fontSize 10→12, wider max text, colored left border for blocked/done states, box-shadow glow when active).
+- `PixelOfficeScene.tsx` — Added office banner ("AGENT OFFICE FLOOR 1"), row labels ("ROW A / ROW B"), subtle cubicle divider lines between desks, inset box shadow for depth.
+
+**Design intent:** The 6 desk scenes should feel like workstations on the same office floor — consistent desk height, consistent perspective, shared floor tiles, shared background color — while each agent's scene clearly communicates their role and current work status within 3 seconds of viewing.

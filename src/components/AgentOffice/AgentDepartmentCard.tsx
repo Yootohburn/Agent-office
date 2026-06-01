@@ -21,7 +21,7 @@ export default function AgentDepartmentCard({ agent, selected, onClick }: Props)
   const statusCfg = STATUS_CONFIG[agent.status]
   const campaign = agent.currentCampaignId ? getCampaignById(agent.currentCampaignId) : null
   const channelCfg = campaign ? CHANNEL_CONFIG[campaign.channel] : null
-  const isFinance = agent.id === 'finance-controller'
+  const isFinance = agent.id === 'social-performance'
 
   return (
     <div

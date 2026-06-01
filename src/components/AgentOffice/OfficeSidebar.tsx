@@ -9,10 +9,10 @@ interface Props {
 
 function urgencyScore(c: Campaign): number {
   if (c.financeWarnings.some(w => w.includes('ขาดทุน'))) return 0
-  if (c.stage === 'ceo_approval') return 1
-  if (c.stage === 'review_compliance') return 2
-  if (c.stage === 'social_adaptation') return 3
-  if (c.stage === 'content_creation') return 4
+  if (c.stage === 'human_approved') return 1
+  if (c.stage === 'asset_ready') return 2
+  if (c.stage === 'script_ready') return 3
+  if (c.stage === 'brief_ready') return 4
   return 5
 }
 

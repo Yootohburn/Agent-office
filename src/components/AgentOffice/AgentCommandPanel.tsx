@@ -7,12 +7,12 @@ import type { ChatMessage } from '../../agents/agentConversationStore'
 import { getConversation, addMessage, createMessage } from '../../agents/agentConversationStore'
 
 const AGENT_ACCENT: Record<DepartmentId, string> = {
-  'ceo-director':             '#00ff9f',
-  'product-analyst':          '#00e5ff',
-  'content-studio':           '#ff9800',
-  'social-community-manager': '#ff4081',
-  'ops-review':               '#ffb300',
-  'finance-controller':       '#00c8a0',
+  'product-research':   '#00e5ff',
+  'offer-analyst':      '#ffb300',
+  'content-strategy':   '#ff9800',
+  'script-writer':      '#ff4081',
+  'creative-production':'#a855f7',
+  'social-performance': '#00ff9f',
 }
 
 const QUICK_PROMPTS = [

@@ -2,27 +2,31 @@ import type { PipelineStage } from './campaignRegistry'
 import type { DepartmentId } from './agentRegistry'
 
 export const STAGE_OWNER: Record<PipelineStage, DepartmentId> = {
-  campaign_brief:       'ceo-director',
-  product_research:     'product-analyst',
-  content_creation:     'content-studio',
-  social_adaptation:    'social-community-manager',
-  review_compliance:    'ops-review',
-  ceo_approval:         'ceo-director',
-  export_publish:       'ops-review',
-  performance_feedback: 'ops-review',
-  finance_review:       'finance-controller',
+  new_product:    'product-research',
+  verified:       'product-research',
+  scored:         'offer-analyst',
+  selected:       'offer-analyst',
+  brief_ready:    'content-strategy',
+  script_ready:   'script-writer',
+  asset_ready:    'creative-production',
+  human_approved: 'social-performance',
+  published:      'social-performance',
+  analyzed:       'social-performance',
+  learned:        'product-research',
 }
 
 export const STAGE_SEQUENCE: PipelineStage[] = [
-  'campaign_brief',
-  'product_research',
-  'content_creation',
-  'social_adaptation',
-  'review_compliance',
-  'ceo_approval',
-  'export_publish',
-  'performance_feedback',
-  'finance_review',
+  'new_product',
+  'verified',
+  'scored',
+  'selected',
+  'brief_ready',
+  'script_ready',
+  'asset_ready',
+  'human_approved',
+  'published',
+  'analyzed',
+  'learned',
 ]
 
 export function getNextStage(current: PipelineStage): PipelineStage | null {

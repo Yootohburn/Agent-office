@@ -1,15 +1,14 @@
 import type { Agent, AgentStatus, DepartmentId } from '../../agents/agentRegistry'
-import { getCampaignById, CHANNEL_CONFIG, formatTHB } from '../../agents/campaignRegistry'
-import { companySummary } from '../../agents/financeRegistry'
+import { getCampaignById, CHANNEL_CONFIG } from '../../agents/campaignRegistry'
 import DeskSceneSVG from './DeskSceneSVG'
 
 const ROOM_META: Record<DepartmentId, { label: string; accent: string; avatarLeft: string }> = {
-  'ceo-director':             { label: 'COMMAND ROOM',   accent: '#00ff9f', avatarLeft: '56%' },
-  'product-analyst':          { label: 'RESEARCH LAB',   accent: '#00e5ff', avatarLeft: '58%' },
-  'content-studio':           { label: 'CONTENT STUDIO', accent: '#ff9800', avatarLeft: '46%' },
-  'social-community-manager': { label: 'SOCIAL STUDIO',  accent: '#ff4081', avatarLeft: '52%' },
-  'ops-review':               { label: 'CONTROL ROOM',   accent: '#ffb300', avatarLeft: '57%' },
-  'finance-controller':       { label: 'FINANCE ROOM',   accent: '#00c8a0', avatarLeft: '60%' },
+  'product-research':   { label: 'RESEARCH LAB',    accent: '#00e5ff', avatarLeft: '58%' },
+  'offer-analyst':      { label: 'PROFIT LAB',       accent: '#ffb300', avatarLeft: '56%' },
+  'content-strategy':   { label: 'STRATEGY ROOM',    accent: '#ff9800', avatarLeft: '54%' },
+  'script-writer':      { label: 'SCRIPT STUDIO',    accent: '#ff4081', avatarLeft: '52%' },
+  'creative-production':{ label: 'PRODUCTION ROOM',  accent: '#a855f7', avatarLeft: '57%' },
+  'social-performance': { label: 'SOCIAL ROOM',      accent: '#00ff9f', avatarLeft: '60%' },
 }
 
 interface Props {
@@ -45,7 +44,6 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
   const meta       = ROOM_META[agent.id]
   const campaign   = agent.currentCampaignId ? getCampaignById(agent.currentCampaignId) : null
   const channelCfg = campaign ? CHANNEL_CONFIG[campaign.channel] : null
-  const isFinance  = agent.id === 'finance-controller'
   const statusBadge = STATUS_BADGE[agent.status]
   const badgeColor  = agent.status === 'working' ? meta.accent : statusBadge.color
   const borders     = getCardBorder(agent.status, meta.accent, selected)
@@ -124,11 +122,11 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
             : agent.currentTask}
         </div>
 
-        {/* Finance mini stats — finance-controller only */}
-        {isFinance && (
+        {/* Social-performance mini stats */}
+        {agent.id === 'social-performance' && campaign && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
-            <MiniStat label="กำไรสุทธิ"  value={formatTHB(companySummary.totalNetProfit)} color="#00ff9f" />
-            <MiniStat label="ROAS เฉลี่ย" value={`${companySummary.avgRoas}x`}             color="#00e5ff" />
+            <MiniStat label="กำไรสุทธิ"  value={`฿${campaign.finance.netProfit.toLocaleString('th-TH')}`} color="#00ff9f" />
+            <MiniStat label="ROAS"        value={`${campaign.finance.roas}x`}                              color="#00e5ff" />
           </div>
         )}
 

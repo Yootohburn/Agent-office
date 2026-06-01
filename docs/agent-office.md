@@ -1,4 +1,57 @@
-# Agent Office v1.2 — Documentation
+# Agent Office v2.4.2 — Documentation
+
+## Research Alignment — v2.4.2
+
+### Why we moved from the old agent model to 6 agents
+
+The previous system had CEO, product-analyst, content-studio, ops-review, finance-controller, and social-community-manager. This was organized around internal company roles, not around the actual product-to-revenue workflow. The new 6-agent system is organized around pipeline stages — each agent owns a specific set of workflow stages and hands off to the next agent.
+
+### Why CEO is now an approval/dashboard role, not a production agent
+
+The CEO is a human role. Building an AI "CEO agent" that makes final decisions is a category error. In the real system, the CEO or business owner reviews the full package before publishing. This is modeled as the `human_approved` pipeline stage — a mandatory gate, not an agent.
+
+### Why Human Approval is a mandatory gate stage
+
+Semi-automation without a human gate tends toward publishing low-quality or risky content at scale. The `human_approved` stage is not optional. No automation path bypasses it. AI generates — human approves — then publish.
+
+### Why Shopee / TikTok / Lazada are channels, not departments
+
+Organizing the office around platforms (TikTok dept, Shopee dept) creates silos that duplicate work. Instead, platforms are revenue channels — a product campaign is assigned to one primary channel and the same 6-agent pipeline handles it regardless of channel.
+
+### Why early categories are storage, cleaning, and budget electronics accessories
+
+These categories have: (1) high demo-ability for short video, (2) low claim risk, (3) impulse buy price range ฿150–฿600, (4) proven affiliate commission rates 7–10%, (5) no health/medical claims. Categories like health supplements or high-end electronics carry compliance risk that outweighs the commission potential at Phase 1 scale.
+
+### Why semi-automation is better than full automation for Phase 1
+
+Full automation at Phase 1 scale would produce low-quality content faster than any human can review it. The semi-auto model (AI generates, human approves) builds trust, catches errors, and produces content the business owner actually believes in. Speed is not the bottleneck — quality and trust are.
+
+### What orchestration will look like in Phase 2
+
+Phase 2 orchestration will use n8n, Make, or Pipedream to connect:
+- Real Shopee Affiliate API (product data + commission)
+- Real Lazada Affiliate API
+- Real TikTok Shop API
+- Claude API for script generation and scoring
+- Canva API for asset generation
+- Human approval via Line Notify or Telegram bot
+
+The React dashboard will become a monitoring interface, not the execution engine.
+
+### What is still mock in Phase 1
+
+Everything. All product data, scores, ROAS figures, pipeline transitions, and agent outputs are static mock data in TypeScript files. No real API calls are made anywhere in the app.
+
+### What becomes real in Phase 2
+
+- Product data: real scraping or API integration
+- Scoring: real Claude API calls with structured output
+- Script generation: real Claude API with product context
+- Human approval: real notification + approval flow
+- Performance data: real analytics API integration
+- Payout tracking: real affiliate dashboard API
+
+---
 
 ## 1. What is Agent Office?
 

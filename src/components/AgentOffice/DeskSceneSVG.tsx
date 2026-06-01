@@ -132,81 +132,64 @@ interface SCProps { agentId: DepartmentId; accent: string; x: number; y: number;
 function ScreenContent({ agentId, accent, x, y, w, h }: SCProps) {
   switch (agentId) {
 
-    case 'ceo-director': {
-      const rows = [
-        { label: 'REVENUE',   pct: 75 },
-        { label: 'PROFIT',    pct: 62 },
-        { label: 'ROAS AVG',  pct: 90 },
-        { label: 'CAMPAIGNS', pct: 50 },
+    case 'product-research': {
+      // Product card grid — rows of small rectangles with labels
+      const cards = [
+        { label: 'P-001', pct: 88 },
+        { label: 'P-002', pct: 74 },
+        { label: 'P-003', pct: 91 },
+        { label: 'P-004', pct: 79 },
       ]
       return (
         <g>
           <rect x={x} y={y} width={w} height={7} fill="#080e1c"/>
           <text x={x+3} y={y+5} fontFamily="monospace" fontSize="4.5"
-            fill={`${accent}99`} letterSpacing="1">DASHBOARD</text>
-          {rows.map((r, i) => (
+            fill={`${accent}99`} letterSpacing="1">PRODUCT CARDS</text>
+          {cards.map((r, i) => (
             <g key={r.label} transform={`translate(0,${i*11})`}>
               <text x={x+2} y={y+16} fontFamily="monospace" fontSize="4" fill="#2a3560">{r.label}</text>
-              <rect x={x+40} y={y+11} width={w-42} height={4} fill="#080e1c"/>
-              <rect x={x+40} y={y+11} width={(w-42)*r.pct/100} height={4}
-                fill={r.pct >= 80 ? accent : '#ffb300'} opacity="0.85"/>
+              <rect x={x+32} y={y+11} width={w-34} height={4} fill="#080e1c"/>
+              <rect x={x+32} y={y+11} width={(w-34)*r.pct/100} height={4}
+                fill={r.pct >= 85 ? accent : `${accent}77`} opacity="0.85"/>
+              <text x={x+w-12} y={y+16} fontFamily="monospace" fontSize="4"
+                fill={`${accent}99`}>{r.pct}</text>
             </g>
           ))}
-          <text x={x+w-14} y={y+h-4} fontFamily="monospace" fontSize="14"
-            fill={`${accent}55`}>✓</text>
         </g>
       )
     }
 
-    case 'product-analyst': {
-      const bars = [38, 62, 48, 84, 72]
+    case 'offer-analyst': {
+      // Bar chart — profit bars per product
+      const bars = [52, 38, 61, 42]
       const maxH = 38
-      const bw   = 13
+      const bw   = 16
       return (
         <g>
           <text x={x+2} y={y+7} fontFamily="monospace" fontSize="4.5"
-            fill={`${accent}99`} letterSpacing="1">TREND ANALYSIS</text>
+            fill={`${accent}99`} letterSpacing="1">PROFIT ANALYSIS</text>
           {bars.map((v, i) => (
             <rect key={i}
-              x={x+4+i*17} y={y+h-6-v*maxH/100}
+              x={x+4+i*21} y={y+h-6-v*maxH/100}
               width={bw} height={v*maxH/100}
-              fill={i===bars.length-1 ? accent : `${accent}55`}/>
+              fill={i===2 ? accent : `${accent}55`}/>
           ))}
-          <polyline
-            points={bars.map((v,i) => `${x+10+i*17},${y+h-6-v*maxH/100}`).join(' ')}
-            stroke={accent} strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
           <line x1={x+2} y1={y+h-6} x2={x+w-2} y2={y+h-6}
             stroke="#1a2540" strokeWidth="0.5"/>
+          <text x={x+w-22} y={y+h-8} fontFamily="monospace" fontSize="4"
+            fill={`${accent}88`}>ROAS 5.0x</text>
         </g>
       )
     }
 
-    case 'content-studio': {
-      const lw = [86,68,80,54,76,62,80]
-      return (
-        <g>
-          {lw.map((pw, i) => (
-            <rect key={i} x={x+3} y={y+4+i*7} width={pw*w/100} height={3}
-              fill={i===0 ? accent : `${accent}${i%2===0?'66':'33'}`}/>
-          ))}
-          {/* Timeline */}
-          <rect x={x}   y={y+h-10} width={w} height={8}   fill="#07090e"/>
-          <rect x={x+2} y={y+h-9}  width={30} height={5}  fill={`${accent}66`}/>
-          <rect x={x+33} y={y+h-10} width={2} height={8}  fill={accent}/>
-          {/* Record dot */}
-          <circle cx={x+w-8} cy={y+8} r={4} fill="#ff525222"/>
-          <circle cx={x+w-8} cy={y+8} r={2} fill="#ff5252"
-            style={{ animation: 'blink 1.5s ease-in-out infinite' }}/>
-        </g>
-      )
-    }
-
-    case 'social-community-manager': {
+    case 'content-strategy': {
+      // Platform icons grid + angle text
       const platforms = [
-        { lbl: 'FB',  bg: '#1877F233' },
-        { lbl: 'IG',  bg: '#E1306C33' },
         { lbl: 'TK',  bg: '#ffffff11' },
+        { lbl: 'SH',  bg: '#ff572233' },
+        { lbl: 'LZ',  bg: '#2979ff33' },
       ]
+      const frameworks = ['daily_problem', 'worth_it', 'before_after']
       return (
         <g>
           {platforms.map((p, i) => (
@@ -215,67 +198,89 @@ function ScreenContent({ agentId, accent, x, y, w, h }: SCProps) {
               <text x={x+i*31+9} y={y+9} fontFamily="monospace" fontSize="5" fill={accent}>{p.lbl}</text>
             </g>
           ))}
-          {[0,1,2].map(i => (
-            <g key={i} transform={`translate(0,${i*13})`}>
-              <rect x={x+1}  y={y+15} width={4}  height={4} fill="#1a2540" rx="1"/>
-              <rect x={x+8}  y={y+15} width={52} height={2} fill={`${accent}44`}/>
-              <rect x={x+8}  y={y+18} width={34} height={1} fill="#1a2540"/>
-              <text x={x+w-20} y={y+21} fontFamily="monospace" fontSize="4.5"
-                fill={`${accent}88`}>♥{(i+1)*148}</text>
+          {frameworks.map((fw, i) => (
+            <g key={fw} transform={`translate(0,${i*13})`}>
+              <rect x={x+1}  y={y+15} width={4}  height={4} fill={`${accent}44`} rx="1"/>
+              <rect x={x+8}  y={y+15} width={62} height={2} fill={`${accent}33`}/>
+              <rect x={x+8}  y={y+18} width={44} height={1} fill="#1a2540"/>
             </g>
           ))}
         </g>
       )
     }
 
-    case 'ops-review': {
-      const items = [
-        { ok: true,  w: 54 },
-        { ok: true,  w: 48 },
-        { ok: false, w: 38 },
-        { ok: true,  w: 50 },
-        { ok: null,  w: 42 },
+    case 'script-writer': {
+      // Script text lines — horizontal lines of varying width
+      const lw = [86,68,80,54,76,62,80]
+      return (
+        <g>
+          <text x={x+2} y={y+7} fontFamily="monospace" fontSize="4.5"
+            fill={`${accent}99`} letterSpacing="1">SCRIPT 25s</text>
+          {lw.map((pw, i) => (
+            <rect key={i} x={x+3} y={y+10+i*6} width={pw*w/100} height={2.5}
+              fill={i===0 ? accent : `${accent}${i%2===0?'66':'33'}`}/>
+          ))}
+          {/* Scene markers */}
+          <rect x={x}   y={y+h-10} width={w} height={7}   fill="#07090e"/>
+          <rect x={x+2} y={y+h-9}  width={24} height={4}  fill={`${accent}55`}/>
+          <rect x={x+27} y={y+h-10} width={2} height={7}  fill={accent}/>
+          {/* Record dot */}
+          <circle cx={x+w-8} cy={y+8} r={3} fill="#ff525222"/>
+          <circle cx={x+w-8} cy={y+8} r={1.5} fill="#ff5252"
+            style={{ animation: 'blink 1.5s ease-in-out infinite' }}/>
+        </g>
+      )
+    }
+
+    case 'creative-production': {
+      // Canva-style grid layout — thumbnail grid
+      const cells = [
+        [0,0], [1,0], [2,0],
+        [0,1], [1,1], [2,1],
       ]
       return (
         <g>
           <text x={x+2} y={y+7} fontFamily="monospace" fontSize="4.5"
-            fill={`${accent}99`} letterSpacing="1">COMPLIANCE</text>
-          {items.map((item, i) => (
-            <g key={i} transform={`translate(0,${i*9+10})`}>
-              <rect x={x+2} y={y+2} width={6} height={6}
-                fill="#060c18" stroke="#1a2540" strokeWidth="0.5" rx="0.5"/>
-              {item.ok === true  && <text x={x+2.5} y={y+7} fontSize="5.5" fill="#00ff9f">✓</text>}
-              {item.ok === false && <text x={x+2.5} y={y+7} fontSize="5.5" fill="#ff5252">✗</text>}
-              <rect x={x+11} y={y+4} width={item.w} height={2}
-                fill={item.ok === true ? '#00ff9f55' : item.ok === false ? '#ff525255' : '#1a2540'}/>
-            </g>
+            fill={`${accent}99`} letterSpacing="1">CANVA BRIEF</text>
+          {cells.map(([col, row], i) => (
+            <rect key={i}
+              x={x+3+col*29} y={y+10+row*22}
+              width={26} height={18}
+              fill={i===0 ? `${accent}22` : '#080e1c'}
+              stroke={i===0 ? accent : `${accent}33`}
+              strokeWidth="0.5" rx="1"/>
           ))}
+          {/* Stylus shape overlay */}
+          <line x1={x+w-12} y1={y+10} x2={x+w-4} y2={y+h-8}
+            stroke={accent} strokeWidth="1.5" strokeLinecap="round" opacity="0.6"/>
+          <circle cx={x+w-4} cy={y+h-8} r={2} fill={accent} opacity="0.5"/>
         </g>
       )
     }
 
-    case 'finance-controller': {
-      const ch = [
-        { lbl: 'TT', val: 80, color: '#00e5ff' },
-        { lbl: 'SH', val: 62, color: '#ff5722' },
-        { lbl: 'LZ', val: 22, color: '#2979ff' },
-      ]
-      const maxH = 36
+    case 'social-performance': {
+      // Analytics line chart
+      const pts = [28, 42, 35, 58, 48, 72, 65, 80]
+      const maxH = 38
       return (
         <g>
-          {/* ROAS */}
-          <text x={x+w-38} y={y+22} fontFamily="monospace" fontSize="18"
-            fill={accent} fontWeight="bold">4.6x</text>
-          <text x={x+w-30} y={y+29} fontFamily="monospace" fontSize="4.5" fill="#2a3560">ROAS</text>
-          {/* Bars */}
-          {ch.map((c, i) => (
-            <g key={c.lbl}>
-              <rect x={x+4+i*24} y={y+h-6-c.val*maxH/100}
-                width={18} height={c.val*maxH/100} fill={c.color} opacity="0.8"/>
-              <text x={x+6+i*24} y={y+h-1} fontFamily="monospace" fontSize="4" fill="#2a3560">{c.lbl}</text>
-            </g>
+          <text x={x+2} y={y+7} fontFamily="monospace" fontSize="4.5"
+            fill={`${accent}99`} letterSpacing="1">ANALYTICS</text>
+          {/* Area fill */}
+          <polyline
+            points={pts.map((v,i) => `${x+4+i*11},${y+h-6-v*maxH/100}`).join(' ')}
+            stroke={accent} strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
+          {/* Dots at each point */}
+          {pts.map((v, i) => (
+            <circle key={i}
+              cx={x+4+i*11} cy={y+h-6-v*maxH/100}
+              r={i===pts.length-1 ? 2 : 1}
+              fill={i===pts.length-1 ? accent : `${accent}77`}/>
           ))}
-          <line x1={x+2} y1={y+h-6} x2={x+78} y2={y+h-6} stroke="#1a2540" strokeWidth="0.5"/>
+          <line x1={x+2} y1={y+h-6} x2={x+w-2} y2={y+h-6}
+            stroke="#1a2540" strokeWidth="0.5"/>
+          <text x={x+w-28} y={y+h-8} fontFamily="monospace" fontSize="4"
+            fill={`${accent}88`}>ROAS 6.1x</text>
         </g>
       )
     }
@@ -289,24 +294,7 @@ function ScreenContent({ agentId, accent, x, y, w, h }: SCProps) {
 function DeskProps({ agentId, accent }: { agentId: DepartmentId; accent: string }) {
   switch (agentId) {
 
-    case 'ceo-director':
-      return (
-        <g>
-          {/* Document stack — right */}
-          <rect x="220" y="83" width="40" height="2" fill="#d0d8e8" opacity="0.4"/>
-          <rect x="222" y="81" width="36" height="2" fill="#c0c8d8" opacity="0.35"/>
-          <rect x="218" y="85" width="44" height="2" fill="#b0b8c8" opacity="0.3"/>
-          {/* Coffee mug — left */}
-          <rect x="21"  y="77" width="16" height="12" fill="#1a2030" rx="1"/>
-          <rect x="23"  y="79" width="12" height={8}  fill="#2a3548"/>
-          <rect x="37"  y="79" width={4}  height={8}  fill="none"
-            stroke="#1a2030" strokeWidth="1.5"/>
-          <path d="M27,77 Q28.5,74 27,71" stroke="#ffffff18" strokeWidth="1" fill="none"/>
-          <path d="M31,77 Q32.5,73 31,70" stroke="#ffffff14" strokeWidth="1" fill="none"/>
-        </g>
-      )
-
-    case 'product-analyst':
+    case 'product-research':
       return (
         <g>
           {/* Sticky notes — right */}
@@ -314,15 +302,60 @@ function DeskProps({ agentId, accent }: { agentId: DepartmentId; accent: string 
           <rect x="226" y="83" width="24" height="8" fill="#ffdd4433" rx="1"/>
           <rect x="222" y="81" width="20" height="1" fill="#2a1a0033"/>
           <rect x="222" y="83" width="16" height="1" fill="#2a1a0033"/>
-          {/* Magnifying glass — left */}
+          {/* Magnifying glass / search — left */}
           <circle cx="33" cy="82" r="7" fill="none" stroke={`${accent}44`} strokeWidth="2"/>
           <circle cx="33" cy="82" r="4" fill={`${accent}0d`}/>
           <line x1="38" y1="87" x2="44" y2="93"
             stroke={`${accent}44`} strokeWidth="2.5" strokeLinecap="round"/>
+          {/* Small product box on desk */}
+          <rect x="52" y="80" width="14" height="10" fill={`${accent}22`}
+            stroke={`${accent}44`} strokeWidth="0.8" rx="1"/>
+          <line x1="59" y1="80" x2="59" y2="90" stroke={`${accent}33`} strokeWidth="0.5"/>
         </g>
       )
 
-    case 'content-studio':
+    case 'offer-analyst':
+      return (
+        <g>
+          {/* Calculator — left */}
+          <rect x="17" y="76" width="26" height="30" fill="#0c1020" rx="1"
+            stroke="#1a2540" strokeWidth="0.5"/>
+          <rect x="19" y="78" width="22" height="8"  fill="#040810"/>
+          <text x="21" y="84" fontFamily="monospace" fontSize="5" fill={`${accent}99`}>5.2x</text>
+          {[0,1,2].map(row => [0,1,2,3].map(col => (
+            <rect key={`${row}-${col}`}
+              x={20+col*5} y={88+row*5} width={4} height={4}
+              fill="#09101e" rx="0.5"/>
+          )))}
+          {/* Spreadsheet / report — right */}
+          <rect x="220" y="78" width="42" height="16" fill="#0c1020"
+            stroke="#1a2540" strokeWidth="0.5" rx="1"/>
+          {[0,1,2].map(i => (
+            <rect key={i} x="222" y={80+i*4} width={[30, 24, 36][i]} height="2"
+              fill={i===0 ? `${accent}66` : `${accent}22`}/>
+          ))}
+        </g>
+      )
+
+    case 'content-strategy':
+      return (
+        <g>
+          {/* Whiteboard / planning pad — left */}
+          <rect x="16" y="74" width="32" height="22" fill="#0c1020" rx="1"
+            stroke={`${accent}33`} strokeWidth="0.8"/>
+          {[0,1,2,3].map(i => (
+            <rect key={i} x="19" y={77+i*4} width={[24, 18, 22, 14][i]} height="1.5"
+              fill={i===0 ? `${accent}77` : `${accent}33`}/>
+          ))}
+          {/* Post-its — right */}
+          <rect x="223" y="79" width="18" height="12" fill="#ffee5522" rx="1"
+            stroke={`${accent}33`} strokeWidth="0.5"/>
+          <rect x="243" y="76" width="16" height="11" fill="#ff980022" rx="1"
+            stroke={`${accent}22`} strokeWidth="0.5"/>
+        </g>
+      )
+
+    case 'script-writer':
       return (
         <g>
           {/* Clapperboard — left */}
@@ -335,78 +368,61 @@ function DeskProps({ agentId, accent }: { agentId: DepartmentId; accent: string 
           ))}
           <rect x="21" y="85" width="24" height="2" fill="#2a2830" opacity="0.8"/>
           <rect x="21" y="88" width="18" height="2" fill="#2a2830" opacity="0.6"/>
-          {/* Headphones — right */}
-          <path d="M225,83 Q236,75 248,83"
-            stroke={`${accent}66`} strokeWidth="2" fill="none"/>
-          <rect x="221" y="82" width="5" height="8" fill={`${accent}44`} rx="1"/>
-          <rect x="248" y="82" width="5" height="8" fill={`${accent}44`} rx="1"/>
+          {/* Script pages — right */}
+          <rect x="222" y="78" width="26" height="16" fill="#0c1020"
+            stroke="#1a2540" strokeWidth="0.5" rx="1"/>
+          {[0,1,2,3].map(i => (
+            <rect key={i} x="224" y={80+i*3} width={[20,16,18,12][i]} height="1.5"
+              fill={`${accent}33`}/>
+          ))}
         </g>
       )
 
-    case 'social-community-manager':
+    case 'creative-production':
       return (
         <g>
-          {/* Smartphone — right */}
+          {/* Stylus / tablet — left */}
+          <rect x="16" y="78" width="34" height="22" fill="#0c1020" rx="2"
+            stroke={`${accent}44`} strokeWidth="0.8"/>
+          <rect x="18" y="80" width="30" height="18" fill="#060a14" rx="1"/>
+          {/* Simple icon/design on tablet */}
+          <rect x="20" y="82" width="12" height="9" fill={`${accent}22`} rx="1"/>
+          <rect x="34" y="82" width="12" height="4"  fill={`${accent}11`} rx="1"/>
+          <rect x="34" y="87" width={8}  height="3"  fill={`${accent}11`} rx="1"/>
+          {/* Stylus pen — angled */}
+          <line x1="44" y1="76" x2="50" y2="96"
+            stroke={`${accent}66`} strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="50" cy="96" r="1.5" fill={accent} opacity="0.5"/>
+          {/* Design file stack — right */}
+          <rect x="222" y="80" width="38" height="2" fill="#c8d0e0" opacity="0.22"/>
+          <rect x="224" y="77" width="34" height="3" fill="#c8d0e0" opacity="0.18"/>
+          <rect x="220" y="83" width="42" height="2" fill="#c8d0e0" opacity="0.14"/>
+          <rect x="222" y="80" width={10} height="2" fill={accent}   opacity="0.4"/>
+        </g>
+      )
+
+    case 'social-performance':
+      return (
+        <g>
+          {/* Phone mockup — right */}
           <rect x="223" y="74" width="20" height="33" fill="#0c1525" rx="2"
             stroke={`${accent}55`} strokeWidth="1"/>
           <rect x="225" y="77" width="16" height="24" fill="#060a14"/>
-          <rect x="226" y="79" width="14" height="2"  fill={`${accent}66`}/>
-          <rect x="226" y="82" width={9}  height="1"  fill="#1a2540"/>
-          <rect x="226" y="85" width="14" height="2"  fill="#ff408144"/>
-          <rect x="226" y="88" width={9}  height="1"  fill="#1a2540"/>
+          {/* Analytics chart on phone */}
+          <rect x="226" y="79" width="14" height="6"  fill={`${accent}22`}/>
+          <polyline points="226,84 229,82 232,83 236,80 240,81"
+            stroke={accent} strokeWidth="1" fill="none"/>
+          <rect x="226" y="86" width={9}  height="1"  fill="#1a2540"/>
+          <rect x="226" y="88" width="14" height="1"  fill={`${accent}33`}/>
           <circle cx="233" cy="97" r="2" fill="#1a2540"/>
-          {/* Heart badge */}
-          <text x="214" y="78" fontSize="9" fill="#ff408177">♥</text>
-          {/* Small tablet — left */}
-          <rect x="20" y="78" width="30" height="20" fill="#0c1525" rx="1"
+          {/* Small report — left */}
+          <rect x="18" y="77" width="30" height="20" fill="#0c1525" rx="1"
             stroke="#1a2540" strokeWidth="0.5"/>
-          <rect x="22" y="80" width="26" height="16" fill="#060a14"/>
-          <rect x="23" y="82" width="24" height="2"  fill={`${accent}44`}/>
-          <rect x="23" y="85" width="16" height="1"  fill="#1a2540"/>
-          <rect x="23" y="87" width="20" height="1"  fill="#1a2540"/>
-        </g>
-      )
-
-    case 'ops-review':
-      return (
-        <g>
-          {/* Clipboard — left */}
-          <rect x="18" y="75" width="26" height="30" fill="#0c1020" rx="1"
-            stroke="#1a2540" strokeWidth="0.5"/>
-          <rect x="24" y="72" width="14" height="5"  fill="#1a2030" rx="1"/>
-          {[0,1,2,3,4].map(i => (
-            <g key={i}>
-              <rect x="21" y={80+i*4} width="4" height="3"
-                fill="#060c18" stroke="#1a2030" strokeWidth="0.4"/>
-              <rect x="27" y={81+i*4} width={[14,10,14,8,12][i]} height="1"
-                fill={i<2 ? '#00ff9f55' : i===2 ? '#ff525555' : '#1a2540'}/>
-            </g>
+          <rect x="20" y="79" width="26" height="2"  fill={`${accent}55`}/>
+          {[0,1,2].map(i => (
+            <rect key={i} x="20" y={83+i*4} width={[22, 16, 20][i]} height="1.5"
+              fill={`${accent}22`}/>
           ))}
-          {/* Stamp — right */}
-          <rect x="224" y="82" width="30" height="13" fill="#ff525211"
-            stroke="#ff525444" strokeWidth="0.8" rx="1"/>
-          <text x="226" y="91" fontFamily="monospace" fontSize="5.5" fill="#ff5252aa">REVIEW</text>
-        </g>
-      )
-
-    case 'finance-controller':
-      return (
-        <g>
-          {/* Calculator — left */}
-          <rect x="17" y="76" width="26" height="30" fill="#0c1020" rx="1"
-            stroke="#1a2540" strokeWidth="0.5"/>
-          <rect x="19" y="78" width="22" height="8"  fill="#040810"/>
-          <text x="21" y="84" fontFamily="monospace" fontSize="5" fill={`${accent}99`}>4.6x</text>
-          {[0,1,2].map(row => [0,1,2,3].map(col => (
-            <rect key={`${row}-${col}`}
-              x={20+col*5} y={88+row*5} width={4} height={4}
-              fill="#09101e" rx="0.5"/>
-          )))}
-          {/* Report stack — right */}
-          <rect x="220" y="82" width="38" height="2" fill="#c8d0e0" opacity="0.28"/>
-          <rect x="222" y="79" width="34" height="3" fill="#c8d0e0" opacity="0.22"/>
-          <rect x="218" y="85" width="42" height="2" fill="#c8d0e0" opacity="0.18"/>
-          <rect x="220" y="82" width={9} height="2"  fill={accent}   opacity="0.45"/>
         </g>
       )
   }

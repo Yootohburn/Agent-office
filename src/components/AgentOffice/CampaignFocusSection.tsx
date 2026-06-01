@@ -13,21 +13,23 @@ interface Props {
 // Campaigns that need attention float to the top
 function urgencyScore(c: Campaign): number {
   if (c.finance.netProfit < 0) return 3
-  if (c.stage === 'ceo_approval') return 2
+  if (c.stage === 'human_approved') return 2
   if (c.financeWarnings.length > 0) return 1
   return 0
 }
 
 const STAGE_FALLBACK: Record<PipelineStage, string> = {
-  campaign_brief:       'CEO ตั้ง brief แคมเปญใหม่',
-  product_research:     'วิเคราะห์สินค้าและเทรนด์',
-  content_creation:     'ผลิต script และ content package',
-  social_adaptation:    'ปรับ content สำหรับ Facebook/IG/LINE',
-  review_compliance:    'ตรวจสอบ compliance และ packaging',
-  ceo_approval:         'รอ CEO อนุมัติ',
-  export_publish:       'แพ็กเกจ export และโพสต์',
-  performance_feedback: 'ติดตามและวิเคราะห์ผลลัพธ์',
-  finance_review:       'Finance วิเคราะห์ผลและ ROAS',
+  new_product:    'รับสินค้าใหม่เข้าระบบ',
+  verified:       'ยืนยันข้อมูลสินค้า',
+  scored:         'ประเมินคะแนนสินค้า',
+  selected:       'เลือกสินค้าโปรโมท',
+  brief_ready:    'สร้าง Content Brief',
+  script_ready:   'เขียน Script และ Storyboard',
+  asset_ready:    'ผลิต Creative Assets',
+  human_approved: 'รอผู้บริหารอนุมัติ',
+  published:      'โพสต์และติดตามผล',
+  analyzed:       'วิเคราะห์ผลลัพธ์',
+  learned:        'บันทึกบทเรียน',
 }
 
 function getNextAction(campaign: Campaign, agents: Agent[]): string {

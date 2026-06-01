@@ -14,45 +14,49 @@ export interface WorkflowResult {
 }
 
 const AGENT_ACCENT: Record<string, string> = {
-  'ceo-director':             '#00ff9f',
-  'product-analyst':          '#00e5ff',
-  'content-studio':           '#ff9800',
-  'social-community-manager': '#ff4081',
-  'ops-review':               '#ffb300',
-  'finance-controller':       '#00c8a0',
+  'product-research':   '#00e5ff',
+  'offer-analyst':      '#ffb300',
+  'content-strategy':   '#ff9800',
+  'script-writer':      '#ff4081',
+  'creative-production':'#a855f7',
+  'social-performance': '#00ff9f',
 }
 
 const AGENT_SHORT_NAME: Record<string, string> = {
-  'ceo-director':             'CEO',
-  'product-analyst':          'Product',
-  'content-studio':           'Content',
-  'social-community-manager': 'Social',
-  'ops-review':               'Ops',
-  'finance-controller':       'Finance',
+  'product-research':   'Research',
+  'offer-analyst':      'Analyst',
+  'content-strategy':   'Strategy',
+  'script-writer':      'Script',
+  'creative-production':'Creative',
+  'social-performance': 'Social',
 }
 
 const STAGE_TASK: Record<PipelineStage, string> = {
-  campaign_brief:       'ตั้ง brief แคมเปญใหม่',
-  product_research:     'วิเคราะห์สินค้าและเทรนด์',
-  content_creation:     'ผลิต script และ content package',
-  social_adaptation:    'ปรับ content สำหรับ Facebook/IG/LINE',
-  review_compliance:    'ตรวจสอบ compliance และ packaging',
-  ceo_approval:         'รีวิวและอนุมัติแคมเปญ',
-  export_publish:       'เตรียม export package และโพสต์',
-  performance_feedback: 'ติดตามและวิเคราะห์ผลลัพธ์',
-  finance_review:       'วิเคราะห์ผลการเงินและ ROAS',
+  new_product:    'รับสินค้าใหม่เข้าระบบ',
+  verified:       'ยืนยันข้อมูลสินค้า',
+  scored:         'ประเมินคะแนนสินค้า',
+  selected:       'เลือกสินค้าโปรโมท',
+  brief_ready:    'สร้าง Content Brief',
+  script_ready:   'เขียน Script และ Storyboard',
+  asset_ready:    'ผลิต Creative Assets',
+  human_approved: 'รอผู้บริหารอนุมัติ',
+  published:      'โพสต์และติดตามผล',
+  analyzed:       'วิเคราะห์ผลลัพธ์',
+  learned:        'บันทึกบทเรียน',
 }
 
 const CHAT_MESSAGES_BY_STAGE: Record<PipelineStage, (c: Campaign) => string> = {
-  campaign_brief:       (c) => `เริ่ม brief แคมเปญ "${c.name}" แล้วนะครับ ทีมพร้อมรับงาน`,
-  product_research:     (c) => `เริ่มวิเคราะห์ "${c.name}" แล้วครับ จะส่งผลใน 15 นาที`,
-  content_creation:     (c) => `ได้รับ brief "${c.name}" แล้วครับ เริ่มเขียน hook ทันที`,
-  social_adaptation:    (c) => `รับ script "${c.name}" มาแล้ว จะปรับสำหรับ Facebook/IG เลยนะครับ`,
-  review_compliance:    (c) => `เริ่มตรวจ compliance "${c.name}" ใช้เวลาประมาณ 10 นาที`,
-  ceo_approval:         (c) => `"${c.name}" ผ่าน compliance ครบ รอ CEO อนุมัตินะครับ`,
-  export_publish:       (c) => `เตรียม export package "${c.name}" อยู่ครับ จะแจ้งเมื่อพร้อมโพสต์`,
-  performance_feedback: (c) => `ติดตามผล "${c.name}" หลังโพสต์แล้วนะครับ จะรายงาน Finance`,
-  finance_review:       (c) => `ได้รับ performance data "${c.name}" แล้ว กำลังวิเคราะห์ ROAS`,
+  new_product:    (c) => `รับสินค้าใหม่ "${c.name}" เข้าระบบแล้วครับ เริ่มตรวจสอบข้อมูล`,
+  verified:       (c) => `ตรวจสอบข้อมูล "${c.name}" ครบแล้ว ส่ง Offer Analyst ได้เลย`,
+  scored:         (c) => `ให้คะแนน "${c.name}" เสร็จแล้วครับ score ${c.scores.final_score}/100`,
+  selected:       (c) => `เลือก "${c.name}" เพื่อโปรโมทแล้ว สร้าง brief ได้เลย`,
+  brief_ready:    (c) => `Brief "${c.name}" พร้อมแล้วครับ hook framework เลือกแล้ว ส่ง Script Writer`,
+  script_ready:   (c) => `Script "${c.name}" 25 วิ เสร็จแล้ว รอ review ก่อนส่ง Creative`,
+  asset_ready:    (c) => `Creative assets "${c.name}" ครบชุดแล้ว รอส่งผู้บริหารอนุมัติ`,
+  human_approved: (c) => `"${c.name}" รอผู้บริหารอนุมัติอยู่นะครับ ห้าม publish ก่อนได้รับอนุมัติ`,
+  published:      (c) => `โพสต์ "${c.name}" แล้วครับ กำลังติดตามผล 48 ชั่วโมง`,
+  analyzed:       (c) => `วิเคราะห์ผล "${c.name}" เสร็จ ROAS ${c.finance.roas}x — บันทึกบทเรียนได้เลย`,
+  learned:        (c) => `บันทึกบทเรียน "${c.name}" ครบแล้ว ส่งข้อมูลกลับ Product Research`,
 }
 
 function makeTimestamp(): string {
@@ -66,13 +70,10 @@ function makeChatTimestamp(): string {
 }
 
 const ACTION_LABEL: Record<WorkflowAction, string> = {
-  run_next_step:   'ส่งมอบงาน',
-  send_to_ceo:     'ส่ง CEO อนุมัติ',
-  send_back:       'ส่งกลับแก้ไข',
-  approve:         'อนุมัติ',
-  reject:          'ปฏิเสธ',
-  mark_ready:      'Mark Ready',
-  generate_export: 'Export Package',
+  run_next_step:    'ส่งมอบงาน',
+  reject:           'ส่งกลับแก้ไข',
+  request_approval: 'ส่งอนุมัติ',
+  approve:          'อนุมัติ',
 }
 
 export function runWorkflowAction(
@@ -91,24 +92,31 @@ export function runWorkflowAction(
       if (ns) nextStage = ns
       break
     }
-    case 'send_to_ceo':
-      nextStage = 'ceo_approval'
-      break
-    case 'send_back': {
-      const idx = STAGE_SEQUENCE.indexOf(prevStage)
-      if (idx > 0) nextStage = STAGE_SEQUENCE[idx - 1]
-      break
-    }
-    case 'approve':
-    case 'mark_ready':
-    case 'generate_export': {
+    case 'request_approval': {
+      // asset_ready → human_approved
       const ns = getNextStage(prevStage)
       if (ns) nextStage = ns
       break
     }
-    case 'reject':
-      nextStage = 'campaign_brief'
+    case 'approve': {
+      // human_approved → published
+      const ns = getNextStage(prevStage)
+      if (ns) nextStage = ns
       break
+    }
+    case 'reject': {
+      // scored → stay at scored; human_approved → back to script_ready
+      if (prevStage === 'human_approved') {
+        nextStage = 'script_ready'
+      } else if (prevStage === 'scored') {
+        // stays at scored — rejected product
+        nextStage = 'scored'
+      } else {
+        const idx = STAGE_SEQUENCE.indexOf(prevStage)
+        if (idx > 0) nextStage = STAGE_SEQUENCE[idx - 1]
+      }
+      break
+    }
   }
 
   const newOwnerId    = STAGE_OWNER[nextStage]
@@ -158,7 +166,7 @@ export function runWorkflowAction(
         currentTask:      `${STAGE_TASK[nextStage]} — ${campaign.name}`,
         progress:         newProgress,
         currentCampaignId: campaign.id,
-        decisionNeeded:   nextStage === 'ceo_approval' ? 'อนุมัติหรือส่งกลับแก้ไข' : null,
+        decisionNeeded:   nextStage === 'human_approved' ? 'อนุมัติหรือส่งกลับแก้ไข' : null,
       }
     }
     return agent
@@ -170,7 +178,7 @@ export function runWorkflowAction(
     agentId:   newOwnerId,
     agentName: AGENT_SHORT_NAME[newOwnerId] ?? newOwnerId,
     message:   `[${campaign.id}] ${ACTION_LABEL[action]}: "${campaign.name}" → ${STAGE_TASK[nextStage]}`,
-    type:      action === 'reject' || action === 'send_back' ? 'warning' : 'success',
+    type:      action === 'reject' ? 'warning' : 'success',
     campaignId: campaign.id,
   }
 

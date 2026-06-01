@@ -13,7 +13,7 @@ export default function AgentDetailPanel({ agent, onClose }: Props) {
   const campaign = agent.currentCampaignId ? getCampaignById(agent.currentCampaignId) : null
   const channelCfg = campaign ? CHANNEL_CONFIG[campaign.channel] : null
   const activeStageIdx = campaign ? getStageIndex(campaign.stage) : -1
-  const isFinance = agent.id === 'finance-controller'
+  const isFinance = agent.id === 'social-performance'
 
   return (
     <div style={{ fontFamily: 'Share Tech Mono, monospace' }}>

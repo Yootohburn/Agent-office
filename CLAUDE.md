@@ -40,12 +40,22 @@ All agent actions, workflows, and outputs in Phase 1 are simulated with static m
 4. Add routing logic in `src/agents/agentTaskRouter.ts`
 5. The dashboard will pick it up automatically
 
+## Orchestration
+
+Do NOT build production orchestration inside Claude Code.
+Real production orchestration for Phase 2 should use n8n / Make / Pipedream or a custom backend.
+Phase 1 is mock data only — all workflows are simulated in TypeScript.
+
+## Phase 2 Direction
+
+When moving beyond Phase 1:
+- Replace mock data in `src/agents/agentRegistry.ts` with real API calls
+- Build workflow orchestration using n8n, Make, or Pipedream
+- Connect real Shopee Affiliate API, Lazada Affiliate API, TikTok Shop API
+- Human Approval Gate remains mandatory — never automate the publish decision
+- Keep mock data available as a fallback for development and testing
+
 ## Future: Codex Support
 
 When Codex repository access is restored, add agent instruction files under `.codex/agents/`.
 Do not create `.codex/` files until that access is confirmed working.
-
-## Future: Real API Integration
-
-When moving beyond Phase 1, replace mock data in `src/agents/agentRegistry.ts` with real API calls.
-Keep mock data available as a fallback for development and testing.

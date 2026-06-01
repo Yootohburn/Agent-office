@@ -14,14 +14,13 @@ export interface MockResponse {
   mockDelay: number
 }
 
-type IntentKey = 'status' | 'next_action' | 'problem_solve' | 'ideas' | 'risk' | 'finance' | 'social_post' | 'general'
+type IntentKey = 'status' | 'next_action' | 'problem_solve' | 'ideas' | 'risk' | 'finance' | 'general'
 
 function detectIntent(msg: string): IntentKey {
   const m = msg.toLowerCase()
   if (m.includes('สรุป') || m.includes('สถานะ') || m.includes('ตอนนี้') || m.includes('overview')) return 'status'
   if (m.includes('ถัดไป') || m.includes('ขั้นตอน') || m.includes('แนะนำ') || m.includes('ต่อไป')) return 'next_action'
-  if (m.includes('โพสต์') || m.includes('facebook') || m.includes('instagram') || m.includes('ig') || m.includes('โซเชียล') || m.includes('caption') || m.includes('community')) return 'social_post'
-  if (m.includes('ปัญหา') || m.includes('แก้') || m.includes('ช่วย') || m.includes('แคมเปญ') || m.includes('fix')) return 'problem_solve'
+  if (m.includes('ปัญหา') || m.includes('แก้') || m.includes('ช่วย') || m.includes('สินค้า') || m.includes('fix')) return 'problem_solve'
   if (m.includes('ไอเดีย') || m.includes('hook') || m.includes('script') || m.includes('คอนเทนต์') || m.includes('สร้าง') || m.includes('idea')) return 'ideas'
   if (m.includes('เสี่ยง') || m.includes('ตรวจ') || m.includes('risk') || m.includes('ระวัง')) return 'risk'
   if (m.includes('การเงิน') || m.includes('ตัวเลข') || m.includes('roas') || m.includes('กำไร') || m.includes('งบ') || m.includes('เงิน')) return 'finance'
@@ -29,331 +28,327 @@ function detectIntent(msg: string): IntentKey {
 }
 
 const RESPONSES: Record<DepartmentId, Partial<Record<IntentKey, string>>> = {
-  'ceo-director': {
+  'product-research': {
     status:
-      `📊 สถานะบริษัทวันนี้:\n\n` +
-      `✅ TikTok Earbuds — content กำลังผลิต 70% ดูดี\n` +
-      `⚠️ Skincare Travel Pouch — รอ CEO อนุมัติ (ด่วน)\n` +
-      `⛔ Lazada Blender — ขาดทุน ${formatTHB(-120)} ต้องตัดสินใจหยุดยิงแอด\n` +
-      `✅ Shopee Desk Lamp — research 45% ปกติดี\n\n` +
-      `📈 กำไรรวม: ${formatTHB(companySummary.totalNetProfit)} | ROAS ${companySummary.avgRoas}x`,
+      `🔬 สถานะ research queue ตอนนี้:\n\n` +
+      `🔄 prod-001 กล่องจัดระเบียบ 6-in-1 — ตรวจสอบอยู่ 72%\n` +
+      `✅ prod-002 Spin Mop — ส่ง Offer Analyst แล้ว (review 187 — ใกล้เกณฑ์)\n` +
+      `✅ prod-003 ที่ชาร์จ 3-in-1 — วิเคราะห์ครบ score 91/100\n` +
+      `✅ prod-004 แผ่นรองเมาส์ RGB — ส่งแล้ว\n\n` +
+      `สินค้าที่น่าสนใจถัดไป: กล่องใส่เครื่องสำอางค์, ที่ตั้งโทรศัพท์ magnetic`,
     next_action:
-      `ลำดับความสำคัญสูงสุดของผมตอนนี้:\n\n` +
-      `1️⃣ อนุมัติ Skincare Travel Pouch — compliance ผ่านแล้ว รอลายเซ็นอย่างเดียว\n` +
-      `2️⃣ ตัดสินใจ Lazada Blender — ขาดทุนอยู่ ต้องหยุดยิงแอดหรือปรับ creative\n` +
-      `3️⃣ รีวิว brief TikTok Earbuds ว่า content ตรงทิศทางไหม\n\n` +
-      `แนะนำจัดการข้อ 1 ก่อน เพราะ ROAS 7.2x พร้อม scale ทันที`,
-    problem_solve:
-      `สำหรับแคมเปญที่มีปัญหา:\n\n` +
-      `Lazada Blender (ขาดทุน ${formatTHB(-120)}):\n` +
-      `→ หยุดยิงแอดก่อนทันที\n` +
-      `→ ให้ Finance ดู cost structure ใหม่\n` +
-      `→ เปลี่ยน angle: จาก health claims เป็น lifestyle\n\n` +
-      `Skincare Pouch (รอนาน):\n` +
-      `→ ผมจะอนุมัติภายในวันนี้\n` +
-      `→ เตรียม export package ให้พร้อมก่อนเลย`,
+      `ขั้นตอนถัดไปของ Product Research:\n\n` +
+      `1️⃣ เสร็จตรวจสอบ prod-001 กล่องจัดระเบียบ\n` +
+      `   → ตรวจ seller authenticity + shipping score\n\n` +
+      `2️⃣ รับ learning data จาก Social Performance\n` +
+      `   → prod-003 ที่ชาร์จ 3-in-1: ROAS 6.1x บันทึก weight\n\n` +
+      `3️⃣ Scout สินค้าหมวดถัดไปสำหรับ week หน้า\n` +
+      `   → เป้า: 3 SKU ต่อสัปดาห์ ตาม company goals`,
     ideas:
-      `ไอเดีย strategic direction ใหม่:\n\n` +
-      `💡 Bundle campaign: Earbuds + Phone Stand — ราคา bundle ฿799 ดึง AOV ขึ้น\n` +
-      `💡 Shopee Flash Sale: โคมไฟ + ที่ชาร์จ — timing เสาร์อาทิตย์\n` +
-      `💡 TikTok Series: "unboxing ทุกวัน" 7 วันต่อเนื่อง build audience\n` +
-      `💡 Lazada: เปลี่ยน angle blender เป็น smoothie bowl recipe แทน health claims`,
+      `สินค้าน่าสนใจที่ควร scout เพิ่ม:\n\n` +
+      `🛍️ Shopee:\n` +
+      `→ ที่ตั้งโทรศัพท์ magnetic (WFH trend)\n` +
+      `→ กล่องเก็บเครื่องสำอางค์ rotating\n` +
+      `→ ไฟ LED โต๊ะทำงาน (aesthetic desk setup)\n\n` +
+      `🛍️ TikTok Shop:\n` +
+      `→ แท่นชาร์จ MagSafe (momentum จาก prod-003)\n` +
+      `→ สายชาร์จ braided หลายหัว\n\n` +
+      `🛍️ Lazada:\n` +
+      `→ ไม้กวาดไฟฟ้า mini handheld\n` +
+      `→ ถุงซิปสุญญากาศ (จัดระเบียบ)`,
     risk:
-      `ความเสี่ยงหลักบริษัทตอนนี้:\n\n` +
-      `⛔ Lazada Blender — ขาดทุน ROAS 2.0x ต่ำมาก ควรหยุดก่อน\n` +
-      `⚠️ Skincare: compliance claim บางจุดยังเสี่ยง ต้องตรวจซ้ำ\n` +
-      `⚠️ เราพึ่ง TikTok มากเกินไป — 69% ของรายได้มาจาก TikTok เดียว\n` +
-      `⚠️ Budget concentrated — ควรกระจาย risk ให้ Shopee มากขึ้น`,
+      `ความเสี่ยงใน research pipeline:\n\n` +
+      `⚠️ prod-002 review count 187 ใกล้เกณฑ์ขั้นต่ำ 200 — ต้องตรวจ recency\n` +
+      `⚠️ prod-002 ROAS est 3.8x ต่ำกว่าเป้า — Offer Analyst กำลังพิจารณา\n` +
+      `⚠️ TikTok category อุปกรณ์ชาร์จ — ต้องระวัง overclaim spec ความเร็ว`,
     finance:
-      `ตัวเลขรวมบริษัทตอนนี้:\n\n` +
+      `มุมมองการเงินจาก research:\n\n` +
+      `Commission rate ที่ดีที่สุด:\n` +
+      `→ TikTok Shop: 8-10% (ดีสุด)\n` +
+      `→ Shopee Affiliate: 7-10%\n` +
+      `→ Lazada: 6-8%\n\n` +
+      `สินค้า sweet spot: ฿150–฿600\n` +
+      `→ Impulse buy ง่ายกว่า, ad cost ต่อ order ต่ำ\n\n` +
+      `บทเรียนจาก prod-003: TikTok + อุปกรณ์ชาร์จ ROAS 6.1x — ขยายหมวดนี้ต่อ`,
+    problem_solve:
+      `แก้ปัญหา research:\n\n` +
+      `prod-002 Spin Mop (ROAS 3.8x ต่ำ):\n` +
+      `→ ถ้าเลือกโปรโมท ต้องลด ad spend ลง 20%\n` +
+      `→ เน้น organic content ลด paid dependency\n` +
+      `→ เลือก hook ที่ demo ง่ายขึ้น: before_after\n\n` +
+      `prod-001 (review count ใกล้เกณฑ์):\n` +
+      `→ ตรวจ review recency — ถ้า recent ≥ 90% ผ่านได้`,
+    general:
+      `ผมดูแล product research ทุกสินค้าก่อนส่ง brief ให้ Offer Analyst ` +
+      `ถามได้ทุกเรื่องเกี่ยวกับสินค้า เทรนด์ scoring เกณฑ์คัดกรอง หรือ approved categories ครับ`,
+  },
+
+  'offer-analyst': {
+    status:
+      `📊 สถานะ scoring queue ตอนนี้:\n\n` +
+      `🔄 prod-002 Spin Mop — กำลังคำนวณ profit margin 45%\n` +
+      `✅ prod-001 กล่องจัดระเบียบ — score 88/100 ส่ง Content Strategy แล้ว\n` +
+      `✅ prod-003 ที่ชาร์จ 3-in-1 — score 91/100 ส่งแล้ว\n` +
+      `✅ prod-004 แผ่นรองเมาส์ — score 79/100 ส่งแล้ว\n\n` +
+      `ROAS เฉลี่ยที่ประมาณ: 4.8x`,
+    next_action:
+      `ขั้นตอนถัดไปของ Offer Analyst:\n\n` +
+      `1️⃣ ให้ suitability_score prod-002 Spin Mop\n` +
+      `   → ตรวจ est_commission ฿570 | ROAS 3.8x (ต่ำกว่าเป้า)\n` +
+      `   → ตัดสินใจ: เลือกโปรโมทหรือข้าม?\n\n` +
+      `2️⃣ เตรียม scoring template สำหรับ batch ถัดไป\n` +
+      `   → focus: จัดระเบียบบ้าน + อุปกรณ์ชาร์จ (ผล prod-001, prod-003 ดี)`,
+    ideas:
+      `ไอเดียปรับ scoring model:\n\n` +
+      `💡 เพิ่ม weight ให้ TikTok fit score\n` +
+      `   → prod-003 TikTok: platform_fit 9/10 → ROAS 6.1x ✅\n\n` +
+      `💡 เพิ่ม weight ให้ demo_score สำหรับ video format\n` +
+      `   → สินค้าที่ demo ง่าย → conversion สูงกว่า\n\n` +
+      `💡 เพิ่ม penalty ถ้า claim_risk = medium+\n` +
+      `   → prod-003 ยังต้องระวัง spec overclaim`,
+    risk:
+      `ความเสี่ยงใน offer analysis:\n\n` +
+      `⚠️ prod-002 ROAS 3.8x ต่ำกว่าเป้า — ต้องพิจารณาก่อนเลือก\n` +
+      `⚠️ prod-003 claim_risk medium — spec ความเร็วชาร์จต้องตรวจก่อน claim\n` +
+      `⚠️ สินค้าราคา ฿500+ conversion อาจต่ำกว่า ต้องใช้ content ที่ demo ชัดขึ้น`,
+    finance:
+      `ตัวเลข commission และ profit:\n\n` +
+      `📊 ประมาณ commission รวม:\n` +
+      `→ prod-001: ฿840 (commission rate 10%)\n` +
+      `→ prod-002: ฿570 (rate 10%)\n` +
+      `→ prod-003: ฿1,220 (rate 10%)\n` +
+      `→ prod-004: ฿630 (rate 10%)\n\n` +
+      `กำไรสุทธิรวม: ${formatTHB(companySummary.totalNetProfit)}\n` +
+      `ROAS เฉลี่ย: ${companySummary.avgRoas}x\n\n` +
+      `แนะนำ: focus สินค้า ROAS > 4.5x ต่อไป`,
+    problem_solve:
+      `แก้ปัญหา prod-002 Spin Mop (ROAS ต่ำ):\n\n` +
+      `ตัวเลข:\n` +
+      `→ revenue ฿5,700 | adSpend ฿1,500 | ROAS 3.8x\n` +
+      `→ netProfit ฿3,070 (ยังบวก แต่ต่ำกว่าเป้า)\n\n` +
+      `ตัวเลือก:\n` +
+      `1. ลด adSpend ฿1,500 → ฿1,000 → ROAS จะขึ้นเป็น ~4.8x\n` +
+      `2. เปลี่ยน hook เป็น demo ที่ดราม่ากว่า (before/after)\n` +
+      `3. ข้ามสินค้านี้ไปก่อน เลือก batch ถัดไป\n\n` +
+      `แนะนำ: ลองตัวเลือก 1 ก่อน ถ้าไม่ดีขึ้นค่อยข้าม`,
+    general:
+      `ผมดูแลการให้คะแนนสินค้าและประเมินความคุ้มค่า ตั้งแต่ commission rate, profit margin, จนถึง return/refund risk ` +
+      `ถามได้ทุกเรื่องเกี่ยวกับ scoring, ROAS ประมาณ, หรือการตัดสินใจเลือกสินค้าครับ`,
+  },
+
+  'content-strategy': {
+    status:
+      `🎯 สถานะ content strategy queue:\n\n` +
+      `🔄 prod-001 กล่องจัดระเบียบ — เลือก framework ปัญหาจุกจิกทุกวัน 60%\n` +
+      `✅ prod-004 แผ่นรองเมาส์ — brief ส่ง Script Writer แล้ว\n` +
+      `⏳ prod-002 Spin Mop — รอ Offer Analyst ตัดสินใจก่อน\n\n` +
+      `Framework ที่ใช้บ่อยสุดสัปดาห์นี้: worth_it, daily_problem`,
+    next_action:
+      `ขั้นตอนถัดไปของ Content Strategy:\n\n` +
+      `1️⃣ เสร็จ brief prod-001 กล่องจัดระเบียบ\n` +
+      `   → hook: "ห้องเล็ก condo แบบนี้ต้องใช้"\n` +
+      `   → platform: TikTok + Shopee Video\n\n` +
+      `2️⃣ เตรียม brief prod-002 Spin Mop (ถ้า Offer Analyst เลือกโปรโมท)\n` +
+      `   → framework: before_after\n` +
+      `   → hook: "ก่อนใช้/หลังใช้ — พื้นบ้านสะอาดใน 3 นาที"`,
+    ideas:
+      `ไอเดีย hook framework:\n\n` +
+      `🎯 สำหรับกล่องจัดระเบียบ:\n` +
+      `→ "คุณเคยเจอห้องรกแบบนี้ไหม? นี่คือสิ่งที่แก้ได้"\n` +
+      `→ "ห้องเล็ก condo แบบนี้ต้องใช้ กล่อง 6-in-1 ฿299"\n` +
+      `→ "ก่อนจัด vs หลังจัด — ต่างกันมากขนาดนี้"\n\n` +
+      `🎯 สำหรับ Spin Mop:\n` +
+      `→ "ทดสอบใน 60 วิ — พื้นสะอาดทันที"\n` +
+      `→ "ก่อนใช้ vs หลังใช้ 30 วิ น้ำในถังเปลี่ยนสี"\n\n` +
+      `🎯 สำหรับแผ่นรองเมาส์:\n` +
+      `→ "฿189 บาท คุ้มจริงไหม? มาดูกัน"`,
+    risk:
+      `ความเสี่ยงใน content strategy:\n\n` +
+      `⚠️ prod-003 ที่ชาร์จ: อย่า claim "ชาร์จเร็วที่สุด" ถ้าไม่มี spec ยืนยัน\n` +
+      `⚠️ hook ที่ดราม่าเกินจริงอาจถูก TikTok throttle\n` +
+      `⚠️ ทุก content ต้องมี #ad หรือ #โฆษณา ครบ\n` +
+      `⚠️ Framework "before_after" — ผลต้องเป็นจริง ห้ามเกินจริง`,
+    finance:
+      `มุมมองการเงินจาก content strategy:\n\n` +
+      `ต้นทุน content per campaign: ฿500–฿800\n\n` +
+      `ROI ที่ดีสุด:\n` +
+      `→ prod-003 TikTok: ต้นทุน ฿800, ROAS 6.1x ✅\n` +
+      `→ prod-001 Shopee: ต้นทุน ฿500, ROAS est 5.2x ✅\n\n` +
+      `แนะนำ: framework "worth_it" กับ "daily_problem" ได้ผล ROI ดีสุด`,
+    problem_solve:
+      `แก้ปัญหา content strategy:\n\n` +
+      `ปัญหา: hook "ดีที่สุด" ถูก flag compliance\n` +
+      `→ เปลี่ยนเป็น "ลองใช้แล้วชอบมาก" หรือ "คุ้มค่าสำหรับราคานี้"\n\n` +
+      `ปัญหา: สินค้า ROAS ต่ำ — content อาจ fit ไม่ดี\n` +
+      `→ เปลี่ยน framework: ถ้า "worth_it" ไม่ work ลอง "quick_test"\n` +
+      `→ หรือ "objection_qa": ตอบ objection ที่คนสงสัยจริงๆ\n\n` +
+      `ปัญหา: ไม่รู้จะ hook ยังไง\n` +
+      `→ ดู comment section สินค้าที่ขายดี — คนถามอะไรบ่อย?`,
+    general:
+      `ผมดูแลกลยุทธ์ content ทั้งหมด ตั้งแต่เลือก hook framework, กลุ่มเป้าหมาย, platform mix, จนถึง CTA ` +
+      `ถามได้ทุกเรื่องเกี่ยวกับ content angle, framework selection, หรือ brief structure ครับ`,
+  },
+
+  'script-writer': {
+    status:
+      `🎬 สถานะ script production:\n\n` +
+      `⚠️ prod-004 แผ่นรองเมาส์ RGB — script 85% รอ review hook direction\n` +
+      `   → ต้องตัดสินใจ: demo-first หรือ problem-first?\n` +
+      `⏳ prod-001 กล่องจัดระเบียบ — รอรับ brief จาก Content Strategy\n\n` +
+      `งานถัดไปหลัง prod-004: prod-001 กล่องจัดระเบียบ 6-in-1`,
+    next_action:
+      `ขั้นตอนถัดไป:\n\n` +
+      `1️⃣ ได้รับการตัดสินใจ hook direction สำหรับ prod-004\n` +
+      `   → ถ้า demo-first: เริ่มด้วยภาพสินค้า RGB สวยๆ\n` +
+      `   → ถ้า problem-first: "โต๊ะรกแบบนี้ทำงานไม่ได้เลย"\n\n` +
+      `2️⃣ เสร็จ script prod-004 ส่ง Creative Production\n\n` +
+      `3️⃣ รับ brief prod-001 กล่องจัดระเบียบ\n` +
+      `   → framework: daily_problem | platform: TikTok + Shopee Video`,
+    ideas:
+      `ไอเดีย script สำหรับสินค้าในคิว:\n\n` +
+      `🎬 prod-004 แผ่นรองเมาส์ RGB (demo-first):\n` +
+      `→ [0–3s] ภาพ RGB glow บนโต๊ะมืด — สวยมาก\n` +
+      `→ [3–8s] "โต๊ะ setup เปลี่ยนทันที ฿189 บาทเท่านั้น"\n` +
+      `→ [8–18s] demo วางแผ่น + RGB modes\n` +
+      `→ [18–25s] proof: review + ราคา\n\n` +
+      `🎬 prod-001 กล่องจัดระเบียบ (problem-first):\n` +
+      `→ [0–3s] ห้องรก — "ทนไม่ไหวแล้ว"\n` +
+      `→ [3–8s] setup กล่อง 6-in-1\n` +
+      `→ [8–18s] demo จัดระเบียบทุก item`,
+    risk:
+      `ความเสี่ยงใน script:\n\n` +
+      `⚠️ prod-004: script 27 วิ อาจเกิน 30 วิ ถ้าเพิ่ม CTA — ต้องตัดฉาก 3\n` +
+      `⚠️ ห้ามใช้ spec ที่ไม่แน่ใจ เช่น "ชาร์จเร็วสุด" "ทนทานที่สุด"\n` +
+      `⚠️ ทุก script ต้องมี CTA ชัดเจน + #ad\n` +
+      `⚠️ Hook 3 วิแรก critical มาก — ต้องไม่ boring`,
+    finance:
+      `มุมมองการเงินจาก script:\n\n` +
+      `ต้นทุน script per campaign: ฿0 (ผลิต in-house)\n\n` +
+      `Script ที่ดีลด cost per order:\n` +
+      `→ prod-003 TikTok script ดี → CPO ฿41 ✅\n` +
+      `→ script ที่ hook อ่อน → CPO สูง\n\n` +
+      `เป้า: ทุก script ต้องทำ CPO < ฿150\n` +
+      `→ prod-002 CPO ฿157 ยังเกินเป้า — ต้องปรับ script ถ้าเลือกโปรโมท`,
+    problem_solve:
+      `แก้ปัญหา script:\n\n` +
+      `ปัญหา prod-004: script ยาวเกิน (27 วิ)\n` +
+      `→ ตัด scene 3 ให้เหลือ 3 วิ (จาก 5 วิ)\n` +
+      `→ CTA รวม proof ใน slide เดียวกัน\n` +
+      `→ target: 25 วิ พอดี\n\n` +
+      `ปัญหา: hook ไม่ดึงดูด\n` +
+      `→ ดู top 10 TikTok ในหมวดเดียว\n` +
+      `→ hook ที่ work มักเป็น: visual shock, price reveal, problem empathy`,
+    general:
+      `ผมดูแลการเขียน script และ storyboard ทุกชิ้น 20–30 วิ พร้อม on-screen text และ shot list ` +
+      `ถามได้ทุกเรื่องเกี่ยวกับ script format, hook writing, storyboard, หรือ timing ครับ`,
+  },
+
+  'creative-production': {
+    status:
+      `🎨 สถานะ creative production:\n\n` +
+      `○ ตอนนี้ idle — รอรับงานจาก Script Writer\n` +
+      `✅ prod-003 ที่ชาร์จ 3-in-1 — Canva brief ครบชุดส่ง Social Performance แล้ว\n\n` +
+      `กำลังเตรียม:\n` +
+      `→ Canva template หมวด desk accessories (prod-004)\n` +
+      `→ Asset checklist template สำหรับ Shopee products`,
+    next_action:
+      `ขั้นตอนถัดไปเมื่อรับงาน:\n\n` +
+      `1️⃣ รับ script + storyboard prod-004 จาก Script Writer\n` +
+      `2️⃣ สร้าง Canva thumbnail layout\n` +
+      `   → Background: desk setup dark + RGB glow\n` +
+      `   → Text overlay: ราคา ฿189 + ลด 41%\n\n` +
+      `3️⃣ สร้าง comparison card\n` +
+      `   → "ก่อน/หลัง" หรือ "คุ้มค่า" card\n\n` +
+      `4️⃣ CapCut checklist สำหรับ editor`,
+    ideas:
+      `ไอเดีย creative production:\n\n` +
+      `💡 prod-004 แผ่นรองเมาส์ RGB:\n` +
+      `→ Thumbnail: ภาพ RGB glow บนโต๊ะมืด — contrast สูง\n` +
+      `→ Text: "฿189 ✨ RGB XXL" ใหญ่ชัด\n` +
+      `→ Comparison card: "โต๊ะก่อน vs หลัง"\n\n` +
+      `💡 prod-001 กล่องจัดระเบียบ:\n` +
+      `→ Thumbnail: ห้องรก → ห้องจัดระเบียบ (split screen)\n` +
+      `→ Text: "6-in-1 ฿299 — จัดได้ทุกมุมห้อง"\n` +
+      `→ Asset: ภาพห้องคอนโด lifestyle shot`,
+    risk:
+      `ความเสี่ยงใน creative production:\n\n` +
+      `⚠️ ภาพ "ก่อน/หลัง" ต้องไม่เกินจริง — ใช้ภาพสินค้าจริงเท่านั้น\n` +
+      `⚠️ Text overlay ราคาต้องตรงกับหน้าสินค้าจริง\n` +
+      `⚠️ ห้ามใช้ภาพ copyrighted โดยไม่ได้รับอนุญาต\n` +
+      `⚠️ Thumbnail ต้องไม่ clickbait เกินจริง`,
+    finance:
+      `ต้นทุน creative production:\n\n` +
+      `Canva Pro: รวมในต้นทุน content ฿500–฿800/campaign\n\n` +
+      `ผลกระทบต่อ ROAS:\n` +
+      `→ Thumbnail ที่ดีเพิ่ม CTR 15–30%\n` +
+      `→ Comparison card ช่วย conversion\n` +
+      `→ prod-003: creative ดี → CTR 3.2% → ROAS 6.1x ✅`,
+    problem_solve:
+      `แก้ปัญหา creative:\n\n` +
+      `ปัญหา: thumbnail CTR ต่ำ\n` +
+      `→ ใส่ราคาใหญ่ๆ ใน thumbnail — คนไทยตอบสนองดี\n` +
+      `→ ใช้ contrast สูง dark background + bright text\n` +
+      `→ เพิ่ม visual proof: "4.8 ⭐ 312 รีวิว"\n\n` +
+      `ปัญหา: CapCut edit ไม่ match script\n` +
+      `→ ส่ง CapCut checklist ที่ระบุ timecode ชัดเจน\n` +
+      `→ แต่ละ scene บอกว่า visual ควรเป็นอะไร`,
+    general:
+      `ผมดูแลการผลิต creative assets ทุกชิ้น Canva brief, thumbnail, CapCut checklist, comparison card ` +
+      `ถามได้ทุกเรื่องเกี่ยวกับ visual design, asset structure, หรือ creative brief ครับ`,
+  },
+
+  'social-performance': {
+    status:
+      `📱 สถานะ social performance:\n\n` +
+      `✅ prod-003 ที่ชาร์จ 3-in-1 — วิเคราะห์ครบ 48 ชม\n` +
+      `   Views 58,400 | CTR 3.2% | ROAS 6.1x | Conv 4.8%\n` +
+      `   pendingPayout ฿600 รอรับจาก TikTok Shop\n\n` +
+      `⏳ รอสินค้าถัดไปผ่าน human approval ก่อน publish`,
+    next_action:
+      `ขั้นตอนถัดไปของ Social Performance:\n\n` +
+      `1️⃣ ส่ง performance report prod-003 ให้ Product Research\n` +
+      `   → learning: TikTok + charger category = ROAS 6.1x\n\n` +
+      `2️⃣ รอ prod-004 แผ่นรองเมาส์ผ่าน human approval\n` +
+      `   → เตรียม post checklist: caption, hashtag, UTM, pinned comment\n\n` +
+      `3️⃣ เตรียม post schedule สำหรับ batch ถัดไป\n` +
+      `   → prime time: 18:00–21:00 weekday, 10:00–12:00 weekend`,
+    ideas:
+      `ไอเดีย social performance:\n\n` +
+      `💡 prod-003 ที่ชาร์จ 3-in-1 (ROAS 6.1x):\n` +
+      `→ เพิ่มงบ 50% ทันที — ROAS ยังสูงมาก\n` +
+      `→ Retarget ด้วย lookalike audience จาก buyer list\n\n` +
+      `💡 prod-004 แผ่นรองเมาส์ (รอโพสต์):\n` +
+      `→ โพสต์ TikTok ช่วง 19:00 Tue/Thu — peak gaming audience\n` +
+      `→ Pinned comment: "ลิงก์ Shopee ด้านล่าง ฿189 เท่านั้น"\n\n` +
+      `💡 Cross-platform:\n` +
+      `→ TikTok → repost Shopee Video → reach คนละกลุ่ม`,
+    risk:
+      `ความเสี่ยง social performance:\n\n` +
+      `⚠️ prod-003 pendingPayout ฿600 รอรับ — ติดตาม TikTok Shop schedule\n` +
+      `⚠️ TikTok algorithm เปลี่ยนบ่อย — ต้อง test posting time\n` +
+      `⚠️ ทุก post ต้องมี #ad ชัดเจน ทั้ง TikTok, Shopee, Lazada\n` +
+      `⚠️ Affiliate link ต้องตรวจทุกครั้งก่อน post`,
+    finance:
+      `ตัวเลข performance ล่าสุด:\n\n` +
       `💰 รายได้รวม: ${formatTHB(companySummary.totalRevenue)}\n` +
       `📈 กำไรสุทธิ: ${formatTHB(companySummary.totalNetProfit)}\n` +
       `📢 ค่าโฆษณา: ${formatTHB(companySummary.totalAdSpend)}\n` +
       `🎯 ROAS เฉลี่ย: ${companySummary.avgRoas}x\n\n` +
-      `TikTok ทำ ROAS ดีที่สุด — แนะนำ scale ก่อน\n` +
-      `Lazada ขาดทุน — ต้องหยุดหรือ restructure`,
-    general:
-      `ผม CEO ดูแลทิศทางแคมเปญทั้งหมด ตอนนี้มี 4 แคมเปญที่กำลังดำเนินการ ` +
-      `ถามได้ทุกเรื่องเกี่ยวกับ strategy การตัดสินใจ หรือภาพรวมบริษัทครับ`,
-  },
-
-  'product-analyst': {
-    status:
-      `🔬 สถานะ research queue ตอนนี้:\n\n` +
-      `✅ TikTok Earbuds X9 — คะแนน 84/100 ส่ง brief ไป Content แล้ว\n` +
-      `🔄 Shopee Desk Lamp — กำลัง analyze 45% เหลือ competitor landscape\n` +
-      `✅ Lazada Blender — คะแนน 71/100 ส่ง brief แล้ว\n` +
-      `✅ Skincare Travel Pouch — คะแนน 77/100 ส่ง brief แล้ว\n\n` +
-      `สินค้าถัดไปที่น่าสนใจ: ที่วางโทรศัพท์ magnetic, desk organizer`,
-    next_action:
-      `ขั้นตอนถัดไปของผม:\n\n` +
-      `1️⃣ ทำ competitor analysis Shopee Desk Lamp ให้เสร็จ\n` +
-      `   → คู่แข่ง 12 ราย ต้องหา unique angle\n` +
-      `   → target: ราคา ฿500–฿1,200, คนทำงานที่บ้าน\n\n` +
-      `2️⃣ Scout สินค้าใหม่สำหรับ TikTok\n` +
-      `   → ดู trending hashtag #homedecor, #gadget\n` +
-      `   → เป้า: commission 8%+, rating 4.5+`,
-    ideas:
-      `สินค้าน่าสนใจที่ควร scout เพิ่ม:\n\n` +
-      `🛍️ TikTok:\n` +
-      `→ Magnetic phone stand (trending #WorkFromHome)\n` +
-      `→ LED strip light (aesthetic room setup)\n` +
-      `→ Mini projector ฿1,500-฿3,000\n\n` +
-      `🛍️ Shopee:\n` +
-      `→ Ergonomic mouse pad (WFH trend)\n` +
-      `→ Cable management set\n\n` +
-      `🛍️ Lazada:\n` +
-      `→ Air purifier compact ราคา ฿800-฿1,500\n` +
-      `→ หลีกเลี่ยง blender หมวดนี้ก่อน (ROAS ต่ำ)`,
-    risk:
-      `ความเสี่ยงในสาย research:\n\n` +
-      `⚠️ Desk Lamp: competitor affiliate มาก 12 ราย — angle ต้องแตกต่างจริงๆ\n` +
-      `⚠️ ราคาสินค้าหลายตัวใกล้ ceiling ฿1,500 — conversion อาจต่ำลง\n` +
-      `⚠️ Blender category: ตลาด Lazada saturated แล้ว ควรหลีกเลี่ยงไปก่อน`,
-    finance:
-      `มุมมอง finance จาก research side:\n\n` +
-      `Commission ที่ดีที่สุด:\n` +
-      `→ TikTok Shop: 8-10% (ดีสุด)\n` +
-      `→ Shopee Affiliate: 6-8%\n` +
-      `→ Lazada: 5-7%\n\n` +
-      `สินค้า sweet spot: ฿200-฿1,500\n` +
-      `→ Conversion rate สูงกว่า\n` +
-      `→ Ad cost ต่อ order ต่ำกว่า\n\n` +
-      `แนะนำ: focus TikTok electronics ต่อไป`,
+      `Best performer: prod-003 TikTok ROAS 6.1x\n` +
+      `ต้องปรับ: prod-002 Lazada ROAS 3.8x ต่ำกว่าเป้า`,
     problem_solve:
-      `วิธีแก้ปัญหาใน research:\n\n` +
-      `Desk Lamp (angle ซ้ำกับคู่แข่ง):\n` +
-      `→ ลอง angle: ลดไมเกรนจากงาน WFH\n` +
-      `→ หรือ: aesthetic desk setup TikTok trend\n` +
-      `→ หรือ: bundle กับ phone stand\n\n` +
-      `Blender (ROAS ต่ำ):\n` +
-      `→ น่าจะมาจาก claim ที่ถูก flag\n` +
-      `→ ถ้าแก้ angle เป็น smoothie lifestyle แทน health → น่าจะดีขึ้น`,
+      `แก้ปัญหา social performance:\n\n` +
+      `ปัญหา: CTR ต่ำ\n` +
+      `→ ทดสอบ posting time ใหม่\n` +
+      `→ เปลี่ยน thumbnail — ราคาต้องเห็นชัดใน 1 วินาที\n` +
+      `→ ลอง hook ใหม่ใน caption\n\n` +
+      `ปัญหา: Conversion ต่ำแม้ CTR ดี\n` +
+      `→ ตรวจ product page — ราคาตรงกับ video ไหม?\n` +
+      `→ Pinned comment ต้องมี link + code ชัดเจน\n` +
+      `→ ลด friction: ลิงก์ตรงไปหน้าสินค้าเลย ไม่ใช่ home page`,
     general:
-      `ผมดูแล product research ทุกสินค้าก่อนส่ง brief ให้ Content Studio ` +
-      `ถามได้ทุกเรื่องเกี่ยวกับสินค้า เทรนด์ commission หรือ competitor landscape ครับ`,
-  },
-
-  'content-studio': {
-    status:
-      `🎬 สถานะ content production:\n\n` +
-      `🔄 TikTok Earbuds — script 70% beat 4/5 เสร็จแล้ว เหลือ CTA + caption\n` +
-      `⏳ Skincare Pouch — script เสร็จ รอ CEO อนุมัติ\n` +
-      `❌ Lazada Blender — ถูก flag จาก Ops เรื่อง health claim ต้องแก้ไข\n\n` +
-      `งานถัดไปหลัง Earbuds เสร็จ: โคมไฟ Shopee (รับ brief แล้ว)`,
-    ideas:
-      `ไอเดีย hook สำหรับ TikTok:\n\n` +
-      `🎯 Earbuds format:\n` +
-      `→ "POV: ซื้อหูฟัง ฿2,800 แล้วรู้ว่าถูกหลอก"\n` +
-      `→ "เปรียบเทียบ 3 รุ่น: แพง กลาง ถูก ผลลัพธ์ช็อกมาก"\n` +
-      `→ "ใส่หูฟังตัวนี้แล้วชีวิตเปลี่ยน (ไม่ clickbait)"\n\n` +
-      `🎯 Skincare Pouch:\n` +
-      `→ "แพ็คของไปทริป 7 ชั่วโมง สิ่งที่ขาดไม่ได้คือ..."\n` +
-      `→ "routine ดูแลผิวตอนเดินทาง ใช้แค่ 5 อย่าง"\n\n` +
-      `🎯 Desk Lamp:\n` +
-      `→ "ก่อน/หลัง setup โต๊ะทำงาน ฿500 เปลี่ยนทุกอย่าง"`,
-    next_action:
-      `ขั้นตอนถัดไปของทีม:\n\n` +
-      `1️⃣ Earbuds: เขียน CTA beat (25-28 วิ) + caption 150 ตัวอักษร\n` +
-      `2️⃣ แก้ Lazada Blender: เอา health claim ออก เปลี่ยนเป็น lifestyle angle\n` +
-      `3️⃣ รับ brief Shopee Desk Lamp: เริ่ม ideation hook`,
-    risk:
-      `ความเสี่ยงใน content:\n\n` +
-      `⛔ Blender: claim "เพิ่ม metabolism" → ถูก flag แล้ว ต้องลบทันที\n` +
-      `⚠️ Skincare: เช็ค ingredient claims อีกรอบก่อน CEO เห็น\n` +
-      `⚠️ Earbuds: อย่าเปรียบเทียบ brand จริงในวิดีโอ → legal risk\n` +
-      `⚠️ ทุก content: ต้องมี #ad หรือ #โฆษณา ครบทุกชิ้น`,
-    finance:
-      `มุมมองการเงินจากฝั่ง content:\n\n` +
-      `ต้นทุน content ต่อแคมเปญ: ฿150-฿200\n\n` +
-      `ROI ดี:\n` +
-      `→ TikTok Earbuds: ต้นทุน ฿200, ROAS 4.6x ✅\n` +
-      `→ Skincare: ต้นทุน ฿150, ROAS 7.2x ✅✅\n\n` +
-      `ROI แย่:\n` +
-      `→ Blender: ต้นทุน ฿200, ROAS 2.0x, ขาดทุน ❌\n` +
-      `→ ปัญหาน่าจะมาจาก creative ที่ถูก flag ทำให้ reach ต่ำ`,
-    problem_solve:
-      `วิธีแก้ปัญหา content ที่มีอยู่:\n\n` +
-      `Blender (ถูก flag):\n` +
-      `→ เอา claim "เพิ่ม metabolism" ออกทั้งหมด\n` +
-      `→ เปลี่ยน angle: "smoothie สวยๆ ทำได้ทุกที่"\n` +
-      `→ เน้น lifestyle visual ไม่ใช่ health benefit\n` +
-      `→ ส่ง Ops ตรวจซ้ำก่อน CEO\n\n` +
-      `Earbuds (ใกล้เสร็จ):\n` +
-      `→ CTA ต้องชัดเจน: "คลิกลิงก์ในไบโอ + โค้ด SAVE5"`,
-    general:
-      `ผมดูแลการผลิตคอนเทนต์ทุกชิ้น ตั้งแต่ hook script caption จนถึง UGC brief ` +
-      `ถามได้ทุกเรื่องเกี่ยวกับ content strategy, format, หรือไอเดีย TikTok ครับ`,
-  },
-
-  'ops-review': {
-    status:
-      `📋 สถานะ compliance queue:\n\n` +
-      `✅ TikTok Earbuds — ผ่าน compliance รอ CEO อนุมัติ\n` +
-      `❌ Lazada Blender — flagged: health claim "เพิ่ม metabolism" ส่งกลับ Content แล้ว\n` +
-      `⏳ Skincare Pouch — กำลังเตรียม export package\n` +
-      `📥 Shopee Desk Lamp — คิวอันดับ 2 (รอ content เสร็จก่อน)`,
-    next_action:
-      `ขั้นตอนถัดไป:\n\n` +
-      `1️⃣ ติดตาม Blender: Content Studio รับ flag แล้วหรือยัง?\n` +
-      `2️⃣ เตรียม export package Skincare — ไฟล์, caption, hashtag\n` +
-      `3️⃣ ตรวจ Earbuds ซ้ำ 1 รอบก่อนส่ง CEO — ตรวจ disclosure #ad\n` +
-      `4️⃣ เตรียม compliance checklist สำหรับ Desk Lamp (คิวถัดไป)`,
-    problem_solve:
-      `วิธีจัดการ Lazada Blender:\n\n` +
-      `ปัญหา: claim "ช่วยเพิ่ม metabolism" → medical claim ที่ไม่มีหลักฐาน\n\n` +
-      `ขั้นตอนแก้:\n` +
-      `1. Content Studio ลบ/แก้ claim ดังกล่าว\n` +
-      `2. เปลี่ยนเป็น lifestyle: "smoothie ทำง่าย พกพาได้ทุกที่"\n` +
-      `3. ส่งกลับ Ops ตรวจซ้ำ\n` +
-      `4. ถ้าผ่าน → ส่ง CEO approve\n\n` +
-      `ETA หลังแก้: 1-2 วันทำการ`,
-    risk:
-      `ความเสี่ยง compliance ตอนนี้:\n\n` +
-      `⛔ Blender: health claim ยังค้างอยู่ → ห้าม publish จนกว่าจะแก้\n` +
-      `⚠️ Earbuds: ตรวจ #ad disclosure ใน caption อีกรอบ\n` +
-      `⚠️ Skincare: claim เกี่ยวกับ skin ต้องระวัง — "ดูแลผิว" ok แต่ "รักษา" ไม่ได้\n` +
-      `⚠️ ทุก Lazada content: ตรวจ price ตรงกับหน้าสินค้าไหม`,
-    finance:
-      `มุมมองการเงินจาก ops:\n\n` +
-      `ต้นทุนที่ซ่อนอยู่:\n` +
-      `→ แคมเปญที่ถูก flag ต้องรอ → delay = opportunity cost\n` +
-      `→ Blender ถูก flag 1 ครั้ง: delay ~3 วัน → เสีย window ขาย\n\n` +
-      `แนะนำ: ลงทุนเวลามากขึ้นใน pre-compliance review\n` +
-      `→ ตรวจก่อน submit จะประหยัดเวลามากกว่า`,
-    ideas:
-      `ไอเดียปรับปรุง compliance process:\n\n` +
-      `💡 สร้าง checklist ก่อน submit ให้ Content Studio ใช้\n` +
-      `💡 Template caption ที่ผ่าน compliance แล้ว (plug & play)\n` +
-      `💡 คำ blacklist ที่ต้องหลีกเลี่ยง: metabolism, รักษา, รับประกัน, ดีที่สุด\n` +
-      `💡 Review ทุก platform แยกกัน — Lazada, Shopee, TikTok rules ต่างกัน`,
-    general:
-      `ผมดูแล compliance และ operations ทุกอย่าง ทุก content ต้องผ่านผมก่อนถึง CEO ` +
-      `ถามได้ทุกเรื่องเกี่ยวกับ compliance rules, queue status, หรือ platform policies ครับ`,
-  },
-
-  'social-community-manager': {
-    status:
-      `📱 สถานะ social adaptation queue:\n\n` +
-      `🔄 Facebook: Earbuds review post — กำลังทำ 3 แบบ (60%)\n` +
-      `⏳ Instagram: Skincare carousel 5 slides — รอ Ops ตรวจ\n` +
-      `📥 LINE OA: Desk Lamp message — คิวถัดไป\n\n` +
-      `✅ Facebook Earbuds แบบที่ 1–2 ผ่าน compliance แล้ว\n` +
-      `⚠️ IG Skincare: ต้องเพิ่ม #ad ใน bio ก่อน approve`,
-    social_post:
-      `ตัวอย่างโพสต์ Facebook สำหรับ Earbuds X9:\n\n` +
-      `📝 แบบที่ 1 (เปรียบเทียบ):\n` +
-      `"เทสหูฟัง 9 รุ่น แล้วเจอตัวนี้ราคา ฿280 🎧\n` +
-      `— Noise cancel ดีกว่ารุ่น ฿2,000 บางยี่ห้อ\n` +
-      `— Battery 8 ชม. ใช้งานได้ทั้งวัน\n` +
-      `ลิงก์ในคอมเมนต์ครับ #ad"\n\n` +
-      `📝 แบบที่ 2 (Q&A):\n` +
-      `"มีคนถามเรื่องหูฟังถูกๆ ดีไหม — มาตอบแบบจริงจัง 🎵\n` +
-      `Q: คุณภาพเสียงเป็นยังไง?\n` +
-      `A: ดีกว่าราคามาก รายละเอียดในลิงก์ #โฆษณา"\n\n` +
-      `ต้องการแบบอื่นหรือปรับ tone บอกได้เลยครับ`,
-    next_action:
-      `ขั้นตอนถัดไปของทีม Social:\n\n` +
-      `1️⃣ ส่ง Facebook Earbuds draft แบบที่ 3 ให้ Ops ตรวจ\n` +
-      `2️⃣ ทำ IG carousel Skincare Pouch:\n` +
-      `   → Slide 1: Hook — "routine เดินทาง 5 ชิ้น"\n` +
-      `   → Slide 2–4: Product shots + benefits\n` +
-      `   → Slide 5: CTA + ลิงก์\n` +
-      `3️⃣ เตรียม LINE OA broadcast สำหรับ Desk Lamp`,
-    ideas:
-      `ไอเดีย social content format:\n\n` +
-      `📘 Facebook:\n` +
-      `→ "ทดสอบจริง" — text review แบบยาว engagement สูง\n` +
-      `→ "before/after" — ภาพเปรียบเทียบ viral ได้\n` +
-      `→ Poll: "คุณจ่ายเท่าไหร่กับหูฟัง?" → lead gen\n\n` +
-      `📸 Instagram:\n` +
-      `→ Carousel 5 slides — save rate สูง กว่า single image\n` +
-      `→ Reel 15 วิ — cut จาก TikTok แต่เพิ่ม caption ไทย\n` +
-      `→ Story sticker poll + link\n\n` +
-      `📲 LINE OA:\n` +
-      `→ Rich message: ภาพ + ปุ่ม "ดูสินค้า" → CTR สูง`,
-    risk:
-      `ความเสี่ยง social content:\n\n` +
-      `⚠️ Facebook: ต้องมี #ad หรือ #โฆษณา ชัดเจน\n` +
-      `⚠️ IG: bio link เปลี่ยนบ่อย — ต้องเช็ค affiliate link ทุกครั้ง\n` +
-      `⚠️ LINE OA: broadcast ไม่ได้ผล ถ้า copy เหมือน TikTok ทุกคำ — ต้องปรับ tone\n` +
-      `⚠️ Platform rules แตกต่าง: Facebook ยอมรับ review โดยตรง แต่ IG ต้องระวัง overclaim`,
-    finance:
-      `มุมมองการเงินจาก social side:\n\n` +
-      `Social media ไม่มี ad spend โดยตรงใน Phase 1\n` +
-      `→ Cost หลัก: เวลา content adaptation (~2–3 ชม./แคมเปญ)\n\n` +
-      `Potential uplift:\n` +
-      `→ Facebook organic: +10–20% traffic บน TikTok campaign\n` +
-      `→ IG carousel: save rate สูง → retarget audience ในอนาคต\n\n` +
-      `แนะนำ: track UTM แยก per platform เมื่อ connect API จริง`,
-    problem_solve:
-      `วิธีแก้ปัญหา social content:\n\n` +
-      `ปัญหา: TikTok script ยาวเกินสำหรับ Facebook caption\n` +
-      `→ ตัด script เหลือ 3 bullet points หลัก\n` +
-      `→ เพิ่ม emoji เพิ่ม engagement บน Facebook\n\n` +
-      `ปัญหา: IG audience ไม่ตอบสนองเหมือน TikTok\n` +
-      `→ เปลี่ยน hook: IG ใช้ visual hook แทน text hook\n` +
-      `→ Carousel slide 1 ต้องสวยงาม ไม่ใช่แค่ข้อความ\n\n` +
-      `ปัญหา: affiliate link ผิดใน post\n` +
-      `→ ตรวจ UTM parameter ทุกครั้งก่อน submit`,
-    general:
-      `ผมดูแล social media adaptation — แปลง TikTok content เป็น Facebook, Instagram, LINE OA ` +
-      `ถามได้ทุกเรื่องเกี่ยวกับ social post, community management, หรือ platform format ครับ`,
-  },
-
-  'finance-controller': {
-    status:
-      `💰 สถานะการเงินบริษัท:\n\n` +
-      `รายได้รวม: ${formatTHB(companySummary.totalRevenue)}\n` +
-      `กำไรสุทธิ: ${formatTHB(companySummary.totalNetProfit)}\n` +
-      `ROAS เฉลี่ย: ${companySummary.avgRoas}x\n` +
-      `ค่าโฆษณา: ${formatTHB(companySummary.totalAdSpend)}\n\n` +
-      `📊 แยกตาม channel:\n` +
-      `→ TikTok: ROAS 5.6x ✅\n` +
-      `→ Shopee: ROAS 6.0x ✅\n` +
-      `→ Lazada: ขาดทุน ${formatTHB(-120)} ⛔`,
-    finance:
-      `รายละเอียดการเงินแต่ละ channel:\n\n` +
-      `🩵 TikTok:\n` +
-      `→ รายได้: ฿7,800 | โฆษณา: ฿1,400 | กำไร: ฿2,650 | ROAS: 5.6x ✅\n\n` +
-      `🟠 Shopee:\n` +
-      `→ รายได้: ฿2,100 | โฆษณา: ฿350 | กำไร: ฿620 | ROAS: 6.0x ✅\n\n` +
-      `🔵 Lazada:\n` +
-      `→ รายได้: ฿1,400 | โฆษณา: ฿700 | กำไร: ${formatTHB(-120)} | ROAS: 2.0x ⛔\n\n` +
-      `⚠️ Lazada: ค่าโฆษณาสูงกว่าที่ควร → ต้องหยุดยิงทันที`,
-    next_action:
-      `คำแนะนำ budget ด่วน:\n\n` +
-      `1️⃣ หยุด Lazada Blender ทันที → ขาดทุนทุกวัน\n` +
-      `2️⃣ เพิ่ม budget TikTok Skincare +20% → ROAS 7.2x คุ้มมาก\n` +
-      `3️⃣ ขยาย Shopee Desk Lamp → ROAS 6.0x เสถียร\n` +
-      `4️⃣ รอ TikTok Earbuds ผ่าน CEO ก่อน scale\n\n` +
-      `ผลลัพธ์คาด: กำไรรวม +฿800-฿1,200 ต่อสัปดาห์`,
-    risk:
-      `ความเสี่ยงด้านการเงิน:\n\n` +
-      `⛔ Lazada Blender: ขาดทุนทุกวันที่ยิงแอดอยู่ → หยุดก่อน\n` +
-      `⚠️ TikTok dependency: 69% รายได้มาจาก TikTok — risk ถ้า algorithm เปลี่ยน\n` +
-      `⚠️ ยอดรอรับเงิน: ${formatTHB(companySummary.totalPendingPayout)} — ติดตาม payout schedule\n` +
-      `⚠️ ถ้า Lazada ขาดทุนต่อเนื่อง 2 สัปดาห์ → ต้องปิด channel ชั่วคราว`,
-    problem_solve:
-      `แก้ปัญหา Lazada Blender:\n\n` +
-      `ตัวเลขปัจจุบัน: รายได้ ฿1,400 vs ค่าโฆษณา ฿700\n` +
-      `→ ต้นทุนรวม (โฆษณา + content): ฿900\n` +
-      `→ กำไร/ขาดทุน: ${formatTHB(-120)}\n\n` +
-      `วิธีแก้:\n` +
-      `1. หยุดยิงแอดก่อน 24 ชม.\n` +
-      `2. ถ้า organic ยังขายได้ → ลอง creative ใหม่ cost ต่ำกว่า\n` +
-      `3. ถ้าไม่ได้ผล → ปิด Lazada channel 2-4 สัปดาห์\n\n` +
-      `Target: ROAS 4.0x ขึ้นไปถึงจะ profitable`,
-    ideas:
-      `ไอเดียเพิ่มรายได้:\n\n` +
-      `💡 Flash sale campaign: Shopee ฿9.9 promotion\n` +
-      `💡 TikTok bundle: Earbuds + Skincare Pouch ราคา bundle\n` +
-      `💡 Retargeting: ยิงแอดหา lookalike audience จาก TikTok buyer\n` +
-      `💡 Content upsell: ใน video แนะนำสินค้าที่ 2 (cross-sell)\n\n` +
-      `แนะนำ: prioritize TikTok ก่อน ROI ดีสุดตอนนี้`,
-    general:
-      `ผมดูแลการเงินทุกช่องทาง ตั้งแต่ revenue commission ad spend จนถึง ROAS และ net profit ` +
-      `ถามได้ทุกเรื่องเกี่ยวกับตัวเลขการเงิน งบโฆษณา หรือการ scale แคมเปญครับ`,
+      `ผมดูแล social media posting, performance tracking, และ learning loop ทั้งหมด ` +
+      `ถามได้ทุกเรื่องเกี่ยวกับ post schedule, performance data, UTM, hashtag, หรือ scaling strategy ครับ`,
   },
 }
 
@@ -365,25 +360,25 @@ export function getInitialGreeting(agentId: DepartmentId): string {
     : ''
 
   const greetings: Record<DepartmentId, string> = {
-    'ceo-director':
-      `สวัสดีครับ ผม CEO${campaignName ? ` กำลังดูแล "${campaignName}" อยู่` : ''} ` +
-      `ตอนนี้ progress ${agent.progress}% — มีอะไรให้ช่วยไหมครับ?`,
-    'product-analyst':
-      `สวัสดีครับ ผม Product Analyst${campaignName ? ` กำลัง research "${campaignName}"` : ''} อยู่ ` +
-      `ถามเรื่อง product research, trends, หรือ scoring ได้เลยครับ`,
-    'content-studio':
-      `สวัสดีครับ ทีม Content Studio${campaignName ? ` กำลังผลิต content สำหรับ "${campaignName}"` : ''} อยู่ ` +
-      `ถามเรื่อง hook, script, ไอเดีย TikTok ได้เลยครับ`,
-    'social-community-manager':
-      `สวัสดีครับ ทีม Social Studio${campaignName ? ` กำลังปรับ content ของ "${campaignName}"` : ''} อยู่ ` +
-      `ถามเรื่อง Facebook post, IG carousel, หรือ LINE OA ได้เลยครับ`,
-    'ops-review':
-      `สวัสดีครับ ผม Ops & Review${campaignName ? ` กำลังตรวจ compliance ของ "${campaignName}"` : ''} อยู่ ` +
-      `ถามเรื่อง compliance, queue, หรือ platform rules ได้ครับ`,
-    'finance-controller':
-      `สวัสดีครับ ผม Finance Controller กำลังวิเคราะห์ ROAS และ P&L อยู่ ` +
-      `รายได้รวมวันนี้ ${formatTHB(companySummary.totalRevenue)} กำไรสุทธิ ${formatTHB(companySummary.totalNetProfit)} ` +
-      `ถามเรื่องตัวเลขได้เลยครับ`,
+    'product-research':
+      `สวัสดีครับ ผม Product Research${campaignName ? ` กำลังตรวจสอบ "${campaignName}"` : ''} อยู่ ` +
+      `progress ${agent.progress}% — ถามเรื่อง product research, scoring criteria, หรือ approved categories ได้เลยครับ`,
+    'offer-analyst':
+      `สวัสดีครับ ผม Offer Analyst${campaignName ? ` กำลังคำนวณ profit margin "${campaignName}"` : ''} อยู่ ` +
+      `ถามเรื่อง scoring, ROAS estimate, หรือ commission calculation ได้เลยครับ`,
+    'content-strategy':
+      `สวัสดีครับ ทีม Content Strategy${campaignName ? ` กำลังเลือก hook framework ของ "${campaignName}"` : ''} อยู่ ` +
+      `ถามเรื่อง hook framework, audience selection, หรือ platform mix ได้เลยครับ`,
+    'script-writer':
+      `สวัสดีครับ ผม Script Writer${campaignName ? ` กำลังเขียน script "${campaignName}"` : ''} อยู่ ` +
+      `ถามเรื่อง script format, hook writing, storyboard, หรือ timing ได้ครับ`,
+    'creative-production':
+      `สวัสดีครับ ทีม Creative Production${campaignName ? ` กำลังเตรียม assets ของ "${campaignName}"` : ' ว่างรอรับงานอยู่'} ` +
+      `ถามเรื่อง Canva brief, thumbnail design, หรือ CapCut checklist ได้เลยครับ`,
+    'social-performance':
+      `สวัสดีครับ ผม Social Performance${campaignName ? ` กำลังวิเคราะห์ "${campaignName}"` : ''} อยู่ ` +
+      `รายได้รวมวันนี้ ${formatTHB(companySummary.totalRevenue)} ROAS ${companySummary.avgRoas}x ` +
+      `ถามเรื่อง performance data, posting strategy, หรือ scaling ได้เลยครับ`,
   }
   return greetings[agentId]
 }

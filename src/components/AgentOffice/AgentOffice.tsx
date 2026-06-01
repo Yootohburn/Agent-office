@@ -59,8 +59,8 @@ export default function AgentOffice() {
 
   // Dynamic KPI counts
   const activeCount    = liveCampaigns.length
-  const pendingReview  = liveCampaigns.filter(c => c.stage === 'review_compliance').length
-  const ceoApproval    = liveCampaigns.filter(c => c.stage === 'ceo_approval').length
+  const pendingReview  = liveCampaigns.filter(c => c.stage === 'human_approved').length
+  const ceoApproval    = liveCampaigns.filter(c => c.stage === 'asset_ready').length
 
   function handleSelectAgent(id: DepartmentId) {
     setSelectedAgentId(prev => prev === id ? null : id)

@@ -1,6 +1,6 @@
 import type { Agent, AgentStatus, DepartmentId } from '../../agents/agentRegistry'
 import { getCampaignById, CHANNEL_CONFIG } from '../../agents/campaignRegistry'
-import DeskSceneSVG from './DeskSceneSVG'
+import AgentDeskSprite from './AgentDeskSprite'
 
 const ROOM_META: Record<DepartmentId, { label: string; accent: string; avatarLeft: string }> = {
   'product-research':   { label: 'RESEARCH LAB',    accent: '#00e5ff', avatarLeft: '58%' },
@@ -63,8 +63,9 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
     >
       {/* ── Room scene ── */}
       <div style={{ position: 'relative' }}>
-        <DeskSceneSVG
+        <AgentDeskSprite
           agentId={agent.id}
+          agentDisplayName={agent.thaiName}
           accent={meta.accent}
           status={agent.status}
           roomLabel={meta.label}

@@ -8,10 +8,6 @@ interface Props {
 }
 
 // ── Shared palette ─────────────────────────────
-const SKIN   = '#c8a070'
-const SKIN_S = '#a87848'
-const HAIR   = '#261808'
-const HAIR_H = '#3d2610'
 const DESK_T = '#1c1208'
 const DESK_F = '#130e05'
 const CHAIR  = '#0c1525'
@@ -148,53 +144,12 @@ export default function DeskSceneSVG({ agentId, accent, status, roomLabel }: Pro
       ))}
       <rect x="113" y="103" width="54" height="1.5" fill="#141c30"/>
 
-      {/* ── 9. Arms ── */}
-      <rect x="77"  y="96" width="38" height="2" fill={SKIN_S} opacity="0.35" rx="2"/>
-      <rect x="165" y="96" width="38" height="2" fill={SKIN_S} opacity="0.35" rx="2"/>
-      <rect x="77"  y="97" width="38" height="7" fill={SKIN} rx="3"/>
-      <rect x="165" y="97" width="38" height="7" fill={SKIN} rx="3"/>
+      {/* ── 9. Character sprite rendered outside SVG by AgentDeskSprite ── */}
 
-      {/* ── 10. Torso / shoulders / neck ── */}
-      {/* Shirt visible above desk */}
-      <rect x="117" y="89" width="46" height="7" fill={accent} opacity="0.8" rx="1"/>
-      {/* Shoulder polygon */}
-      <polygon points="108,104 172,104 169,96 111,96" fill={accent} opacity="0.75"/>
-      {/* Collar flaps */}
-      <rect x="125" y="77" width="9" height="12" fill={accent} opacity="0.8"/>
-      <rect x="146" y="77" width="9" height="12" fill={accent} opacity="0.8"/>
-      {/* Neck */}
-      <rect x="130" y="76" width="20" height="20" fill={SKIN}/>
-      <rect x="130" y="76" width="3"  height="20" fill={SKIN_S} opacity="0.5"/>
-      <rect x="147" y="76" width="3"  height="20" fill={SKIN_S} opacity="0.5"/>
-
-      {/* ── 11. Head ── */}
-      {/* Sideburns */}
-      <rect x="119" y="46" width="4" height="22" fill={HAIR}/>
-      <rect x="157" y="46" width="4" height="22" fill={HAIR}/>
-      {/* Face */}
-      <rect x="120" y="46" width="40" height="30" fill={SKIN} rx="1"/>
-      {/* Hair top */}
-      <rect x="120" y="46" width="40" height="10" fill={HAIR} rx="1"/>
-      {/* Hair highlight */}
-      <rect x="125" y="47" width="18" height="3" fill={HAIR_H} opacity="0.7"/>
-      {/* Ears */}
-      <rect x="116" y="58" width="4" height="12" fill={SKIN}/>
-      <rect x="160" y="58" width="4" height="12" fill={SKIN}/>
-      <rect x="117" y="60" width="3" height="7"  fill={SKIN_S} opacity="0.4"/>
-      <rect x="160" y="60" width="3" height="7"  fill={SKIN_S} opacity="0.4"/>
-      {/* Eyes */}
-      <rect x="127" y="63" width="7" height="5" fill="#281800" rx="0.5"/>
-      <rect x="146" y="63" width="7" height="5" fill="#281800" rx="0.5"/>
-      {/* Eye glints */}
-      <rect x="128"   y="63.5" width="2" height="1.5" fill="#ffffff" opacity="0.28"/>
-      <rect x="147"   y="63.5" width="2" height="1.5" fill="#ffffff" opacity="0.28"/>
-      {/* Screen light tint */}
-      <rect x="120" y="46" width="40" height="30" fill={accent} opacity="0.07" rx="1"/>
-
-      {/* ── 12. Role-specific desk props ── */}
+      {/* ── 10. Role-specific desk props ── */}
       <DeskProps agentId={agentId} accent={accent}/>
 
-      {/* ── 13. Room label + status dot ── */}
+      {/* ── 11. Room label + status dot ── */}
       <text x="7" y="12" fontFamily="monospace" fontSize="7"
         fill={`${accent}55`} letterSpacing="1.5">{roomLabel}</text>
       <circle cx="271" cy="10" r="3.5" fill={dotColor}/>
@@ -203,7 +158,7 @@ export default function DeskSceneSVG({ agentId, accent, status, roomLabel }: Pro
           style={{ animation: 'blink 2s ease-in-out infinite' }}/>
       )}
 
-      {/* ── 14. Status strip at bottom ── */}
+      {/* ── 12. Status strip at bottom ── */}
       <rect x="0" y="186" width="280" height="4" fill={`${stripColor}66`}/>
       <rect x="0" y="186" width="280" height="1" fill={`${stripColor}aa`}/>
       {/* Role label above strip */}

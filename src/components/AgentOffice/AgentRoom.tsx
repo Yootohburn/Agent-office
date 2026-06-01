@@ -1,6 +1,13 @@
 import type { Agent, AgentStatus, DepartmentId } from '../../agents/agentRegistry'
 import { getCampaignById, CHANNEL_CONFIG } from '../../agents/campaignRegistry'
 import AgentDeskSprite from './AgentDeskSprite'
+import type { SpritePaths } from './AgentDeskSprite'
+
+// Wire up real sprite assets here as they become available.
+// Other agents keep CSS fallback until their sprites are ready.
+const SPRITE_PATHS: Partial<Record<DepartmentId, SpritePaths>> = {
+  'product-research': { agent: '/assets/pixel-office/agents/product-research.png' },
+}
 
 const ROOM_META: Record<DepartmentId, { label: string; accent: string; avatarLeft: string }> = {
   'product-research':   { label: 'RESEARCH LAB',    accent: '#00e5ff', avatarLeft: '58%' },
@@ -69,6 +76,7 @@ export default function AgentRoom({ agent, selected, onClick }: Props) {
           accent={meta.accent}
           status={agent.status}
           roomLabel={meta.label}
+          spritePaths={SPRITE_PATHS[agent.id]}
         />
         <div style={{ position: 'absolute', top: 34, left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}>
           <TaskBubble

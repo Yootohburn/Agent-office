@@ -7,6 +7,8 @@ export interface PixelSpriteProps {
   fallbackType: DepartmentId
   accent: string
   status: AgentStatus
+  /** Rendered px width for real sprite images (height = auto to preserve ratio). Default 128. */
+  renderWidth?: number
   scale?: number
   className?: string
   position?: { top?: number; left?: string }
@@ -27,20 +29,22 @@ const HAIR_H = '#3d2610'
 const SKIN   = '#c8a070'
 const SKIN_S = '#a87848'
 
-export default function PixelSprite({ src, alt, fallbackType, accent, status, scale = 1 }: PixelSpriteProps) {
+export default function PixelSprite({ src, alt, fallbackType, accent, status, renderWidth = 128, scale = 1 }: PixelSpriteProps) {
   const isIdle = status === 'idle' || status === 'waiting'
   const s = (n: number) => Math.round(n * scale)
   const icon = ROLE_ICON[fallbackType]
 
   // ── Real sprite asset ───────────────────────────────
+  // Render at renderWidth px wide, height auto (preserves aspect ratio).
+  // imageRendering: pixelated keeps pixel art crisp when scaled down.
   if (src) {
     return (
       <img
         src={src}
         alt={alt}
         style={{
-          width:           s(44),
-          height:          s(50),
+          width:           renderWidth,
+          height:          'auto',
           imageRendering:  'pixelated',
           display:         'block',
           opacity:         isIdle ? 0.4 : 1,

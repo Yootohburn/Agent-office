@@ -8,6 +8,12 @@ export interface SpritePaths {
   agent?: string
   /** Path to custom desk sprite — reserved for future use */
   desk?: string
+  /**
+   * Rendered px width for the image sprite. Default 128.
+   * At 128px: sprite desk surface (≈75% down a square sprite) lands at ~96px,
+   * which aligns with the SVG desk surface at y=96.
+   */
+  renderWidth?: number
 }
 
 interface Props {
@@ -19,10 +25,11 @@ interface Props {
   spritePaths?:     SpritePaths
 }
 
-// Character sits at SVG y=46..96 (50px window above desk surface).
-// SVG height is fixed at 190px, so top=46px is the head-top position in CSS.
-const SPRITE_TOP    = 46
-const SPRITE_CENTER = '50%'
+// CSS fallback sits in the character slot: SVG y=46..96 (50px above desk surface).
+// Real image sprites start at top=0 so their built-in desk aligns with the SVG desk
+// (sprite desk surface is ~75% down a square image → 128×0.75 ≈ 96px = SVG y=96).
+const CSS_FALLBACK_TOP = 46
+const SPRITE_CENTER    = '50%'
 
 export default function AgentDeskSprite({
   agentId,
@@ -32,6 +39,9 @@ export default function AgentDeskSprite({
   roomLabel,
   spritePaths,
 }: Props) {
+  const hasRealSprite = Boolean(spritePaths?.agent)
+  const spriteTop     = hasRealSprite ? 0 : CSS_FALLBACK_TOP
+
   return (
     <div style={{ position: 'relative', lineHeight: 0 }}>
 
@@ -43,13 +53,13 @@ export default function AgentDeskSprite({
         roomLabel={roomLabel}
       />
 
-      {/* ── 2. Character sprite — centered above desk ── */}
+      {/* ── 2. Character sprite — centered, aligned to desk ── */}
       <div style={{
-        position:  'absolute',
-        top:       SPRITE_TOP,
-        left:      SPRITE_CENTER,
-        transform: 'translateX(-50%)',
-        zIndex:    2,
+        position:      'absolute',
+        top:           spriteTop,
+        left:          SPRITE_CENTER,
+        transform:     'translateX(-50%)',
+        zIndex:        2,
         pointerEvents: 'none',
       }}>
         <PixelSprite
@@ -58,6 +68,7 @@ export default function AgentDeskSprite({
           fallbackType={agentId}
           accent={accent}
           status={status}
+          renderWidth={spritePaths?.renderWidth}
         />
       </div>
 

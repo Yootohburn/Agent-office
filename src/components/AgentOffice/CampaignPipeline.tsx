@@ -1,6 +1,9 @@
-import { campaigns, PIPELINE_STAGES, CHANNEL_CONFIG, getStageIndex } from '../../agents/campaignRegistry'
+import { PIPELINE_STAGES, CHANNEL_CONFIG, getStageIndex } from '../../agents/campaignRegistry'
+import type { Campaign } from '../../agents/campaignRegistry'
 
-export default function CampaignPipeline() {
+interface Props { campaigns: Campaign[] }
+
+export default function CampaignPipeline({ campaigns }: Props) {
   return (
     <div style={{ background: '#0a0e1a', border: '1px solid #1a2540', padding: 12 }}>
       {/* Header */}

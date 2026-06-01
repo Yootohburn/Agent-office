@@ -1,9 +1,11 @@
-import { campaigns, CHANNEL_CONFIG, PIPELINE_STAGES, getStageIndex, formatTHB } from '../../agents/campaignRegistry'
+import { CHANNEL_CONFIG, PIPELINE_STAGES, getStageIndex, formatTHB } from '../../agents/campaignRegistry'
 import type { Campaign, PipelineStage } from '../../agents/campaignRegistry'
 import { STAGE_OWNER } from '../../agents/agentTaskRouter'
-import { agents } from '../../agents/agentRegistry'
+import type { Agent } from '../../agents/agentRegistry'
 
 interface Props {
+  campaigns: Campaign[]
+  agents: Agent[]
   selectedCampaignId: string | null
   onSelectCampaign: (id: string) => void
 }
@@ -28,7 +30,7 @@ const STAGE_FALLBACK: Record<PipelineStage, string> = {
   finance_review:       'Finance วิเคราะห์ผลและ ROAS',
 }
 
-function getNextAction(campaign: Campaign): string {
+function getNextAction(campaign: Campaign, agents: Agent[]): string {
   const ownerDeptId = STAGE_OWNER[campaign.stage]
   const ownerAgent  = agents.find(a => a.id === ownerDeptId)
   if (ownerAgent?.currentCampaignId === campaign.id) {
@@ -38,7 +40,7 @@ function getNextAction(campaign: Campaign): string {
   return STAGE_FALLBACK[campaign.stage]
 }
 
-export default function CampaignFocusSection({ selectedCampaignId, onSelectCampaign }: Props) {
+export default function CampaignFocusSection({ campaigns, agents, selectedCampaignId, onSelectCampaign }: Props) {
   const sorted = [...campaigns].sort((a, b) => urgencyScore(b) - urgencyScore(a))
 
   return (
@@ -57,7 +59,7 @@ export default function CampaignFocusSection({ selectedCampaignId, onSelectCampa
           const leftBorder  = isLoss ? '#ff5252' : hasWarning ? '#ffb300' : channelCfg.color
           const roasColor   = campaign.finance.roas >= 4 ? '#00ff9f' : campaign.finance.roas >= 2 ? '#ffb300' : '#ff5252'
           const ownerAgent  = agents.find(a => a.id === STAGE_OWNER[campaign.stage])
-          const nextAction  = getNextAction(campaign)
+          const nextAction  = getNextAction(campaign, agents)
 
           return (
             <div

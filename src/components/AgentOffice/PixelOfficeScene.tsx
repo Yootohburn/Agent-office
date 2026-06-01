@@ -1,8 +1,8 @@
-import type { DepartmentId } from '../../agents/agentRegistry'
-import { agents } from '../../agents/agentRegistry'
+import type { Agent, DepartmentId } from '../../agents/agentRegistry'
 import AgentRoom from './AgentRoom'
 
 interface Props {
+  agents: Agent[]
   selectedAgentId: DepartmentId | null
   onSelectAgent: (id: DepartmentId) => void
 }
@@ -16,7 +16,7 @@ const FLOOR_BG = `
   #06090f
 `
 
-export default function PixelOfficeScene({ selectedAgentId, onSelectAgent }: Props) {
+export default function PixelOfficeScene({ agents, selectedAgentId, onSelectAgent }: Props) {
   const row1 = agents.slice(0, 3)
   const row2 = agents.slice(3, 6)
 

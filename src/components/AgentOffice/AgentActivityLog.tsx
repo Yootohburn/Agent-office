@@ -1,5 +1,6 @@
-import { mockActivityLog } from '../../agents/agentSessionStore'
-import { campaigns, PIPELINE_STAGES, CHANNEL_CONFIG, getStageIndex } from '../../agents/campaignRegistry'
+import type { ActivityLogEntry } from '../../agents/agentSessionStore'
+import type { Campaign } from '../../agents/campaignRegistry'
+import { PIPELINE_STAGES, CHANNEL_CONFIG, getStageIndex } from '../../agents/campaignRegistry'
 
 const TYPE_COLOR = {
   info:    '#8892b0',
@@ -9,7 +10,12 @@ const TYPE_COLOR = {
   system:  '#00e5ff',
 }
 
-export default function AgentActivityLog() {
+interface Props {
+  campaigns: Campaign[]
+  logs: ActivityLogEntry[]
+}
+
+export default function AgentActivityLog({ campaigns, logs }: Props) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, height: '100%' }}>
       {/* Campaigns in motion */}
@@ -66,7 +72,7 @@ export default function AgentActivityLog() {
           ▶ SYSTEM CONSOLE
         </div>
 
-        {[...mockActivityLog].reverse().map(entry => (
+        {[...logs].reverse().map(entry => (
           <div key={entry.id} style={{ marginBottom: 6, display: 'flex', gap: 6, alignItems: 'flex-start' }}>
             <span style={{ fontSize: 11, color: '#1a2540', minWidth: 52, paddingTop: 1, flexShrink: 0 }}>
               [{entry.timestamp}]

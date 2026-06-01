@@ -36,6 +36,33 @@ export interface CampaignFinance {
   pendingPayout: number
 }
 
+export interface AgentOutput {
+  id: string
+  campaignId: string
+  agentId: string
+  stage: PipelineStage
+  title: string
+  summary: string
+  content: string
+  risks: string[]
+  recommendation: string
+  createdAt: string
+}
+
+export interface AgentTask {
+  id: string
+  campaignId: string
+  agentId: string
+  stage: PipelineStage
+  status: 'pending' | 'in_progress' | 'done' | 'rejected'
+  input: string
+  output: string
+  risk: string
+  nextAction: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Campaign {
   id: string
   name: string
@@ -49,6 +76,9 @@ export interface Campaign {
   finance: CampaignFinance
   notes: string
   financeWarnings: string[]
+  riskLevel: 'low' | 'medium' | 'high' | 'critical'
+  riskMessage: string
+  outputs: AgentOutput[]
 }
 
 export const campaigns: Campaign[] = [
@@ -59,7 +89,7 @@ export const campaigns: Campaign[] = [
     category: 'Electronics',
     targetPrice: '< ฿500',
     stage: 'content_creation',
-    progress: 70,
+    progress: 42,
     assignedAgentId: 'content-studio',
     brief: 'TikTok impulse buy. Hook: เปิดโปงว่าหูฟังแพงโดนหลอก. Target: Gen Z 18–25. Format: POV unboxing.',
     finance: {
@@ -75,6 +105,9 @@ export const campaigns: Campaign[] = [
     },
     notes: 'เทรนด์ RISING — ควรโพสต์ภายใน 48 ชม. Commission 8.5% ใน TikTok Shop.',
     financeWarnings: [],
+    riskLevel: 'low',
+    riskMessage: '',
+    outputs: [],
   },
   {
     id: 'camp-002',
@@ -83,7 +116,7 @@ export const campaigns: Campaign[] = [
     category: 'Home & Office',
     targetPrice: '฿500–฿1,200',
     stage: 'product_research',
-    progress: 45,
+    progress: 28,
     assignedAgentId: 'product-analyst',
     brief: 'Shopee affiliate. Target: คนทำงานที่บ้าน. Angle: ถนอมสายตา + ดีไซน์โต๊ะสวย.',
     finance: {
@@ -99,6 +132,9 @@ export const campaigns: Campaign[] = [
     },
     notes: 'คู่แข่ง affiliate 12 ราย — ต้องหา angle ที่ต่าง. Commission 7%.',
     financeWarnings: ['ควรเพิ่มงบ — ROAS 6.0x สูงกว่าเป้า'],
+    riskLevel: 'low',
+    riskMessage: 'คู่แข่ง affiliate 12 ราย ต้องหา angle ที่แตกต่าง',
+    outputs: [],
   },
   {
     id: 'camp-003',
@@ -107,7 +143,7 @@ export const campaigns: Campaign[] = [
     category: 'Kitchen & Health',
     targetPrice: '฿700–฿1,500',
     stage: 'review_compliance',
-    progress: 75,
+    progress: 68,
     assignedAgentId: 'ops-review',
     brief: 'Lazada affiliate. Target: คนรักสุขภาพ. Angle: smoothie ทำง่ายพกพาได้.',
     finance: {
@@ -127,6 +163,9 @@ export const campaigns: Campaign[] = [
       'ROAS ต่ำกว่าเป้าหมาย (2.0x vs เป้า 4.0x)',
       'แคมเปญนี้ควรหยุดยิงแอดหรือแก้ creative ก่อน',
     ],
+    riskLevel: 'critical',
+    riskMessage: 'ค่าโฆษณาสูงกว่ากำไร — ขาดทุน ฿120',
+    outputs: [],
   },
   {
     id: 'camp-004',
@@ -135,7 +174,7 @@ export const campaigns: Campaign[] = [
     category: 'Beauty & Travel',
     targetPrice: '฿400–฿900',
     stage: 'ceo_approval',
-    progress: 90,
+    progress: 80,
     assignedAgentId: 'ceo-director',
     brief: 'TikTok. Angle: routine ดูแลผิวตอนเดินทาง. Target: ผู้หญิง 22–35.',
     finance: {
@@ -151,6 +190,9 @@ export const campaigns: Campaign[] = [
     },
     notes: 'Compliance ผ่านแล้ว รอ CEO อนุมัติ.',
     financeWarnings: ['ควรเพิ่มงบ — ROAS 7.2x สูงมาก คุ้มค่าขยายสเกล'],
+    riskLevel: 'medium',
+    riskMessage: 'ต้องตรวจ disclosure #ad ใน IG caption',
+    outputs: [],
   },
 ]
 

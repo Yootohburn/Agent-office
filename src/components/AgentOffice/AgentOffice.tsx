@@ -1,7 +1,12 @@
 import { useState } from 'react'
-import { agents } from '../../agents/agentRegistry'
-import type { DepartmentId } from '../../agents/agentRegistry'
-import { campaigns, formatTHB } from '../../agents/campaignRegistry'
+import { agents as initialAgents } from '../../agents/agentRegistry'
+import type { Agent, DepartmentId } from '../../agents/agentRegistry'
+import { campaigns as initialCampaigns, formatTHB } from '../../agents/campaignRegistry'
+import type { Campaign } from '../../agents/campaignRegistry'
+import { mockActivityLog, initialTeamChat } from '../../agents/agentSessionStore'
+import type { ActivityLogEntry, TeamChatMessage } from '../../agents/agentSessionStore'
+import { runWorkflowAction } from '../../agents/mockWorkflowEngine'
+import type { WorkflowAction } from '../../agents/campaignWorkflow'
 import { companySummary } from '../../agents/financeRegistry'
 import AgentCommandPanel from './AgentCommandPanel'
 import CampaignDetailPanel from './CampaignDetailPanel'
@@ -23,20 +28,26 @@ const NAV_ITEMS: { id: NavView; label: string }[] = [
   { id: 'log',       label: 'บันทึกการทำงาน' },
 ]
 
-const STATS = {
-  active:        campaigns.length,
-  pendingReview: campaigns.filter(c => c.stage === 'review_compliance').length,
-  ceoApproval:   campaigns.filter(c => c.stage === 'ceo_approval').length,
-}
-
 export default function AgentOffice() {
   const [activeView,         setActiveView]         = useState<NavView>('overview')
   const [selectedAgentId,    setSelectedAgentId]    = useState<DepartmentId | null>(null)
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
 
-  const selectedAgent    = selectedAgentId    ? (agents.find(a => a.id === selectedAgentId) ?? null)       : null
-  const selectedCampaign = selectedCampaignId ? (campaigns.find(c => c.id === selectedCampaignId) ?? null) : null
+  // Live mutable state — forked from static registry data at mount
+  const [liveCampaigns, setLiveCampaigns] = useState<Campaign[]>(() => initialCampaigns.map(c => ({ ...c })))
+  const [liveAgents,    setLiveAgents]    = useState<Agent[]>(() => initialAgents.map(a => ({ ...a })))
+  const [logs,          setLogs]          = useState<ActivityLogEntry[]>(() => [...mockActivityLog])
+  const [teamChat,      setTeamChat]      = useState<TeamChatMessage[]>(() => [...initialTeamChat])
+  const [logCounter,    setLogCounter]    = useState(mockActivityLog.length + 1)
+
+  const selectedAgent    = selectedAgentId    ? (liveAgents.find(a => a.id === selectedAgentId) ?? null)       : null
+  const selectedCampaign = selectedCampaignId ? (liveCampaigns.find(c => c.id === selectedCampaignId) ?? null) : null
   const hasPanel         = selectedAgent !== null || selectedCampaign !== null
+
+  // Dynamic KPI counts
+  const activeCount    = liveCampaigns.length
+  const pendingReview  = liveCampaigns.filter(c => c.stage === 'review_compliance').length
+  const ceoApproval    = liveCampaigns.filter(c => c.stage === 'ceo_approval').length
 
   function handleSelectAgent(id: DepartmentId) {
     setSelectedAgentId(prev => prev === id ? null : id)
@@ -53,6 +64,24 @@ export default function AgentOffice() {
     setSelectedCampaignId(null)
   }
 
+  function handleWorkflowAction(campaignId: string, action: WorkflowAction) {
+    const campaign = liveCampaigns.find(c => c.id === campaignId)
+    if (!campaign) return
+
+    const result = runWorkflowAction(action, campaign, liveAgents, logCounter)
+
+    setLiveCampaigns(prev =>
+      prev.map(c => c.id === result.updatedCampaign.id ? result.updatedCampaign : c)
+    )
+    setLiveAgents(prev => {
+      const updatedMap = new Map(result.updatedAgents.map(a => [a.id, a]))
+      return prev.map(a => updatedMap.get(a.id) ?? a)
+    })
+    setLogs(prev => [result.newLogEntry, ...prev])
+    setTeamChat(prev => [...prev, result.newChatMessage])
+    setLogCounter(n => n + 1)
+  }
+
   return (
     <div style={{ minHeight: '100vh', height: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
@@ -62,7 +91,7 @@ export default function AgentOffice() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
-              ░▒▓ AGENT OFFICE v2.3 ▓▒░
+              ░▒▓ AGENT OFFICE v2.4 ▓▒░
             </div>
             <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#00e5ff', background: '#00e5ff11', padding: '2px 10px', border: '1px solid #00e5ff22', letterSpacing: 1 }}>
               AI AFFILIATE CONTENT CO.
@@ -73,9 +102,9 @@ export default function AgentOffice() {
           </div>
 
           <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end' }}>
-            <KpiChip label="แคมเปญที่กำลังทำ"  value={STATS.active}                             color="#e8eaf6" />
-            <KpiChip label="รอรีวิว"            value={STATS.pendingReview}                      color="#ffb300" />
-            <KpiChip label="รอ CEO อนุมัติ"     value={STATS.ceoApproval}                        color="#ff9800" />
+            <KpiChip label="แคมเปญที่กำลังทำ"  value={activeCount}                              color="#e8eaf6" />
+            <KpiChip label="รอรีวิว"            value={pendingReview}                            color="#ffb300" />
+            <KpiChip label="รอ CEO อนุมัติ"     value={ceoApproval}                              color="#ff9800" />
             <KpiChip label="รายได้รวม"          value={formatTHB(companySummary.totalRevenue)}   color="#00e5ff" />
             <KpiChip label="กำไรสุทธิ"          value={formatTHB(companySummary.totalNetProfit)} color="#00ff9f" />
             <KpiChip label="ROAS เฉลี่ย"         value={`${companySummary.avgRoas}x`}             color={companySummary.avgRoas >= 4 ? '#00ff9f' : '#ffb300'} />
@@ -103,7 +132,7 @@ export default function AgentOffice() {
           </button>
         ))}
         <span style={{ marginLeft: 'auto', fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#1a2540', letterSpacing: 1 }}>
-          {agents.length} agents · Shopee · Lazada · TikTok
+          {liveAgents.length} agents · Shopee · Lazada · TikTok
         </span>
       </nav>
 
@@ -115,6 +144,7 @@ export default function AgentOffice() {
 
         {/* Left: Campaign sidebar — always visible */}
         <OfficeSidebar
+          campaigns={liveCampaigns}
           selectedCampaignId={selectedCampaignId}
           onSelectCampaign={handleSelectCampaign}
         />
@@ -124,6 +154,7 @@ export default function AgentOffice() {
 
           {activeView === 'overview' && (
             <PixelOfficeScene
+              agents={liveAgents}
               selectedAgentId={selectedAgentId}
               onSelectAgent={handleSelectAgent}
             />
@@ -132,10 +163,12 @@ export default function AgentOffice() {
           {activeView === 'campaigns' && (
             <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
               <CampaignFocusSection
+                campaigns={liveCampaigns}
+                agents={liveAgents}
                 selectedCampaignId={selectedCampaignId}
                 onSelectCampaign={handleSelectCampaign}
               />
-              <CampaignPipeline />
+              <CampaignPipeline campaigns={liveCampaigns} />
             </div>
           )}
 
@@ -147,7 +180,7 @@ export default function AgentOffice() {
 
           {activeView === 'log' && (
             <div style={{ padding: '14px 16px' }}>
-              <AgentActivityLog />
+              <AgentActivityLog campaigns={liveCampaigns} logs={logs} />
             </div>
           )}
 
@@ -164,7 +197,11 @@ export default function AgentOffice() {
             )}
             {selectedCampaign && (
               <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
-                <CampaignDetailPanel campaign={selectedCampaign} onClose={closePanel} />
+                <CampaignDetailPanel
+                  campaign={selectedCampaign}
+                  onClose={closePanel}
+                  onAction={handleWorkflowAction}
+                />
               </div>
             )}
           </div>
@@ -178,8 +215,8 @@ export default function AgentOffice() {
         height: 160, flexShrink: 0,
         borderTop: '2px solid #1a2540',
       }}>
-        <SystemConsole />
-        <TeamChatPanel />
+        <SystemConsole logs={logs} />
+        <TeamChatPanel messages={teamChat} />
       </div>
 
     </div>

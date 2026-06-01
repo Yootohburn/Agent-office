@@ -1,4 +1,8 @@
-import { mockActivityLog } from '../../agents/agentSessionStore'
+import type { ActivityLogEntry } from '../../agents/agentSessionStore'
+
+interface Props {
+  logs: ActivityLogEntry[]
+}
 
 const TYPE_COLOR: Record<string, string> = {
   system:  '#2a3560',
@@ -16,8 +20,8 @@ const TYPE_PREFIX: Record<string, string> = {
   error:   'ERR',
 }
 
-export default function SystemConsole() {
-  const recent = [...mockActivityLog].reverse().slice(0, 12)
+export default function SystemConsole({ logs }: Props) {
+  const recent = [...logs].reverse().slice(0, 20)
 
   return (
     <div style={{ background: '#06090f', borderRight: '1px solid #1a2540', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -26,6 +30,9 @@ export default function SystemConsole() {
           ▶ SYSTEM LOG
         </div>
         <div style={{ width: 5, height: 5, background: '#00ff9f', animation: 'blink 1s step-end infinite' }} />
+        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#1a2540', marginLeft: 'auto' }}>
+          {logs.length} entries
+        </span>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '6px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {recent.map(entry => (
@@ -33,10 +40,10 @@ export default function SystemConsole() {
             <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#1a2540', flexShrink: 0, letterSpacing: 0.5, marginTop: 1 }}>
               {entry.timestamp}
             </span>
-            <span style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: TYPE_COLOR[entry.type], flexShrink: 0, letterSpacing: 1, marginTop: 0 }}>
-              [{TYPE_PREFIX[entry.type]}]
+            <span style={{ fontFamily: 'VT323, monospace', fontSize: 11, color: TYPE_COLOR[entry.type] ?? '#4a5680', flexShrink: 0, letterSpacing: 1 }}>
+              [{TYPE_PREFIX[entry.type] ?? 'LOG'}]
             </span>
-            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: `${TYPE_COLOR[entry.type]}bb`, lineHeight: 1.4 }}>
+            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: `${TYPE_COLOR[entry.type] ?? '#4a5680'}bb`, lineHeight: 1.4 }}>
               {entry.message.length > 80 ? entry.message.slice(0, 80) + '…' : entry.message}
             </span>
           </div>

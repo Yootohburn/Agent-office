@@ -123,7 +123,7 @@ export default function AgentOffice() {
     <div style={{ minHeight: '100vh', height: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ── Header ── */}
-      <header style={{ background: '#0a0e1a', borderBottom: '1px solid #1a2540', padding: '8px 20px', flexShrink: 0 }}>
+      <header style={{ position: 'relative', zIndex: 100, background: '#0a0e1a', borderBottom: '1px solid #1a2540', padding: '8px 20px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
@@ -148,7 +148,7 @@ export default function AgentOffice() {
       </header>
 
       {/* ── Navigation ── */}
-      <nav style={{ background: '#080c18', borderBottom: '2px solid #1a2540', padding: '0 20px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+      <nav style={{ position: 'relative', zIndex: 100, background: '#080c18', borderBottom: '2px solid #1a2540', padding: '0 20px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
         {NAV_ITEMS.map(item => (
           <button
             key={item.id}

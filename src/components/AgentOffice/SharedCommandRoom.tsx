@@ -10,14 +10,16 @@ interface Props {
 
 // ── Scene position config ────────────────────────────────────────────────────
 // Percentage values relative to the scene container.
-// Adjust x/y when a real background image is added to match its desk positions.
+// y = vertical % from top of scene. Adjust to match background art desk positions.
+// At 35% the hotspot content (status→task→sprite) places the character feet
+// at roughly 60-65% of the container, aligning with the front-of-desk chair area.
 const AGENT_SCENE_POSITIONS: Record<DepartmentId, { x: number; y: number }> = {
-  'product-research':    { x: 17, y: 10 },
-  'offer-analyst':       { x: 50, y: 10 },
-  'content-strategy':    { x: 83, y: 10 },
-  'script-writer':       { x: 17, y: 55 },
-  'creative-production': { x: 50, y: 55 },
-  'social-performance':  { x: 83, y: 55 },
+  'product-research':    { x: 17, y: 35 },
+  'offer-analyst':       { x: 50, y: 35 },
+  'content-strategy':    { x: 83, y: 35 },
+  'script-writer':       { x: 17, y: 68 },
+  'creative-production': { x: 50, y: 68 },
+  'social-performance':  { x: 83, y: 68 },
 }
 
 // ── Sprite paths ─────────────────────────────────────────────────────────────

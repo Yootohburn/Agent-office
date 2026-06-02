@@ -13,6 +13,10 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
   const [imgFailed, setImgFailed] = useState(false)
   const isIdle = status === 'idle' || status === 'waiting'
 
+  // Derive fallback avatar scale from the target height.
+  // PixelAgentAvatar renders at 50px tall at scale=1.
+  const fallbackScale = Math.max(1.5, height / 50)
+
   if (spriteSrc && !imgFailed) {
     return (
       <img
@@ -22,7 +26,10 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
         style={{
           height,
           width:           'auto',
+          maxWidth:        '100%',
           imageRendering:  'pixelated',
+          objectFit:       'contain',
+          objectPosition:  'bottom center',
           display:         'block',
           opacity:         isIdle ? 0.4 : 1,
         }}
@@ -30,10 +37,9 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
     )
   }
 
-  // CSS fallback — PixelAgentAvatar scaled up, no broken icon shown
   return (
     <div style={{ opacity: isIdle ? 0.4 : 1 }}>
-      <PixelAgentAvatar agentId={agentId} status={status} scale={4.0} />
+      <PixelAgentAvatar agentId={agentId} status={status} scale={fallbackScale} />
     </div>
   )
 }

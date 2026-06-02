@@ -1,0 +1,142 @@
+import type { Agent, DepartmentId } from '../../agents/agentRegistry'
+import AgentRegistryCard from './AgentRegistryCard'
+import ReservedAgentCard from './ReservedAgentCard'
+
+interface Props {
+  agents:          Agent[]
+  selectedAgentId: DepartmentId | null
+  onSelectAgent:   (id: DepartmentId) => void
+}
+
+const RESERVED_AGENTS = [
+  {
+    id:     'workflow-engineer',
+    name:   'Workflow Automation Engineer',
+    nameTh: 'วิศวกรระบบอัตโนมัติ',
+    desc:   'ออกแบบ pipeline n8n / Make / Pipedream เชื่อมต่อทุก agent',
+  },
+  {
+    id:     'dashboard-insight',
+    name:   'Dashboard Insight Agent',
+    nameTh: 'Agent วิเคราะห์แดชบอร์ด',
+    desc:   'สร้าง report อัตโนมัติ วิเคราะห์ trend และ anomaly detection',
+  },
+  {
+    id:     'sop-keeper',
+    name:   'SOP Knowledge Keeper',
+    nameTh: 'ผู้ดูแล SOP และ Playbook',
+    desc:   'ดูแล SOP, Knowledge Base, Playbook — ค้นหาและอัปเดตอัตโนมัติ',
+  },
+  {
+    id:     'deadline-runner',
+    name:   'Project Deadline Runner',
+    nameTh: 'ติดตาม Deadline และ Timeline',
+    desc:   'ติดตาม deadline, แจ้งเตือน overdue, ประสาน handoff ระหว่าง agent',
+  },
+]
+
+export default function AgentRegistryView({ agents, selectedAgentId, onSelectAgent }: Props) {
+  const workingCount = agents.filter(a => a.status === 'working').length
+  const reviewCount  = agents.filter(a => a.status === 'needs_review').length
+  const doneCount    = agents.filter(a => a.status === 'done').length
+  const idleCount    = agents.filter(a => a.status === 'idle' || a.status === 'waiting').length
+
+  return (
+    <div style={{ overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+      {/* ── Registry header ── */}
+      <div>
+        <div style={{
+          fontFamily:   'VT323, monospace',
+          fontSize:     20,
+          color:        '#00ff9f',
+          letterSpacing: 2,
+          marginBottom: 10,
+          lineHeight:   1,
+        }}>
+          ░ AGENT REGISTRY — ทะเบียน AI ทีมงาน
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <StatChip label="Agent ทั้งหมด"      value={agents.length}  color="#00e5ff" />
+          <StatChip label="กำลังทำงาน"         value={workingCount}   color="#00ff9f" />
+          <StatChip label="รอตรวจสอบ"          value={reviewCount}    color="#ffb300" />
+          <StatChip label="เสร็จแล้ว"           value={doneCount}      color="#a855f7" />
+          <StatChip label="ว่าง / รอข้อมูล"    value={idleCount}      color="#4a5680" />
+          <StatChip label="Reserved (Phase 2+)" value={RESERVED_AGENTS.length} color="#2a3560" />
+        </div>
+      </div>
+
+      {/* ── Active Agents ── */}
+      <div>
+        <SectionLabel>ACTIVE AGENTS — ทีมงาน AI ฝ่ายผลิต (6 / 6)</SectionLabel>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          {agents.map(agent => (
+            <AgentRegistryCard
+              key={agent.id}
+              agent={agent}
+              selected={selectedAgentId === agent.id}
+              onSelect={onSelectAgent}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Reserved ── */}
+      <div style={{ paddingBottom: 16 }}>
+        <SectionLabel>RESERVED — FUTURE AGENTS (Phase 2+) — ยังไม่เปิดใช้งาน</SectionLabel>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          {RESERVED_AGENTS.map(a => (
+            <ReservedAgentCard key={a.id} name={a.name} nameTh={a.nameTh} desc={a.desc} />
+          ))}
+        </div>
+        <div style={{
+          marginTop:   10,
+          fontFamily:  'Share Tech Mono, monospace',
+          fontSize:    9,
+          color:       '#1a2540',
+          letterSpacing: 1,
+        }}>
+          Reserved agents are placeholders only. They have no workflow logic, no mock data, and no API connections.
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// Sub-components
+// ─────────────────────────────────────────────
+
+function StatChip({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div style={{
+      display:    'flex',
+      alignItems: 'center',
+      gap:        6,
+      background: `${color}0f`,
+      border:     `1px solid ${color}30`,
+      padding:    '4px 10px',
+    }}>
+      <span style={{ fontFamily: 'VT323, monospace', fontSize: 22, color, lineHeight: 1 }}>{value}</span>
+      <span style={{ fontFamily: 'Sarabun, sans-serif', fontSize: 11, color: `${color}aa` }}>{label}</span>
+    </div>
+  )
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      fontFamily:   'Share Tech Mono, monospace',
+      fontSize:     10,
+      color:        '#2a3560',
+      letterSpacing: 1.5,
+      borderBottom: '1px solid #1a2540',
+      paddingBottom: 6,
+      marginBottom: 10,
+    }}>
+      {children}
+    </div>
+  )
+}

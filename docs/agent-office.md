@@ -597,3 +597,74 @@ When present, it fills the scene container as a cover background. When absent, t
 | System log preview | Bottom bar | Quick operational status |
 
 Team chat and system log should never be mixed.
+
+---
+
+## v2.4.6 — Sprite Alignment Fix + Agent Registry + Stable Navigation
+
+### 1. Bottom-center sprite anchoring
+
+Agent hotspots in `SharedCommandRoom` previously used `top: y%` which positioned the TOP of the entire hotspot (status bubble included) at the configured y%. This caused sprites to appear too high — status bubbles and task labels were in the desk area instead of above it.
+
+**Fix:** Hotspots now use `bottom: ${100-y}%` so the BOTTOM of the container anchors at y% from the top of the scene. Combined with `transform: translateX(-50%) scale(scale)` and `transformOrigin: bottom center`, this places the sprite feet reliably at approximately y%.
+
+**Per-agent config (`AGENT_SCENE_CONFIG` in SharedCommandRoom.tsx):**
+```ts
+interface AgentSceneConfig {
+  x:       number          // % horizontal center of desk
+  y:       number          // % from top where sprite feet should land
+  scale:   number          // 1.0 = 200px sprite height
+  offsetX: number          // fine-tune x in % (positive = right)
+  offsetY: number          // fine-tune y in % (positive = lower)
+  anchor:  'bottom-center' // currently only supported value
+}
+```
+Tune `offsetX` / `offsetY` per-agent when a PNG has large transparent padding that shifts the visual character away from the image's center.
+
+### 2. Sprite image rendering
+
+`OfficeAgentSprite` now adds `objectFit: contain` and `objectPosition: bottom center` to `<img>`. This ensures that even PNG sprites with uneven transparent padding align their character bottom to the container's bottom edge. Fallback avatar scale is derived from the target height: `scale = max(1.5, height / 50)`.
+
+### 3. Short bubble text in command room
+
+The task bubble in `AgentHotspot` now shows a maximum of 10 characters. This is intentional: full task descriptions belong in the right-panel `AgentCommandPanel`. The scene bubble is only a visual status indicator. Status-specific overrides: idle → "ว่าง", waiting → "รอข้อมูล", done → "เสร็จ ✓".
+
+### 4. Navigation z-index (definitive fix)
+
+Three layers of z-index containment now guarantee nav always stays on top:
+
+| Element | z-index | Effect |
+|---|---|---|
+| `<header>` | 100 | Paints above everything |
+| `<nav>` | 100 | Paints above everything |
+| 3-column grid div | 1 (position:relative) | Creates stacking context — all grid children (including scene hotspots) are scoped to z-index 1, below nav/header at 100 |
+| SharedCommandRoom | 0 (position:relative) | Creates inner stacking context — hotspots at z-index 10 inside cannot escape this context |
+
+**Why `selectedAgent` and `activeTab` are independent state:**
+- `activeView` controls which tab content renders in the center column.
+- `selectedAgentId` controls the right-panel content and which hotspot is highlighted.
+- These must remain independent. Clicking an agent in the scene ONLY updates `selectedAgentId` and `rightPanelTab`. It must NOT change `activeView`.
+- Clicking a nav tab ONLY updates `activeView`. It does not clear `selectedAgentId`.
+
+### 5. ห้อง Agent is now Agent Registry
+
+`PixelOfficeScene` (the desk/room scene) is no longer rendered in the `agents` tab. The tab now renders `AgentRegistryView` — a staff registry style management view.
+
+**Layout:**
+- **Stat row:** total agents, working, review, done, idle, reserved count chips
+- **Active Agents grid (3×2):** `AgentRegistryCard` for each of the 6 production agents
+- **Reserved section (1×4):** `ReservedAgentCard` placeholders for 4 future agents
+
+**Each `AgentRegistryCard` shows:** status badge, risk count, sprite portrait (height=72), Thai name, English title, task text (40 chars), progress bar, role tags, campaign ID, select button.
+
+Clicking a card selects the agent and opens `AgentCommandPanel` in the right panel.
+
+**PixelOfficeScene / AgentDeskSprite / DeskSceneSVG** are NOT deleted. They remain in the codebase. Desk PNG assets in `public/assets/pixel-office/desks/` and `backgrounds/` are also retained as fallback/reference assets. Only the import in `AgentOffice.tsx` was removed. These can be safely deleted in a future cleanup sprint after confirming no active imports reference them.
+
+### 6. New component files
+
+| File | Purpose |
+|---|---|
+| `AgentRegistryView.tsx` | Agents tab main view: stats + 6 active cards + 4 reserved cards |
+| `AgentRegistryCard.tsx` | Individual active-agent card in the registry grid |
+| `ReservedAgentCard.tsx` | Placeholder card for future/reserved agents |

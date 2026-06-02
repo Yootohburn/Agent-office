@@ -15,11 +15,12 @@ import CampaignFocusSection from './CampaignFocusSection'
 import FinanceDashboard from './FinanceDashboard'
 import CampaignPipeline from './CampaignPipeline'
 import AgentActivityLog from './AgentActivityLog'
-import PixelOfficeScene from './PixelOfficeScene'
 import SharedCommandRoom from './SharedCommandRoom'
+import AgentRegistryView from './AgentRegistryView'
 import OfficeSidebar from './OfficeSidebar'
 import SystemConsole from './SystemConsole'
 import TeamChatPanel from './TeamChatPanel'
+// PixelOfficeScene is legacy — desk scene, retained for reference but not used in active tabs.
 
 // ── Nav ────────────────────────────────────────────────────────────────────
 type NavView = 'overview' | 'agents' | 'campaigns' | 'finance' | 'log'
@@ -176,7 +177,11 @@ export default function AgentOffice() {
       </nav>
 
       {/* ── 3-column layout ── */}
+      {/* position:relative + zIndex:1 creates a stacking context at z-index 1,
+          keeping all scene content (SharedCommandRoom, hotspots) below the
+          header and nav which sit at zIndex:100. */}
       <div style={{
+        position: 'relative', zIndex: 1,
         flex: 1, display: 'grid', overflow: 'hidden', minHeight: 0,
         gridTemplateColumns: showRightPanel ? '220px 1fr 340px' : '220px 1fr',
       }}>
@@ -205,9 +210,9 @@ export default function AgentOffice() {
             />
           )}
 
-          {/* ห้อง Agent — detailed desk/card view */}
+          {/* ห้อง Agent — Agent Registry: staff directory + management view */}
           {activeView === 'agents' && (
-            <PixelOfficeScene
+            <AgentRegistryView
               agents={liveAgents}
               selectedAgentId={selectedAgentId}
               onSelectAgent={handleSelectAgent}

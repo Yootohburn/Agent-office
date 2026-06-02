@@ -73,7 +73,12 @@ export default function SharedCommandRoom({ agents, selectedAgentId, onSelectAge
       flex:       1,
       minHeight:  0,
       width:      '100%',
-      overflow:   'hidden',
+      // overflow:'clip' (not 'hidden') is required here.
+      // Per CSS Filters spec, filter paint output is NOT clipped by overflow:hidden
+      // on ancestors. overflow:clip IS defined to clip all painted output including
+      // child filter effects — this prevents drop-shadow glow from escaping into
+      // the nav/header area above the scene.
+      overflow:   'clip',
       background: FALLBACK_BG,
       ...(bgReady ? {
         backgroundImage:    `url(${BG_IMAGE_URL})`,

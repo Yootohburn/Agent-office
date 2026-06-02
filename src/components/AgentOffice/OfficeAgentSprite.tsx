@@ -17,6 +17,11 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
   // PixelAgentAvatar renders at 50px tall at scale=1.
   const fallbackScale = Math.max(1.5, height / 50)
 
+  // 0.65 keeps idle agents visible on the dark background.
+  // 0.4 was too low — purple/dark palette agents (e.g. creative-production)
+  // effectively disappeared at that opacity.
+  const idleOpacity = 0.65
+
   if (spriteSrc && !imgFailed) {
     return (
       <img
@@ -31,14 +36,14 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
           objectFit:       'contain',
           objectPosition:  'bottom center',
           display:         'block',
-          opacity:         isIdle ? 0.4 : 1,
+          opacity:         isIdle ? idleOpacity : 1,
         }}
       />
     )
   }
 
   return (
-    <div style={{ opacity: isIdle ? 0.4 : 1 }}>
+    <div style={{ opacity: isIdle ? idleOpacity : 1 }}>
       <PixelAgentAvatar agentId={agentId} status={status} scale={fallbackScale} />
     </div>
   )

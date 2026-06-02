@@ -121,7 +121,7 @@ export default function AgentOffice() {
 
   // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', height: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', minHeight: '100vh', height: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* ── Header ── */}
       <header style={{ position: 'relative', zIndex: 100, background: '#0a0e1a', borderBottom: '1px solid #1a2540', padding: '8px 20px', flexShrink: 0 }}>

@@ -1,5 +1,4 @@
-import type { Agent, DepartmentId } from '../../agents/agentRegistry'
-import AgentStatusBubble from './AgentStatusBubble'
+import type { Agent, AgentStatus, DepartmentId } from '../../agents/agentRegistry'
 import OfficeAgentSprite from './OfficeAgentSprite'
 
 const ROOM_ACCENT: Record<DepartmentId, string> = {
@@ -11,17 +10,26 @@ const ROOM_ACCENT: Record<DepartmentId, string> = {
   'social-performance':  '#00ff9f',
 }
 
-// ── Per-agent scene position config ─────────────────────────────────────────
-// x        — horizontal center of desk, % from left edge of scene
-// y        — target % from top where sprite BOTTOM (feet) should appear
-// scale    — sprite size multiplier (1.0 = default 200px height)
-// offsetX  — fine-tune horizontal shift in %
-// offsetY  — fine-tune vertical shift in %; positive moves down
-// anchor   — only 'bottom-center' is supported
-// ─────────────────────────────────────────────────────────────────────────────
-// The hotspot container uses `bottom: ${100 - (y + offsetY)}%` so its lowest
-// edge (progress bar) sits at y%. Sprite feet land ~5% above that due to
-// name/progress labels below the sprite. Tune offsetY to compensate.
+// Matches AgentStatusBubble data so we can render inline
+const S_ICON: Record<AgentStatus, string> = {
+  working:      '●',
+  done:         '✓',
+  needs_review: '⚠',
+  blocked:      '⛔',
+  failed:       '⛔',
+  idle:         '○',
+  waiting:      '◌',
+}
+const S_COLOR: Record<AgentStatus, string> = {
+  working:      '',           // filled in from accent at runtime
+  done:         '#00ff9f',
+  needs_review: '#ffb300',
+  blocked:      '#ff5252',
+  failed:       '#ff5252',
+  idle:         '#2a3560',
+  waiting:      '#4a5680',
+}
+
 export interface AgentSceneConfig {
   x:       number
   y:       number
@@ -39,7 +47,6 @@ interface Props {
   sceneConfig: AgentSceneConfig
 }
 
-// Short bubble text for scene overlay — full task text stays in right panel.
 function bubbleText(agent: Agent): string {
   if (agent.status === 'idle')    return 'ว่าง'
   if (agent.status === 'waiting') return 'รอข้อมูล'
@@ -52,14 +59,21 @@ const SPRITE_HEIGHT = 200
 
 export default function AgentHotspot({ agent, selected, onClick, spriteSrc, sceneConfig }: Props) {
   const { x, y, scale, offsetX, offsetY } = sceneConfig
-  const accent    = ROOM_ACCENT[agent.id]
-  const hasRisk   = agent.risks.length > 0
-  const isActive  = agent.status === 'working' || agent.status === 'needs_review'
-  const isBlocked = agent.status === 'blocked' || agent.status === 'failed'
+  const accent     = ROOM_ACCENT[agent.id]
+  const hasRisk    = agent.risks.length > 0
+  const isActive   = agent.status === 'working' || agent.status === 'needs_review'
+  const isBlocked  = agent.status === 'blocked' || agent.status === 'failed'
 
-  // `bottom: ${100 - effectiveY}%` anchors the container's bottom edge at effectiveY% from top.
-  const effectiveY = y + offsetY
+  const sColor = agent.status === 'working' ? accent : S_COLOR[agent.status]
+  const sIcon  = S_ICON[agent.status]
+
+  // Agents at x>55% (right column) get their bubble on the LEFT side,
+  // all others get it on the RIGHT — uses the empty inter-desk space.
+  const bubbleSide: 'left' | 'right' = (x + offsetX) > 55 ? 'left' : 'right'
+  const bubbleBorder = isActive ? `${accent}66` : '#1a254099'
+
   const effectiveX = x + offsetX
+  const effectiveY = y + offsetY
 
   return (
     <div
@@ -78,33 +92,71 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
         cursor:          'pointer',
         zIndex:          selected ? 10 : 1,
         width:           160,
-        filter:          selected ? `drop-shadow(0 0 10px ${accent}77)` : 'none',
+        filter:          selected ? `drop-shadow(0 0 8px ${accent}66)` : 'none',
         transition:      'filter 0.15s',
         userSelect:      'none',
       }}
     >
-      {/* Status bubble — floats above sprite */}
-      <AgentStatusBubble status={agent.status} accent={accent} size="sm" />
 
-      {/* Short task bubble */}
+      {/* ── Side speech bubble ─────────────────────────────────────────────
+          Positioned absolutely outside the hotspot's width into the empty
+          desk-row space. pointerEvents:none so clicks still reach the sprite. */}
       <div style={{
-        fontFamily:    'Sarabun, sans-serif',
-        fontSize:      10,
-        color:         isBlocked ? '#ff7070' : isActive ? `${accent}cc` : '#4a5680',
-        background:    '#060a14ee',
-        border:        `1px solid ${isBlocked ? '#ff525244' : isActive ? accent + '33' : '#1a2540'}`,
-        padding:       '1px 6px',
-        whiteSpace:    'nowrap',
-        maxWidth:      150,
-        overflow:      'hidden',
-        textOverflow:  'ellipsis',
-        letterSpacing: 0.3,
-        zIndex:        20,
+        position:      'absolute',
+        top:           30,
+        ...(bubbleSide === 'right' ? { left: 168 } : { right: 168 }),
+        background:    '#06090ff2',
+        border:        `1px solid ${bubbleBorder}`,
+        padding:       '5px 9px',
+        display:       'flex',
+        alignItems:    'center',
+        gap:           5,
+        minWidth:      72,
+        maxWidth:      140,
+        zIndex:        25,
+        pointerEvents: 'none',
       }}>
-        {bubbleText(agent)}
+
+        {/* Triangle pointing toward the agent */}
+        <div style={{
+          position:     'absolute',
+          top:          '50%',
+          transform:    'translateY(-50%)',
+          width:        0,
+          height:       0,
+          borderTop:    '5px solid transparent',
+          borderBottom: '5px solid transparent',
+          ...(bubbleSide === 'right'
+            ? { left: -6,  borderRight: `5px solid ${bubbleBorder}` }
+            : { right: -6, borderLeft:  `5px solid ${bubbleBorder}` }),
+        }} />
+
+        {/* Status icon */}
+        <span style={{
+          fontFamily: 'VT323, monospace',
+          fontSize:   14,
+          color:      sColor,
+          flexShrink: 0,
+          lineHeight: 1,
+        }}>
+          {sIcon}
+        </span>
+
+        {/* Task text */}
+        <span style={{
+          fontFamily:   'Sarabun, sans-serif',
+          fontSize:     10,
+          color:        isBlocked ? '#ff7070' : isActive ? `${accent}cc` : '#4a5680',
+          overflow:     'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace:   'nowrap',
+          lineHeight:   1.3,
+        }}>
+          {bubbleText(agent)}
+        </span>
       </div>
 
-      {/* Sprite / avatar — bottom-aligned inside container */}
+      {/* ── Sprite / avatar ── */}
       <div style={{
         background:     selected ? `${accent}11` : 'transparent',
         border:         `1px solid ${selected ? accent + '55' : 'transparent'}`,
@@ -123,7 +175,7 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
         />
       </div>
 
-      {/* Thai display name */}
+      {/* ── Thai display name ── */}
       <div style={{
         fontFamily:  'Sarabun, sans-serif',
         fontSize:    11,
@@ -136,12 +188,12 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
         {agent.thaiName}
       </div>
 
-      {/* Progress bar */}
+      {/* ── Progress bar ── */}
       <div style={{ width: 100, height: 2, background: '#1a2540' }}>
         <div style={{ width: `${agent.progress}%`, height: '100%', background: accent }} />
       </div>
 
-      {/* Risk badge */}
+      {/* ── Risk badge ── */}
       {hasRisk && (
         <div style={{
           fontFamily:    'VT323, monospace',
@@ -155,6 +207,7 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
           ⚠ {agent.risks.length} ความเสี่ยง
         </div>
       )}
+
     </div>
   )
 }

@@ -22,9 +22,9 @@ interface Props {
 //
 // Tune per-agent if a PNG has large transparent padding shifting the character.
 const AGENT_SCENE_CONFIG: Record<DepartmentId, AgentSceneConfig> = {
-  'product-research':    { x: 17, y: 80, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
-  'offer-analyst':       { x: 50, y: 80, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
-  'content-strategy':    { x: 83, y: 80, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'product-research':    { x: 17, y: 72, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'offer-analyst':       { x: 50, y: 72, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'content-strategy':    { x: 83, y: 72, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
   'script-writer':       { x: 17, y: 94, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
   'creative-production': { x: 50, y: 94, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
   'social-performance':  { x: 83, y: 94, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },

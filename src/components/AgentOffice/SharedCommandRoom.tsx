@@ -22,12 +22,12 @@ interface Props {
 //
 // Tune per-agent if a PNG has large transparent padding shifting the character.
 const AGENT_SCENE_CONFIG: Record<DepartmentId, AgentSceneConfig> = {
-  'product-research':    { x: 17, y: 60, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
-  'offer-analyst':       { x: 50, y: 60, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
-  'content-strategy':    { x: 83, y: 60, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
-  'script-writer':       { x: 17, y: 92, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
-  'creative-production': { x: 50, y: 92, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
-  'social-performance':  { x: 83, y: 92, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'product-research':    { x: 17, y: 63, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'offer-analyst':       { x: 50, y: 63, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'content-strategy':    { x: 83, y: 63, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'script-writer':       { x: 17, y: 94, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'creative-production': { x: 50, y: 94, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
+  'social-performance':  { x: 83, y: 94, scale: 1, offsetX: 0, offsetY: 0, anchor: 'bottom-center' },
 }
 
 // ── Sprite paths ─────────────────────────────────────────────────────────────
@@ -73,12 +73,10 @@ export default function SharedCommandRoom({ agents, selectedAgentId, onSelectAge
       flex:       1,
       minHeight:  0,
       width:      '100%',
-      // overflow:'clip' (not 'hidden') is required here.
-      // Per CSS Filters spec, filter paint output is NOT clipped by overflow:hidden
-      // on ancestors. overflow:clip IS defined to clip all painted output including
-      // child filter effects — this prevents drop-shadow glow from escaping into
-      // the nav/header area above the scene.
-      overflow:   'clip',
+      // overflow:hidden clips all positioned children to this container's bounds.
+      // Hotspot drop-shadow filter has been removed; boxShadow on the sprite
+      // container is used instead (boxShadow is always clipped by its own element).
+      overflow:   'hidden',
       background: FALLBACK_BG,
       ...(bgReady ? {
         backgroundImage:    `url(${BG_IMAGE_URL})`,

@@ -194,7 +194,11 @@ export default function AgentOffice() {
         />
 
         {/* ── Center: tab content ── */}
+        {/* position:relative makes this the containing block for absolutely positioned
+            children (SharedCommandRoom hotspots). Without this, position:absolute
+            children could escape the column's bounds. */}
         <div style={{
+          position:      'relative',
           overflowY:     activeView === 'overview' ? 'hidden' : 'auto',
           display:       'flex',
           flexDirection: 'column',

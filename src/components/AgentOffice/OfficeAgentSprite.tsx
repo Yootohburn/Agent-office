@@ -17,10 +17,10 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
   // PixelAgentAvatar renders at 50px tall at scale=1.
   const fallbackScale = Math.max(1.5, height / 50)
 
-  // 0.65 keeps idle agents visible on the dark background.
-  // 0.4 was too low — purple/dark palette agents (e.g. creative-production)
-  // effectively disappeared at that opacity.
-  const idleOpacity = 0.65
+  // 0.85 keeps idle agents clearly visible while still looking "inactive".
+  // Lower values (0.4, 0.65) made dark-palette agents (e.g. creative-production
+  // with #a855f7 purple) nearly invisible against the #06090f background.
+  const idleOpacity = 0.85
 
   if (spriteSrc && !imgFailed) {
     return (

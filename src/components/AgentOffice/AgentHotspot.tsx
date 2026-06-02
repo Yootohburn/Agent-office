@@ -10,7 +10,6 @@ const ROOM_ACCENT: Record<DepartmentId, string> = {
   'social-performance':  '#00ff9f',
 }
 
-// Matches AgentStatusBubble data so we can render inline
 const S_ICON: Record<AgentStatus, string> = {
   working:      '●',
   done:         '✓',
@@ -21,7 +20,7 @@ const S_ICON: Record<AgentStatus, string> = {
   waiting:      '◌',
 }
 const S_COLOR: Record<AgentStatus, string> = {
-  working:      '',           // filled in from accent at runtime
+  working:      '',           // filled from accent
   done:         '#00ff9f',
   needs_review: '#ffb300',
   blocked:      '#ff5252',
@@ -31,11 +30,11 @@ const S_COLOR: Record<AgentStatus, string> = {
 }
 
 export interface AgentSceneConfig {
-  x:       number
-  y:       number
-  scale:   number
-  offsetX: number
-  offsetY: number
+  x:       number   // % horizontal center of desk
+  y:       number   // % from top where sprite BOTTOM (feet) should appear
+  scale:   number   // size multiplier
+  offsetX: number   // fine-tune horizontal shift in %
+  offsetY: number   // fine-tune vertical shift in %
   anchor:  'bottom-center'
 }
 
@@ -47,15 +46,16 @@ interface Props {
   sceneConfig: AgentSceneConfig
 }
 
-function bubbleText(agent: Agent): string {
+function bubbleTask(agent: Agent): string {
   if (agent.status === 'idle')    return 'ว่าง'
   if (agent.status === 'waiting') return 'รอข้อมูล'
-  if (agent.status === 'done')    return 'เสร็จ ✓'
+  if (agent.status === 'done')    return 'เสร็จแล้ว ✓'
   const t = agent.currentTask
-  return t.length <= 10 ? t : t.slice(0, 9) + '…'
+  return t.length <= 22 ? t : t.slice(0, 21) + '…'
 }
 
-const SPRITE_HEIGHT = 200
+// Sprite height — increase here to resize all scene agents at once.
+const SPRITE_HEIGHT = 240
 
 export default function AgentHotspot({ agent, selected, onClick, spriteSrc, sceneConfig }: Props) {
   const { x, y, scale, offsetX, offsetY } = sceneConfig
@@ -67,13 +67,9 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
   const sColor = agent.status === 'working' ? accent : S_COLOR[agent.status]
   const sIcon  = S_ICON[agent.status]
 
-  // Agents at x>55% (right column) get their bubble on the LEFT side,
-  // all others get it on the RIGHT — uses the empty inter-desk space.
+  // Right column (x > 55%) gets bubble on the LEFT; others get it on the RIGHT.
   const bubbleSide: 'left' | 'right' = (x + offsetX) > 55 ? 'left' : 'right'
   const bubbleBorder = isActive ? `${accent}66` : '#1a254099'
-
-  const effectiveX = x + offsetX
-  const effectiveY = y + offsetY
 
   return (
     <div
@@ -81,8 +77,8 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
       title={agent.thaiName}
       style={{
         position:        'absolute',
-        left:            `${effectiveX}%`,
-        bottom:          `${100 - effectiveY}%`,
+        left:            `${x + offsetX}%`,
+        bottom:          `${100 - (y + offsetY)}%`,
         transform:       `translateX(-50%) scale(${scale})`,
         transformOrigin: 'bottom center',
         display:         'flex',
@@ -92,32 +88,36 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
         cursor:          'pointer',
         zIndex:          selected ? 10 : 1,
         width:           160,
-        filter:          selected ? `drop-shadow(0 0 8px ${accent}66)` : 'none',
-        transition:      'filter 0.15s',
+        // NOTE: NO filter:drop-shadow here. CSS filter outputs are not clipped
+        // by overflow:hidden per the CSS Filters spec, so even a small glow
+        // could escape the scene container and paint over the nav bar.
+        // Selection is indicated via boxShadow on the sprite container instead.
+        transition:      'opacity 0.15s',
         userSelect:      'none',
       }}
     >
 
-      {/* ── Side speech bubble ─────────────────────────────────────────────
-          Positioned absolutely outside the hotspot's width into the empty
-          desk-row space. pointerEvents:none so clicks still reach the sprite. */}
+      {/* ── Side speech bubble ───────────────────────────────────────────────
+          Two lines: agent Thai name (top) + current task text (bottom).
+          Floats into the empty space between desks; pointerEvents:none so
+          the click still reaches the underlying hotspot. */}
       <div style={{
         position:      'absolute',
-        top:           30,
+        top:           20,
         ...(bubbleSide === 'right' ? { left: 168 } : { right: 168 }),
-        background:    '#06090ff2',
+        background:    '#06090ff5',
         border:        `1px solid ${bubbleBorder}`,
-        padding:       '5px 9px',
+        padding:       '6px 10px',
         display:       'flex',
-        alignItems:    'center',
-        gap:           5,
-        minWidth:      72,
-        maxWidth:      140,
+        flexDirection: 'column',
+        gap:           3,
+        minWidth:      80,
+        maxWidth:      170,
         zIndex:        25,
         pointerEvents: 'none',
       }}>
 
-        {/* Triangle pointing toward the agent */}
+        {/* CSS triangle pointer toward the agent */}
         <div style={{
           position:     'absolute',
           top:          '50%',
@@ -131,41 +131,60 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
             : { right: -6, borderLeft:  `5px solid ${bubbleBorder}` }),
         }} />
 
-        {/* Status icon */}
-        <span style={{
-          fontFamily: 'VT323, monospace',
-          fontSize:   14,
-          color:      sColor,
-          flexShrink: 0,
-          lineHeight: 1,
-        }}>
-          {sIcon}
-        </span>
+        {/* Row 1: status icon + Thai name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{
+            fontFamily: 'VT323, monospace',
+            fontSize:   13,
+            color:      sColor,
+            flexShrink: 0,
+            lineHeight: 1,
+          }}>
+            {sIcon}
+          </span>
+          <span style={{
+            fontFamily:   'Sarabun, sans-serif',
+            fontSize:     10,
+            color:        `${accent}bb`,
+            overflow:     'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace:   'nowrap',
+            fontWeight:   'bold',
+            lineHeight:   1.2,
+          }}>
+            {agent.thaiName}
+          </span>
+        </div>
 
-        {/* Task text */}
-        <span style={{
+        {/* Row 2: task text */}
+        <div style={{
           fontFamily:   'Sarabun, sans-serif',
           fontSize:     10,
-          color:        isBlocked ? '#ff7070' : isActive ? `${accent}cc` : '#4a5680',
+          color:        isBlocked ? '#ff7070' : isActive ? '#c8d6f0' : '#4a5680',
           overflow:     'hidden',
           textOverflow: 'ellipsis',
           whiteSpace:   'nowrap',
           lineHeight:   1.3,
+          paddingLeft:  17,   // align under the name (after icon width ~13px + gap 4px)
         }}>
-          {bubbleText(agent)}
-        </span>
+          {bubbleTask(agent)}
+        </div>
       </div>
 
       {/* ── Sprite / avatar ── */}
       <div style={{
-        background:     selected ? `${accent}11` : 'transparent',
-        border:         `1px solid ${selected ? accent + '55' : 'transparent'}`,
+        // boxShadow is always clipped to this element's box — it cannot escape
+        // the scene container unlike filter:drop-shadow.
+        boxShadow:      selected ? `0 0 16px ${accent}77, inset 0 0 20px ${accent}11` : 'none',
+        background:     selected ? `${accent}0d` : 'transparent',
+        border:         `1px solid ${selected ? accent + '66' : 'transparent'}`,
         padding:        '3px 5px',
         display:        'flex',
         justifyContent: 'center',
         alignItems:     'flex-end',
         minHeight:      SPRITE_HEIGHT + 4,
         width:          '100%',
+        transition:     'box-shadow 0.15s, border-color 0.15s',
       }}>
         <OfficeAgentSprite
           agentId={agent.id}
@@ -175,21 +194,8 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
         />
       </div>
 
-      {/* ── Thai display name ── */}
-      <div style={{
-        fontFamily:  'Sarabun, sans-serif',
-        fontSize:    11,
-        color:       selected ? accent : '#8892b0',
-        textAlign:   'center',
-        lineHeight:  1.3,
-        maxWidth:    150,
-        fontWeight:  selected ? 'bold' : 'normal',
-      }}>
-        {agent.thaiName}
-      </div>
-
       {/* ── Progress bar ── */}
-      <div style={{ width: 100, height: 2, background: '#1a2540' }}>
+      <div style={{ width: 110, height: 2, background: '#1a2540' }}>
         <div style={{ width: `${agent.progress}%`, height: '100%', background: accent }} />
       </div>
 
@@ -204,10 +210,9 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
           padding:       '0 5px',
           letterSpacing: 0.5,
         }}>
-          ⚠ {agent.risks.length} ความเสี่ยง
+          ⚠ {agent.risks.length}
         </div>
       )}
-
     </div>
   )
 }

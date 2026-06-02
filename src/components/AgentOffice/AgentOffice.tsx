@@ -18,7 +18,6 @@ import AgentActivityLog from './AgentActivityLog'
 import SharedCommandRoom from './SharedCommandRoom'
 import AgentRegistryView from './AgentRegistryView'
 import OfficeSidebar from './OfficeSidebar'
-import SystemConsole from './SystemConsole'
 import TeamChatPanel from './TeamChatPanel'
 // PixelOfficeScene is legacy — desk scene, retained for reference but not used in active tabs.
 
@@ -39,6 +38,11 @@ const RIGHT_TABS: { id: RightTab; label: string }[] = [
   { id: 'chat',     label: 'คุยกับ Agent' },
   { id: 'teamchat', label: 'แชทีม'        },
 ]
+
+// Fixed heights for header + nav (viewport-anchored, cannot be displaced by children)
+const HEADER_H = 60
+const NAV_H    = 44
+const TOP_H    = HEADER_H + NAV_H
 
 // ── Main component ─────────────────────────────────────────────────────────
 export default function AgentOffice() {
@@ -121,11 +125,11 @@ export default function AgentOffice() {
 
   // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', height: '100vh', background: '#06090f', color: '#e8eaf6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100vh', background: '#06090f', color: '#e8eaf6', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-      {/* ── Header ── */}
-      <header style={{ position: 'relative', zIndex: 100, background: '#0a0e1a', borderBottom: '1px solid #1a2540', padding: '8px 20px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      {/* ── Header: fixed to viewport — cannot be covered by any child ── */}
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, height: HEADER_H, zIndex: 9999, background: '#0a0e1a', borderBottom: '1px solid #1a2540', padding: '8px 20px', display: 'flex', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
               ░▒▓ AGENT OFFICE v2.4.5 ▓▒░
@@ -148,8 +152,8 @@ export default function AgentOffice() {
         </div>
       </header>
 
-      {/* ── Navigation ── */}
-      <nav style={{ position: 'relative', zIndex: 100, background: '#080c18', borderBottom: '2px solid #1a2540', padding: '0 20px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+      {/* ── Navigation: fixed below header — viewport-anchored ── */}
+      <nav style={{ position: 'fixed', top: HEADER_H, left: 0, right: 0, height: NAV_H, zIndex: 9999, background: '#080c18', borderBottom: '2px solid #1a2540', padding: '0 20px', display: 'flex', alignItems: 'center' }}>
         {NAV_ITEMS.map(item => (
           <button
             key={item.id}
@@ -176,12 +180,11 @@ export default function AgentOffice() {
         </span>
       </nav>
 
+      {/* ── Spacer: reserves height for fixed header + nav ── */}
+      <div style={{ height: TOP_H, flexShrink: 0 }} />
+
       {/* ── 3-column layout ── */}
-      {/* position:relative + zIndex:1 creates a stacking context at z-index 1,
-          keeping all scene content (SharedCommandRoom, hotspots) below the
-          header and nav which sit at zIndex:100. */}
       <div style={{
-        position: 'relative', zIndex: 1,
         flex: 1, display: 'grid', overflow: 'hidden', minHeight: 0,
         gridTemplateColumns: showRightPanel ? '220px 1fr 340px' : '220px 1fr',
       }}>
@@ -341,11 +344,6 @@ export default function AgentOffice() {
           </div>
         )}
 
-      </div>
-
-      {/* ── Bottom bar: System Log preview ── */}
-      <div style={{ height: 120, flexShrink: 0, borderTop: '2px solid #1a2540' }}>
-        <SystemConsole logs={logs} />
       </div>
 
     </div>

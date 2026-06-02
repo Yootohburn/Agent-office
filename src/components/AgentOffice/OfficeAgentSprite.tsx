@@ -17,10 +17,10 @@ export default function OfficeAgentSprite({ agentId, status, spriteSrc, height =
   // PixelAgentAvatar renders at 50px tall at scale=1.
   const fallbackScale = Math.max(1.5, height / 50)
 
-  // 0.85 keeps idle agents clearly visible while still looking "inactive".
-  // Lower values (0.4, 0.65) made dark-palette agents (e.g. creative-production
-  // with #a855f7 purple) nearly invisible against the #06090f background.
-  const idleOpacity = 0.85
+  // Full opacity for all agents — purple/dark palettes become near-invisible at
+  // any reduced opacity on the #06090f background. Idle state is indicated by
+  // the status bubble/badge on each card instead.
+  const idleOpacity = 1
 
   if (spriteSrc && !imgFailed) {
     return (

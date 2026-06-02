@@ -67,8 +67,10 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
   const sColor = agent.status === 'working' ? accent : S_COLOR[agent.status]
   const sIcon  = S_ICON[agent.status]
 
-  // Right column (x > 55%) gets bubble on the LEFT; others get it on the RIGHT.
-  const bubbleSide: 'left' | 'right' = (x + offsetX) > 55 ? 'left' : 'right'
+  // x > 55% → bubble LEFT, x < 30% → bubble RIGHT, 30-55% → bubble ABOVE (avoids overlap)
+  const effectiveX = x + offsetX
+  const bubbleSide: 'left' | 'right' | 'above' =
+    effectiveX > 55 ? 'left' : effectiveX < 30 ? 'right' : 'above'
   const bubbleBorder = isActive ? `${accent}66` : '#1a254099'
 
   return (
@@ -97,14 +99,12 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
       }}
     >
 
-      {/* ── Side speech bubble ───────────────────────────────────────────────
-          Two lines: agent Thai name (top) + current task text (bottom).
-          Floats into the empty space between desks; pointerEvents:none so
-          the click still reaches the underlying hotspot. */}
+      {/* ── Speech bubble: side (left/right) or above ── */}
       <div style={{
         position:      'absolute',
-        top:           20,
-        ...(bubbleSide === 'right' ? { left: 168 } : { right: 168 }),
+        ...(bubbleSide === 'right' ? { top: 20, left:  168 }
+          : bubbleSide === 'left'  ? { top: 20, right: 168 }
+          : { bottom: SPRITE_HEIGHT + 28, left: '50%', transform: 'translateX(-50%)' }),
         background:    '#06090ff5',
         border:        `1px solid ${bubbleBorder}`,
         padding:       '6px 10px',
@@ -115,20 +115,24 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
         maxWidth:      170,
         zIndex:        25,
         pointerEvents: 'none',
+        whiteSpace:    'nowrap',
       }}>
 
-        {/* CSS triangle pointer toward the agent */}
+        {/* CSS triangle pointing toward the agent */}
         <div style={{
-          position:     'absolute',
-          top:          '50%',
-          transform:    'translateY(-50%)',
-          width:        0,
-          height:       0,
-          borderTop:    '5px solid transparent',
-          borderBottom: '5px solid transparent',
-          ...(bubbleSide === 'right'
-            ? { left: -6,  borderRight: `5px solid ${bubbleBorder}` }
-            : { right: -6, borderLeft:  `5px solid ${bubbleBorder}` }),
+          position: 'absolute',
+          width:    0,
+          height:   0,
+          ...(bubbleSide === 'right' ? {
+            top: '50%', transform: 'translateY(-50%)',
+            left: -6, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderRight: `5px solid ${bubbleBorder}`,
+          } : bubbleSide === 'left' ? {
+            top: '50%', transform: 'translateY(-50%)',
+            right: -6, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: `5px solid ${bubbleBorder}`,
+          } : {
+            bottom: -6, left: '50%', transform: 'translateX(-50%)',
+            borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: `5px solid ${bubbleBorder}`,
+          }),
         }} />
 
         {/* Row 1: status icon + Thai name */}
@@ -192,11 +196,6 @@ export default function AgentHotspot({ agent, selected, onClick, spriteSrc, scen
           spriteSrc={spriteSrc}
           height={SPRITE_HEIGHT}
         />
-      </div>
-
-      {/* ── Progress bar ── */}
-      <div style={{ width: 110, height: 2, background: '#1a2540' }}>
-        <div style={{ width: `${agent.progress}%`, height: '100%', background: accent }} />
       </div>
 
       {/* ── Risk badge ── */}

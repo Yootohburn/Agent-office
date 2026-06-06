@@ -2,9 +2,10 @@ import { CHANNEL_CONFIG, PIPELINE_STAGES, formatTHB } from '../../agents/campaig
 import type { Campaign } from '../../agents/campaignRegistry'
 
 interface Props {
-  campaigns: Campaign[]
+  campaigns:         Campaign[]
   selectedCampaignId: string | null
-  onSelectCampaign: (id: string) => void
+  onSelectCampaign:  (id: string) => void
+  onNewProduct?:     () => void
 }
 
 function urgencyScore(c: Campaign): number {
@@ -36,14 +37,30 @@ const RISK_COLOR: Record<string, string> = {
   critical: '#ff5252',
 }
 
-export default function OfficeSidebar({ campaigns, selectedCampaignId, onSelectCampaign }: Props) {
+export default function OfficeSidebar({ campaigns, selectedCampaignId, onSelectCampaign, onNewProduct }: Props) {
   const sorted = [...campaigns].sort((a, b) => urgencyScore(a) - urgencyScore(b))
 
   return (
     <div style={{ borderRight: '2px solid #1a2540', background: '#080c18', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ padding: '10px 12px 8px', borderBottom: '1px solid #1a2540', flexShrink: 0 }}>
-        <div style={{ fontFamily: 'VT323, monospace', fontSize: 15, color: '#2a3560', letterSpacing: 2 }}>
-          ▶ CAMPAIGN QUEUE
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontFamily: 'VT323, monospace', fontSize: 15, color: '#2a3560', letterSpacing: 2 }}>
+            ▶ CAMPAIGN QUEUE
+          </div>
+          {onNewProduct && (
+            <button
+              onClick={onNewProduct}
+              title="เพิ่มสินค้าใหม่"
+              style={{
+                fontFamily: 'VT323, monospace', fontSize: 14,
+                color: '#00e5ff', background: '#00e5ff11',
+                border: '1px solid #00e5ff33', padding: '1px 7px',
+                cursor: 'pointer', letterSpacing: 1, lineHeight: 1.4,
+              }}
+            >
+              +
+            </button>
+          )}
         </div>
         <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#1a2540', marginTop: 2 }}>
           {campaigns.length} active — sorted by urgency

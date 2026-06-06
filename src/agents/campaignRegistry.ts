@@ -76,6 +76,20 @@ export interface AgentTask {
   nextAction: string
   createdAt: string
   updatedAt: string
+  // v2.5 extended fields
+  input_json?:            Record<string, unknown>
+  output_json?:           Record<string, unknown>
+  human_review_required?: boolean
+}
+
+export interface HumanApproval {
+  approval_id:   string
+  campaign_id:   string
+  stage:         string
+  status:        'pending' | 'approved' | 'rejected' | 'needs_revision'
+  reviewer_note: string
+  created_at:    string
+  updated_at:    string
 }
 
 export interface Campaign {
@@ -103,6 +117,12 @@ export interface Campaign {
   return_risk: 'low' | 'medium' | 'high'
   suitability_score: number
   scores: ProductScores
+  // v2.5 fields — optional for backward-compat with mock data
+  product_id?:             string
+  next_action?:            string
+  next_action_deadline?:   string
+  created_at?:             string
+  updated_at?:             string
 }
 
 export const campaigns: Campaign[] = [

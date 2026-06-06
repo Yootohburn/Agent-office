@@ -8,7 +8,11 @@ import type { ActivityLogEntry, TeamChatMessage } from '../../agents/agentSessio
 import { runWorkflowAction } from '../../agents/mockWorkflowEngine'
 import type { WorkflowAction } from '../../agents/campaignWorkflow'
 import { companySummary } from '../../agents/financeRegistry'
-import AgentCommandPanel from './AgentCommandPanel'
+import AgentCommandPanel    from './AgentCommandPanel'
+import ProductIntakeForm    from './ProductIntakeForm'
+import { submitProduct }    from '../../services/productIntakeService'
+import { campaignRepository } from '../../data/campaignRepository'
+import type { ProductIntakeFormData } from '../../data/types'
 import CampaignDetailPanel from './CampaignDetailPanel'
 import ChannelDetailPanel from './ChannelDetailPanel'
 import CampaignFocusSection from './CampaignFocusSection'
@@ -52,7 +56,17 @@ export default function AgentOffice() {
   const [selectedChannelId,  setSelectedChannelId]  = useState<CampaignChannel | null>(null)
   const [rightPanelTab,      setRightPanelTab]      = useState<RightTab>('teamchat')
 
-  const [liveCampaigns, setLiveCampaigns] = useState<Campaign[]>(() => initialCampaigns.map(c => ({ ...c })))
+  const [showIntakeForm,  setShowIntakeForm]  = useState(false)
+
+  // Merge mock campaigns with any user-submitted campaigns from localStorage.
+  const [liveCampaigns, setLiveCampaigns] = useState<Campaign[]>(() => {
+    const mock      = initialCampaigns.map(c => ({ ...c }))
+    const persisted = campaignRepository.getAll()
+    // Persisted campaigns take precedence over mock if ids collide (unlikely).
+    const map = new Map(mock.map(c => [c.id, c]))
+    persisted.forEach(c => map.set(c.id, c))
+    return Array.from(map.values())
+  })
   const [liveAgents,    setLiveAgents]    = useState<Agent[]>(() => initialAgents.map(a => ({ ...a })))
   const [logs,          setLogs]          = useState<ActivityLogEntry[]>(() => [...mockActivityLog])
   const [teamChat,      setTeamChat]      = useState<TeamChatMessage[]>(() => [...initialTeamChat])
@@ -121,6 +135,19 @@ export default function AgentOffice() {
     setLogs(prev => [result.newLogEntry, ...prev])
     setTeamChat(prev => [...prev, result.newChatMessage])
     setLogCounter(n => n + 1)
+  }
+
+  function handleProductIntake(formData: ProductIntakeFormData) {
+    const result = submitProduct(formData, logCounter)
+    setLiveCampaigns(prev => [result.campaign, ...prev])
+    setLogs(prev         => [result.logEntry,  ...prev])
+    setTeamChat(prev     => [...prev, result.chatMessage])
+    setLogCounter(n      => n + 1)
+    setSelectedCampaignId(result.campaign.id)
+    setSelectedAgentId(null)
+    setSelectedChannelId(null)
+    setActiveView('campaigns')
+    setShowIntakeForm(false)
   }
 
   // ── Render ─────────────────────────────────────────────────────────────
@@ -194,6 +221,7 @@ export default function AgentOffice() {
           campaigns={liveCampaigns}
           selectedCampaignId={selectedCampaignId}
           onSelectCampaign={handleSelectCampaign}
+          onNewProduct={() => { setActiveView('campaigns'); setShowIntakeForm(true) }}
         />
 
         {/* ── Center: tab content ── */}
@@ -228,6 +256,33 @@ export default function AgentOffice() {
 
           {activeView === 'campaigns' && (
             <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+              {/* ── New product button ── */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setShowIntakeForm(v => !v)}
+                  style={{
+                    fontFamily:    'VT323, monospace',
+                    fontSize:      15,
+                    color:         showIntakeForm ? '#4a5680' : '#00e5ff',
+                    background:    showIntakeForm ? 'transparent' : '#00e5ff0d',
+                    border:        `1px solid ${showIntakeForm ? '#1a2540' : '#00e5ff44'}`,
+                    padding:       '6px 18px',
+                    cursor:        'pointer',
+                    letterSpacing: 1,
+                  }}
+                >
+                  {showIntakeForm ? '✕ ปิดแบบฟอร์ม' : '+ เพิ่มสินค้าใหม่'}
+                </button>
+              </div>
+
+              {showIntakeForm && (
+                <ProductIntakeForm
+                  onSubmit={handleProductIntake}
+                  onCancel={() => setShowIntakeForm(false)}
+                />
+              )}
+
               <CampaignFocusSection
                 campaigns={liveCampaigns}
                 agents={liveAgents}

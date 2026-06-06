@@ -5,6 +5,7 @@ import { STAGE_OWNER } from '../../agents/agentTaskRouter'
 import { getAgentById } from '../../agents/agentRegistry'
 import { STAGE_ACTIONS } from '../../agents/campaignWorkflow'
 import type { WorkflowAction } from '../../agents/campaignWorkflow'
+import AgentTaskQueue from './AgentTaskQueue'
 
 interface Props {
   campaign: Campaign
@@ -216,6 +217,11 @@ export default function CampaignDetailPanel({ campaign, onClose, onAction }: Pro
           <p style={{ margin: 0, fontSize: 11, color: '#00e5ff', lineHeight: 1.5 }}>{campaign.notes}</p>
         </PanelSection>
       )}
+
+      {/* Task Queue */}
+      <PanelSection title="AGENT TASK QUEUE">
+        <AgentTaskQueue campaign={campaign} onAction={onAction} />
+      </PanelSection>
 
     </div>
   )

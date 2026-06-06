@@ -1,0 +1,100 @@
+/* 8-bit Agent Office — global styles */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-base:       #06090f;
+  --bg-panel:      #0a0e1a;
+  --bg-card:       #0c1425;
+  --border:        #1a2540;
+  --text-primary:  #e8eaf6;
+  --text-muted:    #4a5680;
+  --text-dim:      #2a3560;
+  --neon-green:    #00ff9f;
+  --neon-cyan:     #00e5ff;
+  --amber:         #ffb300;
+  --red:           #ff5252;
+  --shopee:        #ff5722;
+  --lazada:        #2979ff;
+  --tiktok:        #00e5ff;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Sarabun', sans-serif;
+}
+
+#root {
+  height: 100%;
+}
+
+/* Pixel cursor */
+* {
+  cursor: default;
+}
+
+button, [role="button"] {
+  cursor: pointer;
+}
+
+/* Scrollbars — dark, minimal */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* Pixel blink animation */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Slow glow pulse — used by ring light in Content Studio when working */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+/* Scanline overlay — subtle CRT effect */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.04) 2px,
+    rgba(0, 0, 0, 0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Selection */
+::selection {
+  background: var(--neon-green);
+  color: var(--bg-base);
+}

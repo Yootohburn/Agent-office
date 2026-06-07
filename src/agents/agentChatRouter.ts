@@ -2,11 +2,15 @@
  * Mock chat response router for Phase 1.
  * Routes user messages to realistic Thai responses by agent role + intent.
  * Replace getMockResponse() body with a real fetch() call to enable live LLM later.
+ *
+ * v2.6.2: Added getMockResponseWithContext() for campaign-context-aware responses.
+ * Use that function when AgentContext is available (selected campaign + agent).
  */
 import type { DepartmentId } from './agentRegistry'
 import { agents } from './agentRegistry'
 import { campaigns, formatTHB } from './campaignRegistry'
 import { companySummary } from './financeRegistry'
+import type { AgentContext } from '../services/agentContextBuilder'
 
 export interface MockResponse {
   text: string
@@ -15,6 +19,40 @@ export interface MockResponse {
 }
 
 type IntentKey = 'status' | 'next_action' | 'problem_solve' | 'ideas' | 'risk' | 'finance' | 'general'
+
+export type DetailedIntent =
+  | 'summarize_status'
+  | 'suggest_next_action'
+  | 'analyze_profit'
+  | 'generate_hooks'
+  | 'generate_script'
+  | 'generate_caption'
+  | 'generate_storyboard'
+  | 'review_risk'
+  | 'create_social_post'
+  | 'explain_finance'
+  | 'improve_campaign'
+  | 'check_missing_data'
+  | 'ideas'
+  | 'unknown'
+
+export function detectDetailedIntent(msg: string): DetailedIntent {
+  const m = msg.toLowerCase()
+  if (m.includes('storyboard') || m.includes('สตอรี่บอร์ด') || m.includes('scene'))                         return 'generate_storyboard'
+  if (m.includes('สคริปต์') || m.includes('script') || m.includes('เขียน script') || m.includes('30 วิ') || m.includes('20 วิ')) return 'generate_script'
+  if (m.includes('hook') || m.includes('เขียน hook') || m.includes('hook 5') || m.includes('hook '))         return 'generate_hooks'
+  if (m.includes('caption') || m.includes('แคปชั่น') || m.includes('caption '))                              return 'generate_caption'
+  if (m.includes('facebook') || m.includes('โพสต์') || m.includes('ig caption') || m.includes('social post') || m.includes('pinned')) return 'create_social_post'
+  if (m.includes('ขาดทุน') || m.includes('roas') || m.includes('กำไรพอ') || m.includes('commission') || m.includes('คุ้มทุน')) return 'analyze_profit'
+  if (m.includes('การเงิน') || m.includes('ตัวเลข') || m.includes('งบ') || m.includes('revenue') || m.includes('explain'))    return 'explain_finance'
+  if (m.includes('เสี่ยง') || m.includes('ตรวจ') || m.includes('risk') || m.includes('ระวัง') || m.includes('compliance'))    return 'review_risk'
+  if (m.includes('ขาดข้อมูล') || m.includes('ข้อมูลไหน') || m.includes('ขาดอะไร') || m.includes('missing'))                 return 'check_missing_data'
+  if (m.includes('ปรับปรุง') || m.includes('แก้ปัญหา') || m.includes('ทำยังไง') || m.includes('improve') || m.includes('fix')) return 'improve_campaign'
+  if (m.includes('สรุป') || m.includes('สถานะ') || m.includes('ตอนนี้') || m.includes('overview'))                           return 'summarize_status'
+  if (m.includes('ถัดไป') || m.includes('ขั้นตอน') || m.includes('แนะนำ') || m.includes('ต่อไป') || m.includes('next'))       return 'suggest_next_action'
+  if (m.includes('ไอเดีย') || m.includes('คอนเทนต์') || m.includes('สร้าง') || m.includes('idea') || m.includes('angle'))     return 'ideas'
+  return 'unknown'
+}
 
 function detectIntent(msg: string): IntentKey {
   const m = msg.toLowerCase()
@@ -392,4 +430,329 @@ export function getMockResponse(
   const agentResponses = RESPONSES[agentId]
   const text = agentResponses[intent] ?? agentResponses.general ?? 'ขอโทษครับ ลองถามใหม่อีกครั้งนะครับ'
   return { text, intent, mockDelay: 700 + Math.random() * 800 }
+}
+
+/**
+ * Context-aware response router (v2.6.2).
+ * Uses selected campaign + product + finance data to produce relevant Thai responses.
+ * Falls back to getMockResponse() when context is null.
+ */
+export function getMockResponseWithContext(
+  agentId:     DepartmentId,
+  userMessage: string,
+  context:     AgentContext | null,
+): MockResponse {
+  if (!context?.campaign) {
+    return getMockResponse(agentId, userMessage)
+  }
+
+  const intent  = detectDetailedIntent(userMessage)
+  const delay   = 700 + Math.random() * 900
+  const c       = context.campaign
+  const f       = context.finance ?? c.finance
+  const name    = c.name
+  const ch      = c.channel === 'tiktok' ? 'TikTok Shop' : c.channel === 'shopee' ? 'Shopee' : 'Lazada'
+  const price   = c.targetPrice
+  const stage   = context.currentStageLabel
+  const roas    = f.roas
+  const profit  = formatTHB(f.netProfit)
+  const rev     = formatTHB(f.revenue)
+  const risk    = c.riskLevel
+  const cr      = c.commission_rate
+  const est     = formatTHB(c.est_commission_baht)
+  const riskMsg = c.riskMessage || 'ไม่มีความเสี่ยงพิเศษ'
+  const cat     = c.category
+  const riskFlags = context.riskFlags
+
+  const text = buildContextResponse(agentId, intent, {
+    name, ch, price, stage, roas, profit, rev, risk, cr, est, riskMsg, cat, riskFlags, f,
+  })
+  return { text, intent, mockDelay: delay }
+}
+
+interface ResponseVars {
+  name: string; ch: string; price: string; stage: string
+  roas: number; profit: string; rev: string; risk: string
+  cr: number; est: string; riskMsg: string; cat: string
+  riskFlags: string[]
+  f: { revenue: number; commission: number; adSpend: number; contentCost: number; netProfit: number; roas: number; conversionRate: number; costPerOrder: number; pendingPayout: number }
+}
+
+function buildContextResponse(agentId: DepartmentId, intent: DetailedIntent, v: ResponseVars): string {
+  const { name, ch, price, stage, roas, profit, rev, risk, cr, est, riskMsg, cat, riskFlags, f } = v
+  const roasOk    = roas >= 4 ? '✅ ดีกว่าเป้า' : roas >= 2 ? '⚠️ ต่ำกว่าเป้า' : '❌ ขาดทุน'
+  const breakeven = cr > 0 ? (f.adSpend / ((cr / 100) * f.revenue / f.costPerOrder || 1)).toFixed(1) : '—'
+
+  // ── Product Research ──────────────────────────────────────────────────────
+  if (agentId === 'product-research') {
+    if (intent === 'summarize_status') return (
+      `📦 สรุปสินค้า — ${name}\n\n` +
+      `ช่องทาง: ${ch} | หมวด: ${cat} | ราคา: ${price}\n` +
+      `ขั้นตอนปัจจุบัน: ${stage}\n` +
+      `ความเสี่ยง: ${risk.toUpperCase()}\n\n` +
+      `สินค้านี้${roas >= 4 ? 'มีศักยภาพดี' : roas >= 2 ? 'ควรทดสอบก่อน' : 'มีความเสี่ยงสูง'} บน ${ch}\n` +
+      `Commission rate: ${cr}% | ประมาณ commission: ${est}\n\n` +
+      `${riskFlags.length > 0 ? '⚠ ข้อควรระวัง:\n' + riskFlags.map(r => `→ ${r}`).join('\n') : '✅ ไม่มีความเสี่ยงพิเศษ'}`
+    )
+    if (intent === 'review_risk') return (
+      `🔬 ตรวจความเสี่ยง — ${name}\n\n` +
+      `ระดับความเสี่ยง: ${risk.toUpperCase()}\n` +
+      `${riskMsg}\n\n` +
+      `จุดที่ต้องระวัง:\n` +
+      (riskFlags.length > 0 ? riskFlags.map(r => `⚠ ${r}`).join('\n') : '✅ ยังไม่พบ risk flag') + '\n\n' +
+      `Claim risk: ${cat.includes('ชาร์จ') || cat.includes('เทคโนโลยี') ? 'ต้องระวัง spec overclaim' : 'อยู่ในเกณฑ์ปกติ'}\n` +
+      `ขั้นตอนถัดไป: ตรวจ seller authenticity + recent reviews ก่อน brief`
+    )
+    if (intent === 'check_missing_data') return (
+      `📋 ข้อมูลที่อาจขาด — ${name}\n\n` +
+      `✅ มีแล้ว: ชื่อสินค้า, ราคา, หมวดหมู่, commission rate\n` +
+      `❓ ตรวจสอบ:\n` +
+      `→ Seller rating ล่าสุด\n` +
+      `→ Review count + recency (reviews ใหม่ใน 30 วัน)\n` +
+      `→ Sold count ต่อเดือน\n` +
+      `→ Return/refund rate\n` +
+      `→ Spec ที่จะ claim ใน script ต้องยืนยันก่อน\n\n` +
+      `แนะนำ: เช็ก product page ${ch} อีกครั้งก่อนส่ง brief`
+    )
+    if (intent === 'suggest_next_action') return (
+      `➡️ ขั้นตอนถัดไป — ${name} (${stage})\n\n` +
+      `1. ตรวจ seller + review recency บน ${ch}\n` +
+      `2. Confirm spec ที่จะ claim ใน script\n` +
+      `3. ส่ง product card ให้ Offer Analyst ประเมิน commission\n` +
+      `4. บันทึก learning จากแคมเปญก่อนหน้าถ้ามี`
+    )
+  }
+
+  // ── Offer Analyst ─────────────────────────────────────────────────────────
+  if (agentId === 'offer-analyst') {
+    if (intent === 'analyze_profit' || intent === 'explain_finance') return (
+      `📊 วิเคราะห์กำไร — ${name}\n\n` +
+      `ราคาขาย: ${price} | Commission: ${cr}%\n` +
+      `Revenue: ${rev} | Profit สุทธิ: ${profit}\n` +
+      `ROAS: ${roas}x ${roasOk}\n` +
+      `Ad spend: ${formatTHB(f.adSpend)} | Content cost: ${formatTHB(f.contentCost)}\n` +
+      `Cost per order: ${formatTHB(f.costPerOrder)}\n\n` +
+      `ประมาณ commission ต่อ 1 order: ${est}\n\n` +
+      `คำแนะนำ:\n` +
+      (roas >= 5  ? `→ ROAS ดีมาก — เพิ่มงบโฆษณาได้เลย` :
+       roas >= 4  ? `→ ROAS ดี — maintain งบเดิม ดู conversion 7 วัน` :
+       roas >= 2  ? `→ ROAS ต่ำกว่าเป้า — ลด ad spend 20% ก่อน` :
+                   `→ ROAS ต่ำมาก — ควร pause และ revise strategy`)
+    )
+    if (intent === 'summarize_status') return (
+      `📊 สรุป Offer Analysis — ${name}\n\n` +
+      `Channel: ${ch} | Stage: ${stage}\n` +
+      `ROAS: ${roas}x ${roasOk} | Profit: ${profit}\n` +
+      `Commission rate: ${cr}% | Est. commission: ${est}\n` +
+      `Risk: ${risk.toUpperCase()}\n\n` +
+      `สถานะ: ${f.netProfit >= 0 ? 'คุ้มค่าโปรโมท ✅' : 'ต้องปรับ strategy ⚠️'}`
+    )
+    if (intent === 'review_risk') return (
+      `⚠ ความเสี่ยงทางการเงิน — ${name}\n\n` +
+      `ROAS ปัจจุบัน: ${roas}x (เป้า ≥ 4x)\n` +
+      `Break-even ROAS: ${breakeven}x\n` +
+      `${riskMsg}\n\n` +
+      `Return risk: ${v.cat.includes('เสื้อผ้า') || v.cat.includes('แฟชั่น') ? 'สูง — เสื้อผ้าคืนบ่อย' : 'ปกติ'}\n` +
+      `Claim risk: ${risk === 'high' || risk === 'critical' ? 'ต้องตรวจก่อน publish' : 'อยู่ในเกณฑ์'}\n\n` +
+      `แนะนำ: ${f.netProfit >= 0 ? 'ดำเนินต่อแต่ติดตามใกล้ชิด' : 'หยุดก่อน — วิเคราะห์ root cause'}`
+    )
+    if (intent === 'improve_campaign') return (
+      `🔧 แนวทางปรับ — ${name}\n\n` +
+      `ปัจจุบัน ROAS ${roas}x, profit ${profit}\n\n` +
+      `ตัวเลือก:\n` +
+      `1. ลด ad spend ${formatTHB(f.adSpend * 0.2)} → ROAS จะขึ้นประมาณ ${(roas * 1.25).toFixed(1)}x\n` +
+      `2. เปลี่ยน hook → เพิ่ม CTR → cost per order ลด\n` +
+      `3. ปรับ platform — ถ้า ${ch} ไม่ work ลอง TikTok\n` +
+      `4. เพิ่ม commission negotiation กับ seller\n\n` +
+      `แนะนำ: เริ่มจากปรับ hook ก่อน ต้นทุนต่ำสุด`
+    )
+  }
+
+  // ── Content Strategy ──────────────────────────────────────────────────────
+  if (agentId === 'content-strategy') {
+    if (intent === 'generate_hooks' || intent === 'ideas') return (
+      `🎯 Hook Ideas — ${name} (${ch})\n\n` +
+      `Hook 1 — Problem:\n"คุณเคยรู้สึกว่า ${cat} ยากและแพงไหม? นี่คือวิธีแก้"\n\n` +
+      `Hook 2 — Price Shock:\n"${price} ได้อะไรบ้าง? มาดูกัน"\n\n` +
+      `Hook 3 — Before/After:\n"ก่อนใช้ vs หลังใช้ — ต่างกันมากขนาดนี้จริงๆ"\n\n` +
+      `Hook 4 — Social Proof:\n"คนออเดอร์ไปกี่พันชิ้นแล้ว — ลองดูว่าดีจริงไหม"\n\n` +
+      `Hook 5 — Question:\n"ถ้าคุณยังไม่รู้จักสิ่งนี้ แปลว่าคุณเสียเงินเปล่า"\n\n` +
+      `แนะนำ: Hook 1 (Problem) เหมาะสุดสำหรับ ${ch} ในหมวด ${cat}\n\n` +
+      `⚠ ห้าม: "ดีที่สุด" "การันตี" "ถูกที่สุด" — ใช้ "ลองแล้วชอบ" แทน`
+    )
+    if (intent === 'summarize_status') return (
+      `🎯 Content Strategy — ${name}\n\n` +
+      `Platform หลัก: ${ch}\n` +
+      `หมวด: ${cat} | ราคา: ${price}\n` +
+      `Stage: ${stage}\n\n` +
+      `Framework ที่เหมาะ: ${cat.includes('จัดระเบียบ') || cat.includes('บ้าน') ? 'daily_problem + before_after' : cat.includes('ชาร์จ') || cat.includes('อุปกรณ์') ? 'worth_it + demo' : 'problem_solve + social_proof'}\n` +
+      `Target audience: คนไทยอายุ 20–35 ที่ใช้ ${ch} เป็นประจำ\n` +
+      `CTA แนะนำ: "ลิงก์ใน bio / pinned comment"`
+    )
+    if (intent === 'suggest_next_action') return (
+      `➡️ ขั้นตอนถัดไป — Content Strategy\n\n` +
+      `1. เลือก hook framework สำหรับ "${name}"\n` +
+      `2. กำหนด target audience ให้ชัด: ${cat} → ใครซื้อ?\n` +
+      `3. เลือก platform mix: ${ch} เป็นหลัก\n` +
+      `4. ส่ง content brief ให้ Script Writer\n` +
+      `5. ตรวจ compliance: ห้ามมี overclaim ใน brief`
+    )
+  }
+
+  // ── Script Writer ─────────────────────────────────────────────────────────
+  if (agentId === 'script-writer') {
+    if (intent === 'generate_hooks') return (
+      `🎬 Hook 5 แบบ — ${name}\n\n` +
+      `Hook 1 — Problem Empathy:\n"เวลาต้องซื้อ ${cat} ทีไรก็แพงทุกที — จนกระทั่งเจออันนี้"\n\n` +
+      `Hook 2 — Price Reveal:\n"${price} เท่านั้น — ดูว่าคุ้มจริงไหม"\n\n` +
+      `Hook 3 — Visual Shock:\n[ภาพก่อน/หลัง 1 วินาที] "นี่คือสิ่งที่เปลี่ยนไป"\n\n` +
+      `Hook 4 — Question:\n"ทำไมคนไทยแห่ซื้อสิ่งนี้กันหลายพัน order แล้ว?"\n\n` +
+      `Hook 5 — Objection:\n"ฉันเองก็คิดว่าไม่ต้องใช้ — จนได้ลองจริง"\n\n` +
+      `✅ แนะนำ: Hook 1 สำหรับ ${ch}\n` +
+      `⚠ Risk note: ห้าม claim ตัวเลขที่ไม่มีข้อมูลยืนยัน`
+    )
+    if (intent === 'generate_script') return (
+      `📝 Script 25 วินาที — ${name} (${ch})\n\n` +
+      `[0–3s] HOOK\n"${cat}แบบนี้มีด้วยเหรอ? แค่ ${price}?"\n[ภาพสินค้า close-up ชัดๆ]\n\n` +
+      `[3–10s] PROBLEM\n"ปกติของแบบนี้ราคา 2–3 เท่า — นี่คือทางเลือก"\n[demo การใช้งาน]\n\n` +
+      `[10–20s] DEMO\n[แสดงการใช้งานจริง step by step — ไม่เกิน 3 steps]\n"ง่ายมาก ใช้เวลาไม่ถึงนาที"\n\n` +
+      `[20–25s] CTA\n"ลิงก์อยู่ใน ${ch} ด้านล่าง — ${price} เท่านั้น"\n[ราคาชัดเจน + rating]\n\n` +
+      `On-screen text: ราคา ${price} + ⭐ rating + [ลิงก์]\n` +
+      `⚠ ตรวจ: script ≤ 30 วิ, ต้องมี #ad, ห้าม overclaim`
+    )
+    if (intent === 'generate_caption') return (
+      `📱 Caption TikTok — ${name}\n\n` +
+      `"${cat}ราคา ${price} — ลองแล้วดีจริง ไม่โอเวอร์\n` +
+      `ลิงก์ ${ch} อยู่ใน bio นะคะ/ครับ 👇\n\n` +
+      `#affiliate #${cat.replace(/\s+/g, '')} #${ch}"\n\n` +
+      `Pinned comment:\n"${ch} ลิงก์ด้านล่างเลยนะ ${price} เท่านั้น #ad"\n\n` +
+      `⚠ ต้องมี #ad หรือ #โฆษณา ตาม guideline`
+    )
+    if (intent === 'generate_storyboard') return (
+      `🎬 Storyboard — ${name}\n\n` +
+      `Scene 1 [0–3s]: Hook shot\n→ Close-up สินค้าบนพื้นหรือโต๊ะสวยๆ\n→ Text overlay: ราคา ${price}\n\n` +
+      `Scene 2 [3–10s]: Problem\n→ แสดง "ก่อน" — สภาพที่ต้องการแก้\n→ ไม่ต้องพูดมาก ใช้ visual\n\n` +
+      `Scene 3 [10–20s]: Demo\n→ แสดงขั้นตอนใช้งาน (max 3 steps)\n→ Text overlay อธิบายแต่ละ step\n\n` +
+      `Scene 4 [20–25s]: CTA\n→ ราคา + rating + link\n→ Text: "หาซื้อได้ที่ ${ch}"\n\n` +
+      `Shot list: close-up × 2, demo × 3, CTA × 1\n` +
+      `⚠ เช็ก: ทุก scene ต้องใช้สินค้าจริง ไม่ใช้ภาพ stock ที่เกินจริง`
+    )
+    if (intent === 'summarize_status') return (
+      `🎬 Script Status — ${name}\n\n` +
+      `Stage: ${stage} | Channel: ${ch}\n` +
+      `ราคา: ${price} | หมวด: ${cat}\n\n` +
+      `งานที่ต้องทำ:\n` +
+      `→ เขียน hook 3–5 แบบ\n` +
+      `→ Script 20–30 วิ\n` +
+      `→ Storyboard scene-by-scene\n` +
+      `→ On-screen text + Caption\n` +
+      `→ ตรวจ compliance ก่อนส่ง`
+    )
+  }
+
+  // ── Creative Production ───────────────────────────────────────────────────
+  if (agentId === 'creative-production') {
+    if (intent === 'ideas' || intent === 'summarize_status') return (
+      `🎨 Creative Brief — ${name}\n\n` +
+      `Thumbnail direction:\n` +
+      `→ Background: สีเข้ม high contrast\n` +
+      `→ Text overlay: ราคา ${price} ชัดๆ ใหญ่ๆ\n` +
+      `→ Visual: สินค้าตรงกลาง ชัดเจน\n` +
+      `→ Badge: ⭐ + sold count (ถ้ามี)\n\n` +
+      `Asset checklist:\n` +
+      `□ ภาพสินค้า 5–10 ใบ (จากหน้าสินค้า ${ch})\n` +
+      `□ Canva template (หมวด ${cat})\n` +
+      `□ Comparison card: ก่อน/หลัง\n` +
+      `□ CapCut checklist (timecode)\n\n` +
+      `A/B Creative: ทำ 2 เวอร์ชัน — ราคา focus vs demo focus\n` +
+      `⚠ ห้ามใช้ภาพ copyright, ห้าม edit ราคาให้ต่างจากจริง`
+    )
+    if (intent === 'suggest_next_action') return (
+      `➡️ ขั้นตอนถัดไป — Creative Production\n\n` +
+      `1. รับ script + storyboard จาก Script Writer\n` +
+      `2. สร้าง thumbnail Canva (2 เวอร์ชัน)\n` +
+      `3. เตรียม comparison card\n` +
+      `4. ส่ง CapCut checklist ให้ editor\n` +
+      `5. เช็ก assets ครบก่อนส่ง Social Performance`
+    )
+    if (intent === 'check_missing_data') return (
+      `📋 Asset ที่ต้องการ — ${name}\n\n` +
+      `□ ภาพสินค้า high-res จาก ${ch}\n` +
+      `□ ราคาปัจจุบัน (ต้องตรงกับ video)\n` +
+      `□ Rating + review count (ใส่ใน thumbnail)\n` +
+      `□ Hook ที่ content strategy เลือกแล้ว\n` +
+      `□ Script timing (กี่ scene, กี่วินาที)\n\n` +
+      `ขาดข้อมูลไหน? แจ้ง Script Writer ก่อนเริ่ม Canva`
+    )
+  }
+
+  // ── Social Performance ────────────────────────────────────────────────────
+  if (agentId === 'social-performance') {
+    if (intent === 'create_social_post') return (
+      `📱 Post versions — ${name}\n\n` +
+      `── Facebook (review style) ──\n` +
+      `"รีวิวแบบตรงๆ: ${name}\n` +
+      `ลองใช้แล้วดีจริงๆ ครับ/ค่ะ ราคา ${price} บน ${ch}\n` +
+      `ไม่โอเวอร์ ใช้ได้จริงในชีวิตประจำวัน\n` +
+      `ลิงก์ซื้อ: [affiliate link] #ad"\n\n` +
+      `── TikTok/IG Caption ──\n` +
+      `"${cat} ราคา ${price} — ลองแล้วโอเค 🙌\n` +
+      `#affiliate #${cat.replace(/\s+/g, '')} #${ch.toLowerCase()} #ad"\n\n` +
+      `── Pinned Comment ──\n` +
+      `"${ch} ลิงก์ด้านล่างเลยนะ ราคา ${price} #ad"\n\n` +
+      `── Hashtag Set ──\n` +
+      `#${cat.replace(/\s+/g, '')} #ของดีราคาถูก #${ch.toLowerCase()} #affiliate #รีวิว #ad\n\n` +
+      `⚠ Compliance: ต้องมี #ad ทุก platform`
+    )
+    if (intent === 'analyze_profit' || intent === 'explain_finance') return (
+      `📈 Performance Summary — ${name}\n\n` +
+      `Revenue: ${rev} | Profit: ${profit}\n` +
+      `ROAS: ${roas}x ${roasOk}\n` +
+      `Conv. rate: ${(f.conversionRate * 100).toFixed(1)}%\n` +
+      `CPO: ${formatTHB(f.costPerOrder)}\n\n` +
+      `การตัดสินใจ:\n` +
+      (roas >= 5  ? `→ SCALE — เพิ่มงบ 50% ทันที ROAS ยังดีมาก` :
+       roas >= 4  ? `→ MAINTAIN — ดูต่ออีก 7 วัน` :
+       roas >= 2  ? `→ REVISE — เปลี่ยน hook หรือ reduce ad spend` :
+                   `→ PAUSE — วิเคราะห์ก่อน ไม่คุ้มขณะนี้`) + '\n\n' +
+      `Pending payout: ${formatTHB(f.pendingPayout)}`
+    )
+    if (intent === 'summarize_status') return (
+      `📱 Social Performance — ${name}\n\n` +
+      `Stage: ${stage} | Channel: ${ch}\n` +
+      `ROAS: ${roas}x | Profit: ${profit}\n` +
+      `Risk: ${risk.toUpperCase()}\n\n` +
+      `สถานะโพสต์: ${roas >= 4 ? 'Performance ดี — ดูต่อ' : 'ต้องปรับ strategy'}\n` +
+      `ขั้นตอนถัดไป: ${roas >= 4 ? 'เพิ่มงบ / retarget' : 'revise hook + ลด ad spend'}`
+    )
+    if (intent === 'suggest_next_action') return (
+      `➡️ ขั้นตอนถัดไป — Social Performance\n\n` +
+      `1. เตรียม post checklist: caption + hashtag + UTM + pinned comment\n` +
+      `2. กำหนด posting time: 18:00–21:00 weekday (prime time TH)\n` +
+      `3. โพสต์ผ่าน human approval gate ก่อนเสมอ\n` +
+      `4. ติดตามผล 24–48 ชม. แรก: views, CTR, conversion\n` +
+      `5. Report กลับให้ Product Research (learning loop)`
+    )
+  }
+
+  // ── Unknown / Fallback ────────────────────────────────────────────────────
+  if (intent === 'unknown') {
+    const roleHelp: Record<DepartmentId, string> = {
+      'product-research':   'วิเคราะห์สินค้า, ตรวจความเสี่ยง, หาข้อมูลขาด, สรุปสถานะ',
+      'offer-analyst':      'วิเคราะห์กำไร, คำนวณ ROAS, ตรวจ commission, แนะนำ scale/pause',
+      'content-strategy':   'สร้าง hook ideas, เลือก platform, วาง CTA, เลือก audience',
+      'script-writer':      'เขียน hook 5 แบบ, script 30 วิ, caption, storyboard',
+      'creative-production':'ทำ thumbnail brief, asset checklist, Canva brief, A/B creative',
+      'social-performance': 'เขียนโพสต์ Facebook/IG/TikTok, วิเคราะห์ performance, scale/pause',
+    }
+    return (
+      `ตอนนี้ฉันดูแลแคมเปญนี้อยู่: "${name}" (${ch}, ${stage})\n\n` +
+      `ฉันช่วยได้ เช่น:\n→ ${roleHelp[agentId] ?? 'ตอบคำถามทั่วไปเกี่ยวกับแคมเปญ'}\n\n` +
+      `ลองถามตรงๆ เช่น:\n` +
+      `"สรุปสถานะแคมเปญนี้" / "ตรวจความเสี่ยง" / "แนะนำขั้นตอนถัดไป"`
+    )
+  }
+
+  // Default: fall back to static response for this intent
+  return getMockResponse(agentId, intent).text
 }

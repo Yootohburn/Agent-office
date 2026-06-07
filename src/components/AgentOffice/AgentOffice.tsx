@@ -18,6 +18,7 @@ import type { ProductIntakeFormData } from '../../data/types'
 import type { ImportResult } from '../../services/csvImportService'
 import CampaignDetailPanel from './CampaignDetailPanel'
 import ChannelDetailPanel from './ChannelDetailPanel'
+import { STAGE_OWNER } from '../../agents/agentTaskRouter'
 import CampaignFocusSection from './CampaignFocusSection'
 import FinanceDashboard from './FinanceDashboard'
 import CampaignPipeline from './CampaignPipeline'
@@ -78,6 +79,7 @@ export default function AgentOffice() {
 
   const selectedAgent    = selectedAgentId    ? (liveAgents.find(a => a.id === selectedAgentId) ?? null)       : null
   const selectedCampaign = selectedCampaignId ? (liveCampaigns.find(c => c.id === selectedCampaignId) ?? null) : null
+  const ownerAgentId     = selectedCampaign   ? (STAGE_OWNER[selectedCampaign.stage] ?? null)                  : null
 
   const selectedAgentCampaign = selectedAgent?.currentCampaignId
     ? liveCampaigns.find(c => c.id === selectedAgent.currentCampaignId)
@@ -110,9 +112,10 @@ export default function AgentOffice() {
   }
 
   function handleSelectCampaign(id: string) {
-    setSelectedCampaignId(prev => prev === id ? null : id)
-    setSelectedAgentId(null)
+    const isDeselecting = selectedCampaignId === id
+    setSelectedCampaignId(isDeselecting ? null : id)
     setSelectedChannelId(null)
+    // Don't clear selectedAgentId — owner agent highlight is computed separately
   }
 
   function handleSelectChannel(channelId: CampaignChannel) {
@@ -175,7 +178,7 @@ export default function AgentOffice() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ fontFamily: 'VT323, monospace', fontSize: 22, color: '#00ff9f', letterSpacing: 3, lineHeight: 1 }}>
-              ░▒▓ AGENT OFFICE v2.4.5 ▓▒░
+              ░▒▓ AGENT OFFICE v2.6.2 ▓▒░
             </div>
             <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 11, color: '#00e5ff', background: '#00e5ff11', padding: '2px 10px', border: '1px solid #00e5ff22', letterSpacing: 1 }}>
               AI AFFILIATE CONTENT CO.
@@ -257,6 +260,7 @@ export default function AgentOffice() {
             <SharedCommandRoom
               agents={liveAgents}
               selectedAgentId={selectedAgentId}
+              ownerAgentId={ownerAgentId}
               onSelectAgent={handleSelectAgent}
             />
           )}
@@ -389,6 +393,7 @@ export default function AgentOffice() {
                           onClose={closePanel}
                           currentStageLabel={agentCurrentStageLabel}
                           latestOutput={agentLatestOutput}
+                          selectedCampaign={selectedCampaign}
                         />
                       : <NoAgentSelected/>
                   )}
@@ -398,17 +403,9 @@ export default function AgentOffice() {
                 </div>
               </>
             ) : (
-              // ── Other tabs: agent / campaign / channel detail ──
+              // ── Other tabs: campaign > agent > channel (priority order) ──
               <>
-                {selectedAgent && (
-                  <AgentCommandPanel
-                    agent={selectedAgent}
-                    onClose={closePanel}
-                    currentStageLabel={agentCurrentStageLabel}
-                    latestOutput={agentLatestOutput}
-                  />
-                )}
-                {selectedCampaign && (
+                {selectedCampaign ? (
                   <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
                     <CampaignDetailPanel
                       campaign={selectedCampaign}
@@ -416,15 +413,22 @@ export default function AgentOffice() {
                       onAction={handleWorkflowAction}
                     />
                   </div>
-                )}
-                {selectedChannelId && (
+                ) : selectedAgent ? (
+                  <AgentCommandPanel
+                    agent={selectedAgent}
+                    onClose={closePanel}
+                    currentStageLabel={agentCurrentStageLabel}
+                    latestOutput={agentLatestOutput}
+                    selectedCampaign={selectedCampaign}
+                  />
+                ) : selectedChannelId ? (
                   <div style={{ padding: 16, overflowY: 'auto', flex: 1 }}>
                     <ChannelDetailPanel
                       channelId={selectedChannelId}
                       onClose={closePanel}
                     />
                   </div>
-                )}
+                ) : null}
               </>
             )}
 

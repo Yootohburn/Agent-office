@@ -1,34 +1,48 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import type { Agent, DepartmentId } from '../../agents/agentRegistry'
-import { getCampaignById, CHANNEL_CONFIG } from '../../agents/campaignRegistry'
-import type { AgentOutput } from '../../agents/campaignRegistry'
-import { getMockResponse, getInitialGreeting } from '../../agents/agentChatRouter'
+import { getCampaignById, CHANNEL_CONFIG, PIPELINE_STAGES } from '../../agents/campaignRegistry'
+import type { Campaign, AgentOutput } from '../../agents/campaignRegistry'
+import { getMockResponse, getMockResponseWithContext } from '../../agents/agentChatRouter'
 import type { ChatMessage } from '../../agents/agentConversationStore'
 import { getConversation, addMessage, createMessage } from '../../agents/agentConversationStore'
+import { getInitialGreeting } from '../../agents/agentChatRouter'
+import { buildAgentContext } from '../../services/agentContextBuilder'
+import { STAGE_OWNER } from '../../agents/agentTaskRouter'
 
 const AGENT_ACCENT: Record<DepartmentId, string> = {
-  'product-research':   '#00e5ff',
-  'offer-analyst':      '#ffb300',
-  'content-strategy':   '#ff9800',
-  'script-writer':      '#ff4081',
-  'creative-production':'#a855f7',
-  'social-performance': '#00ff9f',
+  'product-research':    '#00e5ff',
+  'offer-analyst':       '#ffb300',
+  'content-strategy':    '#ff9800',
+  'script-writer':       '#ff4081',
+  'creative-production': '#a855f7',
+  'social-performance':  '#00ff9f',
 }
 
-const QUICK_PROMPTS = [
-  'สรุปสถานะตอนนี้',
-  'แนะนำขั้นตอนถัดไป',
-  'เขียนโพสต์โซเชียล',
-  'สร้างไอเดียใหม่',
-  'ตรวจความเสี่ยง',
-  'อธิบายตัวเลขการเงิน',
-]
+const STAGE_LABEL: Record<string, string> = Object.fromEntries(
+  PIPELINE_STAGES.map(s => [s.id, s.label])
+)
+
+const CHANNEL_SHORT: Record<string, string> = {
+  shopee:  'Shopee',
+  lazada:  'Lazada',
+  tiktok:  'TikTok Shop',
+}
+
+const QUICK_PROMPTS: Record<DepartmentId, string[]> = {
+  'product-research':   ['สรุปสินค้านี้', 'จุดขายคืออะไร', 'มีข้อมูลอะไรขาด', 'สินค้านี้เสี่ยงไหม'],
+  'offer-analyst':      ['วิเคราะห์กำไร', 'คำนวณ ROAS คุ้มทุน', 'ควรเพิ่มงบไหม', 'แคมเปญนี้ขาดทุนเพราะอะไร'],
+  'content-strategy':   ['ควรขายมุมไหน', 'หา hook framework', 'เลือก target audience', 'ทำ CTA ให้หน่อย'],
+  'script-writer':      ['เขียน Hook 5 แบบ', 'ทำสคริปต์ 30 วิ', 'ทำ Caption TikTok', 'ทำ Storyboard'],
+  'creative-production':['ทำ thumbnail brief', 'ต้องใช้ asset อะไร', 'ทำ Canva brief', 'ทำ A/B creative idea'],
+  'social-performance': ['เขียนโพสต์ Facebook', 'เขียน IG caption', 'ทำ pinned comment', 'วิเคราะห์ performance'],
+}
 
 interface Props {
-  agent: Agent
-  onClose: () => void
+  agent:            Agent
+  onClose:          () => void
   currentStageLabel?: string
-  latestOutput?: AgentOutput
+  latestOutput?:    AgentOutput
+  selectedCampaign?: Campaign | null
 }
 
 function initConversation(agentId: DepartmentId): ChatMessage[] {
@@ -39,10 +53,15 @@ function initConversation(agentId: DepartmentId): ChatMessage[] {
   return [greeting]
 }
 
-export default function AgentCommandPanel({ agent, onClose, currentStageLabel, latestOutput }: Props) {
-  const campaign = agent.currentCampaignId ? getCampaignById(agent.currentCampaignId) : null
-  const channelCfg = campaign ? CHANNEL_CONFIG[campaign.channel] : null
-  const accent = AGENT_ACCENT[agent.id]
+export default function AgentCommandPanel({ agent, onClose, currentStageLabel, latestOutput, selectedCampaign }: Props) {
+  const fallbackCampaign = agent.currentCampaignId ? getCampaignById(agent.currentCampaignId) : null
+  const activeCampaign   = selectedCampaign ?? fallbackCampaign
+  const channelCfg       = activeCampaign ? CHANNEL_CONFIG[activeCampaign.channel] : null
+  const accent           = AGENT_ACCENT[agent.id]
+
+  const ownerAgentId     = activeCampaign ? STAGE_OWNER[activeCampaign.stage] : null
+  const isOwner          = ownerAgentId === agent.id
+  const context          = buildAgentContext(activeCampaign ?? null, agent)
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => initConversation(agent.id))
   const [inputText, setInputText] = useState('')
@@ -64,30 +83,30 @@ export default function AgentCommandPanel({ agent, onClose, currentStageLabel, l
     if (!trimmed || isTyping) return
 
     const userMsg = createMessage(agent.id, 'user', trimmed, {
-      campaignId: agent.currentCampaignId ?? undefined,
+      campaignId: activeCampaign?.id ?? undefined,
     })
     addMessage(userMsg)
     setMessages(prev => [...prev, userMsg])
     setInputText('')
     setIsTyping(true)
 
-    const { text: responseText, intent, mockDelay } = getMockResponse(
-      agent.id,
-      trimmed,
-      agent.currentCampaignId ?? undefined,
-    )
+    const { text: responseText, intent, mockDelay } = activeCampaign
+      ? getMockResponseWithContext(agent.id, trimmed, context)
+      : getMockResponse(agent.id, trimmed, agent.currentCampaignId ?? undefined)
+
     setTimeout(() => {
       const agentMsg = createMessage(agent.id, 'agent', responseText, {
-        campaignId: agent.currentCampaignId ?? undefined,
+        campaignId: activeCampaign?.id ?? undefined,
         intent,
       })
       addMessage(agentMsg)
       setMessages(prev => [...prev, agentMsg])
       setIsTyping(false)
     }, mockDelay)
-  }, [agent.id, agent.currentCampaignId, isTyping])
+  }, [agent.id, activeCampaign, context, isTyping])
 
   const agentShortName = agent.thaiName.split('/')[0].trim()
+  const quickPrompts   = QUICK_PROMPTS[agent.id] ?? []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', fontFamily: 'Sarabun, sans-serif' }}>
@@ -113,10 +132,10 @@ export default function AgentCommandPanel({ agent, onClose, currentStageLabel, l
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px' }}>
-          {campaign && channelCfg && (
+          {activeCampaign && channelCfg && (
             <div>
               <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 1, marginBottom: 2 }}>แคมเปญปัจจุบัน</div>
-              <div style={{ fontSize: 13, color: channelCfg.color, lineHeight: 1.3 }}>{campaign.name}</div>
+              <div style={{ fontSize: 13, color: channelCfg.color, lineHeight: 1.3 }}>{activeCampaign.name}</div>
             </div>
           )}
           <div>
@@ -144,7 +163,7 @@ export default function AgentCommandPanel({ agent, onClose, currentStageLabel, l
           </div>
         )}
 
-        {/* Stage chip + latest output */}
+        {/* Stage + latest output */}
         {(currentStageLabel || latestOutput) && (
           <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
             {currentStageLabel && (
@@ -167,21 +186,47 @@ export default function AgentCommandPanel({ agent, onClose, currentStageLabel, l
         )}
       </div>
 
+      {/* ── Context Chips (shown when campaign is selected) ── */}
+      {activeCampaign && (
+        <div style={{ padding: '8px 12px', borderBottom: '1px solid #1a2540', flexShrink: 0, background: '#080c18' }}>
+          <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#2a3560', letterSpacing: 1, marginBottom: 5 }}>
+            CONTEXT
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            <ContextChip label="Agent"    value={agentShortName}                               color={accent} />
+            <ContextChip label="Campaign" value={activeCampaign.name.slice(0, 20) + (activeCampaign.name.length > 20 ? '…' : '')} color={channelCfg?.color ?? '#e8eaf6'} />
+            <ContextChip label="Stage"    value={STAGE_LABEL[activeCampaign.stage] ?? activeCampaign.stage} color="#8892b0" />
+            <ContextChip label="Platform" value={CHANNEL_SHORT[activeCampaign.channel] ?? activeCampaign.channel} color={channelCfg?.color ?? '#e8eaf6'} />
+            <ContextChip label="Risk"     value={activeCampaign.riskLevel.toUpperCase()}
+              color={activeCampaign.riskLevel === 'critical' ? '#ff5252' : activeCampaign.riskLevel === 'high' ? '#ff9800' : activeCampaign.riskLevel === 'medium' ? '#ffb300' : '#2a3560'} />
+            {activeCampaign.targetPrice && (
+              <ContextChip label="Price" value={activeCampaign.targetPrice} color="#e8eaf6" />
+            )}
+          </div>
+          {!isOwner && ownerAgentId && (
+            <div style={{ marginTop: 5, fontFamily: 'Share Tech Mono, monospace', fontSize: 9, color: '#ffb300' }}>
+              ⚠ ผู้รับผิดชอบขั้นตอนนี้คือ {ownerAgentId.replace(/-/g, ' ')}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Quick Prompts ── */}
       <div style={{ padding: '10px 14px', borderBottom: '1px solid #1a2540', flexShrink: 0 }}>
         <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 10, color: '#2a3560', letterSpacing: 1, marginBottom: 6 }}>
           QUICK PROMPTS
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
-          {QUICK_PROMPTS.map(p => (
+          {quickPrompts.map(p => (
             <button
               key={p}
               onClick={() => send(p)}
               disabled={isTyping}
               style={{
-                fontFamily: 'Sarabun, sans-serif', fontSize: 13,
-                color: isTyping ? '#2a3560' : '#00e5ff',
-                background: '#00e5ff08', border: '1px solid #00e5ff22',
+                fontFamily: 'Sarabun, sans-serif', fontSize: 12,
+                color:      isTyping ? '#2a3560' : accent,
+                background: `${accent}08`,
+                border:     `1px solid ${accent}22`,
                 padding: '5px 8px', cursor: isTyping ? 'default' : 'pointer',
                 textAlign: 'left', lineHeight: 1.3,
               }}
@@ -199,7 +244,7 @@ export default function AgentCommandPanel({ agent, onClose, currentStageLabel, l
             key={msg.id}
             style={{
               display: 'flex', flexDirection: 'column', gap: 3, maxWidth: '90%',
-              alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+              alignSelf:  msg.sender === 'user' ? 'flex-end' : 'flex-start',
               alignItems: msg.sender === 'user' ? 'flex-end' : 'flex-start',
             }}
           >
@@ -210,8 +255,8 @@ export default function AgentCommandPanel({ agent, onClose, currentStageLabel, l
               fontFamily: 'Sarabun, sans-serif', fontSize: 14, lineHeight: 1.6,
               padding: '8px 12px',
               background: msg.sender === 'user' ? `${accent}11` : '#0c1425',
-              border: `1px solid ${msg.sender === 'user' ? `${accent}33` : '#1a2540'}`,
-              color: msg.sender === 'user' ? accent : '#e8eaf6',
+              border:     `1px solid ${msg.sender === 'user' ? `${accent}33` : '#1a2540'}`,
+              color:      msg.sender === 'user' ? accent : '#e8eaf6',
               whiteSpace: 'pre-line',
             }}>
               {msg.text}
@@ -271,6 +316,19 @@ export default function AgentCommandPanel({ agent, onClose, currentStageLabel, l
         </button>
       </div>
 
+    </div>
+  )
+}
+
+function ContextChip({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div style={{
+      fontFamily: 'Share Tech Mono, monospace', fontSize: 9,
+      background: `${color}0d`, border: `1px solid ${color}28`,
+      padding: '1px 6px', lineHeight: 1.6,
+    }}>
+      <span style={{ color: '#2a3560' }}>{label}: </span>
+      <span style={{ color }}>{value}</span>
     </div>
   )
 }

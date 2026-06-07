@@ -1,4 +1,85 @@
-# Agent Office v2.6 — Documentation
+# Agent Office v2.6.2 — Documentation
+
+---
+
+## v2.6.2 Campaign Queue Fix + Role-Aware Agent Brain Mock
+
+### Overview
+
+v2.6.2 makes the app behave like a real Agent Office by improving campaign queue operations, agent context awareness, and chat intelligence using mock/rule-based logic only (no live LLM calls).
+
+### Campaign Queue (OfficeSidebar)
+
+The left Campaign Queue is now an operational queue:
+- **6 filter tabs**: ทั้งหมด / เร่งด่วน / รอรีวิว / กำลังทำงาน / ขาดทุน / พร้อมถัดไป
+- **Status badges**: urgent, needs_review, working, blocked, ready_next_step, profitable, losing_money, idle — computed by `computeQueueStatus()` in `agentContextBuilder.ts`
+- **Sort order**: urgent → needs_review → blocked → working → ready_next_step → profitable → newest
+- **Item display**: campaign name, channel badge, stage, status badge, progress bar, owner agent name, profit, next-action hint
+
+### State Management — selectedCampaignId vs selectedAgentId
+
+These are now separate independent state concepts:
+- `selectedCampaignId` — which campaign the user is inspecting
+- `selectedAgentId` — which agent the user is chatting with
+- Selecting a campaign no longer clears `selectedAgentId`
+- `ownerAgentId` is computed from `STAGE_OWNER[campaign.stage]` and passed to SharedCommandRoom for a pulsing ring highlight
+- Right panel priority (non-overview tabs): campaign detail > agent chat > channel detail
+
+### Agent Context Builder (`src/services/agentContextBuilder.ts`)
+
+Builds an `AgentContext` object from a selected campaign + agent:
+- Linked product (from productRepository by `product_id`)
+- Latest agent output
+- Finance snapshot
+- Risk flags
+- Available workflow actions
+- Sync status
+- Queue status
+
+This context is passed into the chat routing function for context-aware responses.
+
+### Role-Aware Mock Agent Brain (`src/agents/agentChatRouter.ts`)
+
+`getMockResponseWithContext(agentId, userMessage, context)` replaces `getMockResponse()` when context is available:
+- **14 intent types** (vs 7 before): generate_hooks, generate_script, generate_caption, generate_storyboard, create_social_post, analyze_profit, explain_finance, review_risk, check_missing_data, improve_campaign, summarize_status, suggest_next_action, ideas, unknown
+- Responses inject actual campaign name, product, price, ROAS, commission, risk level from context
+- Generation tasks produce usable sample output (hooks, script, caption, storyboard, Facebook post, pinned comment, hashtag set)
+- Thai language, social commerce tone, no fake claims
+
+### Context Chips + Dynamic Quick Prompts (`src/components/AgentOffice/AgentCommandPanel.tsx`)
+
+When a campaign is selected:
+- A context chip bar shows: Agent · Campaign · Stage · Platform · Risk · Price
+- A note appears if the selected agent is not the stage owner: "ผู้รับผิดชอบขั้นตอนนี้คือ X"
+- Quick prompts are now role-specific per agent (4 prompts each)
+
+### LLM Adapter Interface (`src/services/llm/llmAdapter.ts`)
+
+Phase 2 preparation:
+- `LLMAdapter` interface with `generateAgentResponse(input: AgentBrainInput): Promise<AgentBrainOutput>`
+- `MockLLMAdapter` — delegates to rule-based `getMockResponse()`
+- `OpenAIAdapter`, `ClaudeAdapter`, `GeminiAdapter` — stub classes that throw "not yet implemented"
+
+**Important**: Real LLM API calls must go through a backend/serverless function. NEVER put API keys in the frontend bundle.
+
+### Claude Code / Codex Scope
+
+Claude Code and Codex may be used as **development assistants and subagents** for building and reviewing this repository.
+
+The live app must NOT depend on Claude Code/Codex sessions to run the 6 production business agents. The production path is:
+
+```
+Agent Office app
+  → agentContextBuilder (build context)
+  → agentBrainService / getMockResponseWithContext (Phase 1 mock)
+  → [Phase 2] backend LLM adapter (OpenAI / Claude / Gemini via serverless)
+  → human approval gate (mandatory)
+  → sheet/workflow sync
+```
+
+### No Real API Calls
+
+All agent responses in v2.6.2 are still rule-based mock responses. No real LLM, Shopee, Lazada, or TikTok APIs are called.
 
 ---
 

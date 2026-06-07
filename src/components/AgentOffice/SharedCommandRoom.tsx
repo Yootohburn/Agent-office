@@ -6,6 +6,7 @@ import type { AgentSceneConfig } from './AgentHotspot'
 interface Props {
   agents:          Agent[]
   selectedAgentId: DepartmentId | null
+  ownerAgentId?:   DepartmentId | null
   onSelectAgent:   (id: DepartmentId) => void
 }
 
@@ -53,7 +54,7 @@ const ROW_LABELS: [string, string] = [
   'ROW B — สคริปต์ · ผลิตงาน · โซเชียล',
 ]
 
-export default function SharedCommandRoom({ agents, selectedAgentId, onSelectAgent }: Props) {
+export default function SharedCommandRoom({ agents, selectedAgentId, ownerAgentId, onSelectAgent }: Props) {
   const [bgReady, setBgReady] = useState(false)
 
   useEffect(() => {
@@ -145,15 +146,33 @@ export default function SharedCommandRoom({ agents, selectedAgentId, onSelectAge
       {agents.map(agent => {
         const cfg = AGENT_SCENE_CONFIG[agent.id]
         if (!cfg) return null
+        const isCampaignOwner = ownerAgentId === agent.id && selectedAgentId !== agent.id
         return (
-          <AgentHotspot
-            key={agent.id}
-            agent={agent}
-            selected={selectedAgentId === agent.id}
-            onClick={() => onSelectAgent(agent.id)}
-            spriteSrc={AGENT_SPRITE_PATHS[agent.id]}
-            sceneConfig={cfg}
-          />
+          <div key={agent.id} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {isCampaignOwner && (
+              <div style={{
+                position:     'absolute',
+                left:         `${cfg.x}%`,
+                top:          `${cfg.y}%`,
+                transform:    'translate(-50%, -50%)',
+                width:        72, height: 72,
+                border:       '2px solid #ffb300',
+                borderRadius: '50%',
+                animation:    'pulse 1.6s ease-in-out infinite',
+                pointerEvents:'none',
+                zIndex:       1,
+              }} />
+            )}
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'auto' }}>
+              <AgentHotspot
+                agent={agent}
+                selected={selectedAgentId === agent.id}
+                onClick={() => onSelectAgent(agent.id)}
+                spriteSrc={AGENT_SPRITE_PATHS[agent.id]}
+                sceneConfig={cfg}
+              />
+            </div>
+          </div>
         )
       })}
 

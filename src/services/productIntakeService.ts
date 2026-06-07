@@ -1,7 +1,7 @@
 // Orchestrates product submission: Product → Campaign → AgentTask → Log → Chat.
 // All data stays local (Phase 1). Phase 2: replace repository calls with API calls.
 
-import type { ProductIntakeFormData, Product, AgentTaskRecord } from '../data/types'
+import type { ProductIntakeFormData, Product, AgentTaskRecord, SyncStatus } from '../data/types'
 import type { Campaign, CampaignFinance, ProductScores }        from '../agents/campaignRegistry'
 import type { ActivityLogEntry, TeamChatMessage }               from '../agents/agentSessionStore'
 import { productRepository }  from '../data/productRepository'
@@ -55,8 +55,9 @@ export interface ProductIntakeResult {
 }
 
 export function submitProduct(
-  form:       ProductIntakeFormData,
-  nextLogId:  number,
+  form:        ProductIntakeFormData,
+  nextLogId:   number,
+  syncStatus:  SyncStatus = 'local_only',
 ): ProductIntakeResult {
   const now        = new Date().toISOString()
   const productId  = `prod-${Date.now()}`
@@ -91,6 +92,7 @@ export function submitProduct(
     notes:               form.notes,
     target_platform:     form.target_platform || form.marketplace,
     campaign_goal:       form.campaign_goal,
+    sync_status:         syncStatus,
     created_at:          now,
     updated_at:          now,
   }

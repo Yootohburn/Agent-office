@@ -1,10 +1,11 @@
-// Canonical domain types for v2.5 Manual Product Intake.
+// Canonical domain types for v2.5 Manual Product Intake + v2.6 Google Sheets Sync.
 // Phase 1: localStorage. Phase 2: replace repositories with Supabase client.
 
 export type Marketplace    = 'shopee' | 'lazada' | 'tiktok'
 export type RiskLevel      = 'low' | 'medium' | 'high'
 export type TaskStatus     = 'pending' | 'in_progress' | 'done' | 'failed' | 'needs_review'
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'needs_revision'
+export type SyncStatus     = 'local_only' | 'imported_from_sheet' | 'pending_sync' | 'synced' | 'sync_error'
 
 /** Full product record. commission_rate stored as percentage (e.g. 10 = 10%). */
 export interface Product {
@@ -31,6 +32,7 @@ export interface Product {
   notes:               string
   target_platform:     string
   campaign_goal:       string
+  sync_status?:        SyncStatus
   created_at:          string   // ISO string
   updated_at:          string
 }
@@ -60,6 +62,36 @@ export interface HumanApproval {
   reviewer_note: string
   created_at:    string
   updated_at:    string
+}
+
+/** Daily performance record — Phase 2 will populate from affiliate API. */
+export interface PerformanceDaily {
+  perf_id:     string
+  campaign_id: string
+  product_id:  string
+  date:        string   // YYYY-MM-DD
+  views:       number
+  clicks:      number
+  orders:      number
+  revenue:     number
+  commission:  number
+  ctr:         number
+  roas:        number
+  created_at:  string
+}
+
+/** Risk log entry — one per risk event per campaign stage. */
+export interface RiskLog {
+  risk_id:     string
+  campaign_id: string
+  product_id:  string
+  stage:       string
+  risk_type:   string
+  description: string
+  severity:    RiskLevel
+  resolved:    boolean
+  created_at:  string
+  updated_at:  string
 }
 
 /** Form data submitted from ProductIntakeForm. */

@@ -10,9 +10,12 @@ import type { WorkflowAction } from '../../agents/campaignWorkflow'
 import { companySummary } from '../../agents/financeRegistry'
 import AgentCommandPanel    from './AgentCommandPanel'
 import ProductIntakeForm    from './ProductIntakeForm'
+import CSVImportModal       from './CSVImportModal'
+import CSVExportPanel       from './CSVExportPanel'
 import { submitProduct }    from '../../services/productIntakeService'
 import { campaignRepository } from '../../data/campaignRepository'
 import type { ProductIntakeFormData } from '../../data/types'
+import type { ImportResult } from '../../services/csvImportService'
 import CampaignDetailPanel from './CampaignDetailPanel'
 import ChannelDetailPanel from './ChannelDetailPanel'
 import CampaignFocusSection from './CampaignFocusSection'
@@ -57,6 +60,7 @@ export default function AgentOffice() {
   const [rightPanelTab,      setRightPanelTab]      = useState<RightTab>('teamchat')
 
   const [showIntakeForm,  setShowIntakeForm]  = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
 
   // Merge mock campaigns with any user-submitted campaigns from localStorage.
   const [liveCampaigns, setLiveCampaigns] = useState<Campaign[]>(() => {
@@ -148,6 +152,18 @@ export default function AgentOffice() {
     setSelectedChannelId(null)
     setActiveView('campaigns')
     setShowIntakeForm(false)
+  }
+
+  function handleCSVImport(result: ImportResult) {
+    if (result.campaigns.length > 0) {
+      setLiveCampaigns(prev => [...result.campaigns, ...prev])
+      setSelectedCampaignId(result.campaigns[0].id)
+      setSelectedAgentId(null)
+      setSelectedChannelId(null)
+    }
+    setLogs(prev     => [result.logEntry,    ...prev])
+    setTeamChat(prev => [...prev, result.chatMessage])
+    setLogCounter(n  => n + result.imported + 1)
   }
 
   // ── Render ─────────────────────────────────────────────────────────────
@@ -257,8 +273,23 @@ export default function AgentOffice() {
           {activeView === 'campaigns' && (
             <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-              {/* ── New product button ── */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              {/* ── Action buttons row ── */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button
+                  onClick={() => setShowImportModal(true)}
+                  style={{
+                    fontFamily:    'VT323, monospace',
+                    fontSize:      15,
+                    color:         '#ffb300',
+                    background:    '#ffb3000d',
+                    border:        '1px solid #ffb30044',
+                    padding:       '6px 18px',
+                    cursor:        'pointer',
+                    letterSpacing: 1,
+                  }}
+                >
+                  นำเข้าจาก Google Sheet / CSV
+                </button>
                 <button
                   onClick={() => setShowIntakeForm(v => !v)}
                   style={{
@@ -290,6 +321,7 @@ export default function AgentOffice() {
                 onSelectCampaign={handleSelectCampaign}
               />
               <CampaignPipeline campaigns={liveCampaigns} />
+              <CSVExportPanel campaigns={liveCampaigns} />
             </div>
           )}
 
@@ -400,6 +432,14 @@ export default function AgentOffice() {
         )}
 
       </div>
+
+      {showImportModal && (
+        <CSVImportModal
+          logCounter={logCounter}
+          onClose={() => setShowImportModal(false)}
+          onConfirm={result => { handleCSVImport(result); setShowImportModal(false) }}
+        />
+      )}
 
     </div>
   )

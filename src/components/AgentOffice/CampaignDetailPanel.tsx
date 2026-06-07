@@ -5,7 +5,16 @@ import { STAGE_OWNER } from '../../agents/agentTaskRouter'
 import { getAgentById } from '../../agents/agentRegistry'
 import { STAGE_ACTIONS } from '../../agents/campaignWorkflow'
 import type { WorkflowAction } from '../../agents/campaignWorkflow'
+import { productRepository } from '../../data/productRepository'
 import AgentTaskQueue from './AgentTaskQueue'
+
+const SYNC_STATUS_STYLE: Record<string, { color: string; label: string }> = {
+  local_only:          { color: '#2a3560', label: 'local only'          },
+  imported_from_sheet: { color: '#00e5ff', label: 'imported from sheet' },
+  pending_sync:        { color: '#ffb300', label: 'pending sync'        },
+  synced:              { color: '#00ff9f', label: 'synced'              },
+  sync_error:          { color: '#ff5252', label: 'sync error'          },
+}
 
 interface Props {
   campaign: Campaign
@@ -30,6 +39,11 @@ export default function CampaignDetailPanel({ campaign, onClose, onAction }: Pro
   const buttons     = STAGE_ACTIONS[campaign.stage] ?? []
   const latestOutput = campaign.outputs.length > 0 ? campaign.outputs[campaign.outputs.length - 1] : undefined
 
+  const syncStatus = campaign.product_id
+    ? productRepository.getById(campaign.product_id)?.sync_status
+    : undefined
+  const syncStyle = syncStatus ? (SYNC_STATUS_STYLE[syncStatus] ?? SYNC_STATUS_STYLE.local_only) : null
+
   return (
     <div style={{ fontFamily: 'Share Tech Mono, monospace' }}>
 
@@ -52,6 +66,11 @@ export default function CampaignDetailPanel({ campaign, onClose, onAction }: Pro
           </span>
           <span style={{ fontSize: 11, color: '#4a5680' }}>{campaign.category}</span>
           <span style={{ fontSize: 11, color: '#4a5680' }}>{campaign.targetPrice}</span>
+          {syncStyle && (
+            <span style={{ fontSize: 10, color: syncStyle.color, background: `${syncStyle.color}18`, padding: '1px 7px', border: `1px solid ${syncStyle.color}44`, letterSpacing: 1 }}>
+              {syncStyle.label}
+            </span>
+          )}
         </div>
       </div>
 

@@ -1,3 +1,50 @@
+# Agent Office v2.6 — Documentation
+
+---
+
+## v2.6 Google Sheets Backend Sync Layer
+
+### Overview
+
+Google Sheet is the MVP source of truth for product data and campaign outputs.
+The current app supports **manual CSV / pasted-table import and export**. Live frontend write-back to Google Sheets is intentionally disabled — exposing Google API credentials in frontend JavaScript is unsafe.
+
+### What is implemented in v2.6
+
+- **Manual CSV import**: User pastes CSV or tab-separated data copied from a Google Sheet. App parses, validates, and imports valid rows into localStorage.
+- **CSV export**: One-click download for Products, Campaigns, Tasks, and Risk Log.
+- **Sync status tracking**: Each product has a `sync_status` field (`local_only`, `imported_from_sheet`, `pending_sync`, `synced`, `sync_error`). Status is visible in the Campaign Detail Panel.
+- **Mock sync service**: Skeleton methods (`syncProductToSheet`, `syncCampaignToSheet`, etc.) write to a local `agent_office_sync_log` collection and return mock results. Ready to swap for real API calls in Phase 2.
+- **Sheet schemas**: Column definitions for `Product_Intake`, `Campaigns`, `Performance_Daily`, `Risk_Log` sheets.
+- **Row mappers**: TypeScript mappers from CSV rows to typed objects.
+
+### Why live frontend write-back is disabled
+
+Writing to Google Sheets from the browser requires a Google API key or OAuth token. Embedding credentials in frontend JavaScript (Vite env vars are included in the bundle) exposes them to anyone who opens DevTools. This is a security antipattern.
+
+### Safe write-back options for Phase 2
+
+| Option | How it works |
+|---|---|
+| **n8n webhook** | App POSTs JSON to n8n webhook URL; n8n uses its own Google Sheets credentials to write |
+| **Google Apps Script Web App** | Apps Script deployed as a web app with `doPost()`; app POSTs to the Script URL |
+| **Backend API** | Express/FastAPI/Edge Function holds credentials server-side; app calls the API |
+| **Supabase Edge Function** | Supabase function with Google credentials writes to Sheets on trigger |
+
+None of these require credentials in the frontend bundle.
+
+### localStorage remains the Phase 1 fallback
+
+All data imported or created through the UI is persisted in localStorage under `agent_office_*` keys. This survives page reloads. Supabase will replace localStorage in Phase 2 — only `localStorageDatabase.ts` function bodies need to change.
+
+### Notes on Paperclips AI and n8n
+
+- Paperclips AI is **not** used as the core backend.
+- n8n (or Make / Pipedream) will be added in Phase 2 as the workflow orchestrator.
+- Agent Office Phase 1 runs entirely in the browser with no backend.
+
+---
+
 # Agent Office v2.4.2 — Documentation
 
 ## Research Alignment — v2.4.2
